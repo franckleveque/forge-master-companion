@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px; /* Increased max-width for PvP layout */
     margin: auto;
     background: #fff;
     padding: 20px;
@@ -15,12 +15,12 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-h1, h2 {
+h1, h2, h3, h4 {
     text-align: center;
     color: #5a2d0c;
 }
 
-.character-stats, .passive-skills, .equipment-comparison, .results {
+.character-stats, .passive-skills, .equipment-comparison, .results, .enemy-stats {
     margin-bottom: 20px;
 }
 
@@ -35,8 +35,10 @@ input, select {
     margin-bottom: 10px;
     border-radius: 4px;
     border: 1px solid #ddd;
+    box-sizing: border-box; /* Added for consistent sizing */
 }
 
+/* General Button Styles */
 button {
     display: block;
     width: 100%;
@@ -46,10 +48,31 @@ button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    margin-bottom: 20px; /* Added margin */
 }
 
 button:hover {
     background: #4a2106;
+}
+
+/* Mode Selector Styles */
+.mode-selector {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.mode-selector button {
+    width: auto;
+    background: #ddd;
+    color: #333;
+    margin: 0 5px;
+    padding: 10px 20px;
+}
+
+.mode-selector button.active {
+    background: #5a2d0c;
+    color: #fff;
 }
 
 .equipment-comparison {
@@ -59,38 +82,6 @@ button:hover {
 
 .equipment-setup {
     width: 48%;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    padding: 12px;
-    border: 1px solid #ddd;
-    text-align: left;
-}
-
-th {
-    background-color: #f2f2f2;
-}
-
-.passive-skill-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.passive-skill-item select {
-    flex-grow: 1;
-    margin-right: 10px;
-}
-
-.passive-skill-item input {
-    width: 80px;
-    margin-right: 10px;
 }
 
 .passive-grid {
@@ -108,6 +99,7 @@ th {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    gap: 10px;
 }
 
 .active-skill-item {
@@ -117,11 +109,20 @@ th {
     border-radius: 4px;
 }
 
+/* PvP Simulation Layout */
 .simulation-setup {
     display: flex;
     justify-content: space-between;
+    gap: 2%; /* Add gap between columns */
 }
 
 .player-column {
-    width: 48%;
+    width: 49%;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+.result-details {
+    margin-top: 15px;
 }
