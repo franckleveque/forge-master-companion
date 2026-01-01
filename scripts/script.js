@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function simulate(stats) {
-        const MAX_SIMULATION_TIME = 600; // 10 minutes
+        const MAX_SIMULATION_TIME = 60; // 60 seconds for PvP
         const p = stats.basePassiveSkills;
 
         // Calculate final stats
