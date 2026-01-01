@@ -76,16 +76,32 @@
         </div>
 
         <div class="equipment-comparison">
+            <div class="shared-category-selector">
+                <label for="equipment-category">Category:</label>
+                <select id="equipment-category">
+                    <option value="head">Head</option>
+                    <option value="body">Body</option>
+                    <option value="hands">Hands</option>
+                    <option value="necklace">Necklace</option>
+                    <option value="ring">Ring</option>
+                    <option value="weapon">Weapon</option>
+                    <option value="boots">Boots</option>
+                    <option value="belt">Belt</option>
+                </select>
+            </div>
             <div class="equipment-setup">
                 <h2>Equipment 1 (New)</h2>
-                <label for="equip1-weapon-type">Weapon Type:</label>
-                <select id="equip1-weapon-type">
-                    <option value="corp-a-corp">Corp à corp</option>
-                    <option value="a-distance">À distance</option>
-                </select>
-                <label for="equip1-main-carac">Main Caracteristic:</label>
-                <select id="equip1-main-carac"><option value="damage">Damage</option><option value="health">Health</option></select>
-                <input type="number" id="equip1-main-carac-value" value="100">
+                <div id="equip1-weapon-type-container" style="display: none;">
+                    <label for="equip1-weapon-type">Weapon Type:</label>
+                    <select id="equip1-weapon-type">
+                        <option value="corp-a-corp">Corp à corp</option>
+                        <option value="a-distance">À distance</option>
+                    </select>
+                </div>
+                <label for="equip1-damage-value">Damage:</label>
+                <input type="number" id="equip1-damage-value" value="100">
+                <label for="equip1-health-value">Health:</label>
+                <input type="number" id="equip1-health-value" value="0">
                 <label for="equip1-passive-skill">Passive Skill:</label>
                 <select id="equip1-passive-skill"></select>
                 <input type="number" id="equip1-passive-skill-value" value="10">
@@ -96,14 +112,17 @@
                     <input type="checkbox" id="equip2-unequip">
                     <label for="equip2-unequip">Stats are included in Character Stats (unequip first)</label>
                 </div>
-                <label for="equip2-weapon-type">Weapon Type:</label>
-                <select id="equip2-weapon-type">
-                    <option value="corp-a-corp">Corp à corp</option>
-                    <option value="a-distance">À distance</option>
-                </select>
-                <label for="equip2-main-carac">Main Caracteristic:</label>
-                <select id="equip2-main-carac"><option value="damage">Damage</option><option value="health">Health</option></select>
-                <input type="number" id="equip2-main-carac-value" value="0">
+                <div id="equip2-weapon-type-container" style="display: none;">
+                    <label for="equip2-weapon-type">Weapon Type:</label>
+                    <select id="equip2-weapon-type">
+                        <option value="corp-a-corp">Corp à corp</option>
+                        <option value="a-distance">À distance</option>
+                    </select>
+                </div>
+                <label for="equip2-damage-value">Damage:</label>
+                <input type="number" id="equip2-damage-value" value="0">
+                <label for="equip2-health-value">Health:</label>
+                <input type="number" id="equip2-health-value" value="0">
                 <label for="equip2-passive-skill">Passive Skill:</label>
                 <select id="equip2-passive-skill"></select>
                 <input type="number" id="equip2-passive-skill-value" value="0">
