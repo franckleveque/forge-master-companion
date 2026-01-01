@@ -120,11 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (stats.weaponType === 'corp-a-corp') finalDamage *= (1 + p['degats-corps-a-corps'] / 100);
         if (stats.weaponType === 'a-distance') finalDamage *= (1 + p['degats-a-distance'] / 100);
 
-        let attackSpeedBonus = p['vitesse-attaque'] / 100;
-        if (attackSpeedBonus >= 1) {
-            attackSpeedBonus = 0.99; // Cap at 99% to prevent division by zero
-        }
-        const attackSpeed = 1 / (1 - attackSpeedBonus);
+        const attackSpeedBonus = p['vitesse-attaque'] / 100;
+        const attackSpeed = 1 / Math.pow(0.5, attackSpeedBonus);
         const critChance = p['chance-critique'] / 100;
         const critDamage = 1.5 + p['degats-critiques'] / 100;
         const blockChance = p['chance-blocage'] / 100;
@@ -134,8 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentHealth = finalHealth;
         let time = 0;
-        let playerAttackTimer = stats.weaponType === 'corp-a-corp' ? 2 : 0;
-        let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? 2 : 0;
+        let playerAttackTimer = stats.weaponType === 'corp-a-corp' ? -2 : 0;
+        let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? -2 : 0;
 
         // Deterministic counters
         let critCounter = 0;
