@@ -30,7 +30,7 @@ A detailed combat simulator to help you choose the best equipment in Forge Maste
 
 ## Combat Assumptions
 
-*   **Simulation Model:** The simulation is **deterministic** and runs second-by-second until the character's health reaches zero or a 60-second time limit is reached. It does not use random chance, ensuring that the results are stable and reflect the "on-average" performance of a gear setup.
+*   **Simulation Model:** The simulation is **deterministic** and runs on a high-precision time step (0.01 seconds) to accurately model the timing of attacks and events. It continues until the character's health reaches zero or a 60-second time limit is reached. It does not use random chance, ensuring that the results are stable and reflect the "on-average" performance of a gear setup.
 *   **Player Attack Speed:** The "Vitesse d'attaque" passive reduces the time between attacks based on an exponential model. Every 100% of bonus attack speed halves the time per attack (doubling the number of attacks). The formula is: `Attacks per Second = 1 / (0.5 ^ Bonus %)`. For example, a 200% bonus results in `1 / (0.5 ^ 2) = 4` attacks per second.
 *   **Weapon Delay:** The simulation correctly uses the weapon type selected for each piece of equipment. Melee weapons have a 2-second delay before their first attack, while ranged weapons attack immediately.
 *   **Enemy Attack Speed:** Assumed to be 1 hit per second.

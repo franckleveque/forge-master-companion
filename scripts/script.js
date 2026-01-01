@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function simulate(stats) {
         const MAX_SIMULATION_TIME = 60; // 60 seconds for PvP
+        const dt = 0.01; // High-precision time step
         const p = stats.basePassiveSkills;
 
         // Calculate final stats
@@ -122,6 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const attackSpeedBonus = p['vitesse-attaque'] / 100;
         const attackSpeed = 1 / Math.pow(0.5, attackSpeedBonus);
+        const timePerPlayerAttack = 1 / attackSpeed;
+
         const critChance = p['chance-critique'] / 100;
         const critDamage = 1.5 + p['degats-critiques'] / 100;
         const blockChance = p['chance-blocage'] / 100;
@@ -131,8 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentHealth = finalHealth;
         let time = 0;
-        let playerAttackTimer = stats.weaponType === 'corp-a-corp' ? -2 : 0;
-        let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? -2 : 0;
+
+        // Timers represent the countdown to the next event
+        let playerAttackTimer = stats.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
+        let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
+        const timePerEnemyAttack = 1.0; // Assuming enemy attack speed is 1 attack/sec
 
         // Deterministic counters
         let critCounter = 0;
@@ -141,14 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalDamageDealt = 0;
 
         while (currentHealth > 0 && time < MAX_SIMULATION_TIME) {
-            time++;
+            time += dt;
 
             // Healing
-            currentHealth += healthRegenPerSec;
+            currentHealth += healthRegenPerSec * dt;
 
             // Player attacks
-            playerAttackTimer += attackSpeed;
-            while(playerAttackTimer >= 1) {
+            playerAttackTimer -= dt;
+            while(playerAttackTimer <= 0) {
                 let damageDealt = finalDamage;
 
                 critCounter += critChance;
@@ -165,12 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 currentHealth += damageDealt * lifesteal;
                 totalDamageDealt += damageDealt;
-                playerAttackTimer--;
+                playerAttackTimer += timePerPlayerAttack;
             }
 
             // Active skills
             stats.activeSkills.forEach(skill => {
-                skill.timer--;
+                skill.timer -= dt;
                 if (skill.timer <= 0) {
                     if (skill.type === 'damage') {
                         const skillDamage = skill.value * (1 + p['competence-degats'] / 100);
@@ -178,20 +184,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (skill.type === 'healing') {
                         currentHealth += skill.value;
                     }
-                    skill.timer = skill.cooldown * (1 - p['competences-temps-recharge'] / 100);
+                    const cooldown = skill.cooldown * (1 - p['competences-temps-recharge'] / 100);
+                    skill.timer += cooldown;
                 }
             });
 
             // Enemy attacks
-            enemyAttackTimer--;
-            if (enemyAttackTimer <= 0) {
+            enemyAttackTimer -= dt;
+            while (enemyAttackTimer <= 0) {
                 blockCounter += blockChance;
                 if (blockCounter < 1) {
-                    currentHealth -= stats.enemy.dps;
+                    currentHealth -= stats.enemy.dps * timePerEnemyAttack;
                 } else {
                     blockCounter--;
                 }
-                enemyAttackTimer = 1; // Assuming enemy attack speed is 1
+                enemyAttackTimer += timePerEnemyAttack;
             }
 
             // Cap health
