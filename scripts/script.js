@@ -18,8 +18,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const equip1PassiveSkill = document.getElementById('equip1-passive-skill');
     const equip2PassiveSkill = document.getElementById('equip2-passive-skill');
     const compareButton = document.getElementById('compare-button');
-    const survivalTime1 = document.getElementById('survival-time-1');
-    const survivalTime2 = document.getElementById('survival-time-2');
+    const equip1Category = document.getElementById('equip1-category');
+    const equip2Category = document.getElementById('equip2-category');
+    const equip1WeaponTypeContainer = document.getElementById('equip1-weapon-type-container');
+    const equip2WeaponTypeContainer = document.getElementById('equip2-weapon-type-container');
+
+    equip1Category.addEventListener('change', () => {
+        equip2Category.value = equip1Category.value;
+        toggleWeaponTypeDisplay();
+    });
+
+    equip2Category.addEventListener('change', () => {
+        equip1Category.value = equip2Category.value;
+        toggleWeaponTypeDisplay();
+    });
+
+    function toggleWeaponTypeDisplay() {
+        equip1WeaponTypeContainer.style.display = equip1Category.value === 'weapon' ? 'block' : 'none';
+        equip2WeaponTypeContainer.style.display = equip2Category.value === 'weapon' ? 'block' : 'none';
+    }
 
     function populatePassiveSkills() {
         passiveSkills.forEach(skill => {
@@ -64,11 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function getEquipment(index) {
+    function getEquipment(index, baseStats) {
+        const category = document.getElementById(`equip${index}-category`).value;
+        const weaponType = category === 'weapon' ? document.getElementById(`equip${index}-weapon-type`).value : baseStats.weaponType;
+
         return {
-            weaponType: document.getElementById(`equip${index}-weapon-type`).value,
-            mainCarac: document.getElementById(`equip${index}-main-carac`).value,
-            mainCaracValue: parseFloat(document.getElementById(`equip${index}-main-carac-value`).value) || 0,
+            category: category,
+            weaponType: weaponType,
+            damage: parseFloat(document.getElementById(`equip${index}-damage-value`).value) || 0,
+            health: parseFloat(document.getElementById(`equip${index}-health-value`).value) || 0,
             passiveSkill: document.getElementById(`equip${index}-passive-skill`).value,
             passiveSkillValue: parseFloat(document.getElementById(`equip${index}-passive-skill-value`).value) || 0
         };
@@ -77,13 +98,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyEquipment(baseStats, equipment) {
         let stats = JSON.parse(JSON.stringify(baseStats));
 
-        stats.weaponType = equipment.weaponType;
-
-        if (equipment.mainCarac === 'damage') {
-            stats.totalDamage += equipment.mainCaracValue;
-        } else {
-            stats.totalHealth += equipment.mainCaracValue;
+        if (equipment.category === 'weapon') {
+            stats.weaponType = equipment.weaponType;
         }
+
+        stats.totalDamage += equipment.damage;
+        stats.totalHealth += equipment.health;
 
         const passive = passiveSkills.find(p => p.name === equipment.passiveSkill);
         if (passive) {
@@ -96,11 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function unequipEquipment(baseStats, equipment) {
         let stats = JSON.parse(JSON.stringify(baseStats));
 
-        if (equipment.mainCarac === 'damage') {
-            stats.totalDamage -= equipment.mainCaracValue;
-        } else {
-            stats.totalHealth -= equipment.mainCaracValue;
-        }
+        stats.totalDamage -= equipment.damage;
+        stats.totalHealth -= equipment.health;
 
         const passive = passiveSkills.find(p => p.name === equipment.passiveSkill);
         if (passive) {
@@ -225,8 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function compare() {
         let baseStats = getCharacterStats();
-        const equipNew = getEquipment(1);
-        const equipOld = getEquipment(2);
+        const equipNew = getEquipment(1, baseStats);
+        const equipOld = getEquipment(2, baseStats);
         const unequipCheckbox = document.getElementById('equip2-unequip');
 
         if (unequipCheckbox.checked) {
