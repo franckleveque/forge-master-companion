@@ -10,140 +10,128 @@
     <h1>Forge Master Companion</h1>
 
     <div class="container">
-        <div class="character-stats">
-            <h2>Character Stats</h2>
-            <label for="total-damage">Total Damage:</label>
-            <input type="number" id="total-damage" value="1000">
-            <label for="total-health">Total Health:</label>
-            <input type="number" id="total-health" value="10000">
-            <label for="weapon-type">Weapon Type:</label>
-            <select id="weapon-type">
-                <option value="corp-a-corp">Corp à corp</option>
-                <option value="a-distance">À distance</option>
-            </select>
-        </div>
-
-        <div class="passive-skills">
-            <h2>Base Passive Skills (%)</h2>
-            <div class="passive-grid">
-                <div class="passive-item"><label for="chance-critique">Chance critique:</label><input type="number" id="chance-critique" value="5"></div>
-                <div class="passive-item"><label for="degats-critiques">Dégâts critiques:</label><input type="number" id="degats-critiques" value="50"></div>
-                <div class="passive-item"><label for="chance-blocage">Chance de blocage:</label><input type="number" id="chance-blocage" value="0"></div>
-                <div class="passive-item"><label for="regeneration-sante">Régénération santé:</label><input type="number" id="regeneration-sante" value="0"></div>
-                <div class="passive-item"><label for="vol-de-vie">Vol de vie:</label><input type="number" id="vol-de-vie" value="0"></div>
-                <div class="passive-item"><label for="double-chance">Double chance:</label><input type="number" id="double-chance" value="0"></div>
-                <div class="passive-item"><label for="degats">Dégâts:</label><input type="number" id="degats" value="0"></div>
-                <div class="passive-item"><label for="degats-corps-a-corps">Dégâts corps à corps:</label><input type="number" id="degats-corps-a-corps" value="0"></div>
-                <div class="passive-item"><label for="degats-a-distance">Dégâts à distance:</label><input type="number" id="degats-a-distance" value="0"></div>
-                <div class="passive-item"><label for="vitesse-attaque">Vitesse d'attaque:</label><input type="number" id="vitesse-attaque" value="0"></div>
-                <div class="passive-item"><label for="competence-degats">Compétence dégâts:</label><input type="number" id="competence-degats" value="0"></div>
-                <div class="passive-item"><label for="competences-temps-recharge">Compétences temps de recharge:</label><input type="number" id="competences-temps-recharge" value="0"></div>
-                <div class="passive-item"><label for="sante">Santé:</label><input type="number" id="sante" value="0"></div>
-            </div>
-        </div>
-
-        <div class="active-skills">
-            <h2>Active Skills</h2>
-            <div class="active-skill-item">
-                <h3>Skill 1</h3>
-                <select id="active1-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
-                <input type="number" id="active1-value" placeholder="Value" value="500">
-                <input type="number" id="active1-cooldown" placeholder="Cooldown (s)" value="10">
-            </div>
-            <div class="active-skill-item">
-                <h3>Skill 2</h3>
-                <select id="active2-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
-                <input type="number" id="active2-value" placeholder="Value">
-                <input type="number" id="active2-cooldown" placeholder="Cooldown (s)">
-            </div>
-            <div class="active-skill-item">
-                <h3>Skill 3</h3>
-                <select id="active3-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
-                <input type="number" id="active3-value" placeholder="Value">
-                <input type="number" id="active3-cooldown" placeholder="Cooldown (s)">
-            </div>
-        </div>
-
-        <div class="enemy-stats">
-            <h2>Enemy Stats</h2>
-            <label for="enemy-dps">Enemy Damage per Second:</label>
-            <input type="number" id="enemy-dps" value="500">
-            <label for="enemy-weapon-type">Enemy Weapon Type:</label>
-            <select id="enemy-weapon-type">
-                <option value="corp-a-corp">Corp à corp</option>
-                <option value="a-distance">À distance</option>
-            </select>
-        </div>
-
-        <div class="equipment-comparison">
-            <div class="shared-category-selector">
-                <label for="equipment-category">Category:</label>
-                <select id="equipment-category">
-                    <option value="head">Head</option>
-                    <option value="body">Body</option>
-                    <option value="hands">Hands</option>
-                    <option value="necklace">Necklace</option>
-                    <option value="ring">Ring</option>
-                    <option value="weapon">Weapon</option>
-                    <option value="boots">Boots</option>
-                    <option value="belt">Belt</option>
-                </select>
-            </div>
-            <div class="equipment-setup">
-                <h2>Equipment 1 (New)</h2>
-                <div id="equip1-weapon-type-container" style="display: none;">
-                    <label for="equip1-weapon-type">Weapon Type:</label>
-                    <select id="equip1-weapon-type">
+        <div class="simulation-setup">
+            <div class="player-column">
+                <h2>Player</h2>
+                <div class="character-stats">
+                    <h3>Character Stats</h3>
+                    <label for="player-total-damage">Total Damage:</label>
+                    <input type="number" id="player-total-damage" value="1000">
+                    <label for="player-total-health">Total Health:</label>
+                    <input type="number" id="player-total-health" value="10000">
+                    <label for="player-weapon-type">Weapon Type:</label>
+                    <select id="player-weapon-type">
                         <option value="corp-a-corp">Corp à corp</option>
                         <option value="a-distance">À distance</option>
                     </select>
                 </div>
-                <label for="equip1-damage-value">Damage:</label>
-                <input type="number" id="equip1-damage-value" value="100">
-                <label for="equip1-health-value">Health:</label>
-                <input type="number" id="equip1-health-value" value="0">
-                <label for="equip1-passive-skill">Passive Skill:</label>
-                <select id="equip1-passive-skill"></select>
-                <input type="number" id="equip1-passive-skill-value" value="10">
-            </div>
-            <div class="equipment-setup">
-                <h2>Equipment 2 (Old)</h2>
-                <div class="unequip-check">
-                    <input type="checkbox" id="equip2-unequip">
-                    <label for="equip2-unequip">Stats are included in Character Stats (unequip first)</label>
+
+                <div class="passive-skills">
+                    <h3>Base Passive Skills (%)</h3>
+                    <div class="passive-grid">
+                        <div class="passive-item"><label for="player-chance-critique">Chance critique:</label><input type="number" id="player-chance-critique" value="5"></div>
+                        <div class="passive-item"><label for="player-degats-critiques">Dégâts critiques:</label><input type="number" id="player-degats-critiques" value="50"></div>
+                        <div class="passive-item"><label for="player-chance-blocage">Chance de blocage:</label><input type="number" id="player-chance-blocage" value="0"></div>
+                        <div class="passive-item"><label for="player-regeneration-sante">Régénération santé:</label><input type="number" id="player-regeneration-sante" value="0"></div>
+                        <div class="passive-item"><label for="player-vol-de-vie">Vol de vie:</label><input type="number" id="player-vol-de-vie" value="0"></div>
+                        <div class="passive-item"><label for="player-double-chance">Double chance:</label><input type="number" id="player-double-chance" value="0"></div>
+                        <div class="passive-item"><label for="player-degats">Dégâts:</label><input type="number" id="player-degats" value="0"></div>
+                        <div class="passive-item"><label for="player-degats-corps-a-corps">Dégâts corps à corps:</label><input type="number" id="player-degats-corps-a-corps" value="0"></div>
+                        <div class="passive-item"><label for="player-degats-a-distance">Dégâts à distance:</label><input type="number" id="player-degats-a-distance" value="0"></div>
+                        <div class="passive-item"><label for="player-vitesse-attaque">Vitesse d'attaque:</label><input type="number" id="player-vitesse-attaque" value="0"></div>
+                        <div class="passive-item"><label for="player-competence-degats">Compétence dégâts:</label><input type="number" id="player-competence-degats" value="0"></div>
+                        <div class="passive-item"><label for="player-competences-temps-recharge">Compétences temps de recharge:</label><input type="number" id="player-competences-temps-recharge" value="0"></div>
+                        <div class="passive-item"><label for="player-sante">Santé:</label><input type="number" id="player-sante" value="0"></div>
+                    </div>
                 </div>
-                <div id="equip2-weapon-type-container" style="display: none;">
-                    <label for="equip2-weapon-type">Weapon Type:</label>
-                    <select id="equip2-weapon-type">
+
+                <div class="active-skills">
+                    <h3>Active Skills</h3>
+                    <div class="active-skill-item">
+                        <h4>Skill 1</h4>
+                        <select id="player-active1-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
+                        <input type="number" id="player-active1-value" placeholder="Value" value="500">
+                        <input type="number" id="player-active1-cooldown" placeholder="Cooldown (s)" value="10">
+                    </div>
+                    <div class="active-skill-item">
+                        <h4>Skill 2</h4>
+                        <select id="player-active2-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
+                        <input type="number" id="player-active2-value" placeholder="Value">
+                        <input type="number" id="player-active2-cooldown" placeholder="Cooldown (s)">
+                    </div>
+                    <div class="active-skill-item">
+                        <h4>Skill 3</h4>
+                        <select id="player-active3-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
+                        <input type="number" id="player-active3-value" placeholder="Value">
+                        <input type="number" id="player-active3-cooldown" placeholder="Cooldown (s)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-column">
+                <h2>Opponent</h2>
+                <div class="character-stats">
+                    <h3>Character Stats</h3>
+                    <label for="opponent-total-damage">Total Damage:</label>
+                    <input type="number" id="opponent-total-damage" value="1000">
+                    <label for="opponent-total-health">Total Health:</label>
+                    <input type="number" id="opponent-total-health" value="10000">
+                    <label for="opponent-weapon-type">Weapon Type:</label>
+                    <select id="opponent-weapon-type">
                         <option value="corp-a-corp">Corp à corp</option>
                         <option value="a-distance">À distance</option>
                     </select>
                 </div>
-                <label for="equip2-damage-value">Damage:</label>
-                <input type="number" id="equip2-damage-value" value="0">
-                <label for="equip2-health-value">Health:</label>
-                <input type="number" id="equip2-health-value" value="0">
-                <label for="equip2-passive-skill">Passive Skill:</label>
-                <select id="equip2-passive-skill"></select>
-                <input type="number" id="equip2-passive-skill-value" value="0">
+
+                <div class="passive-skills">
+                    <h3>Base Passive Skills (%)</h3>
+                    <div class="passive-grid">
+                        <div class="passive-item"><label for="opponent-chance-critique">Chance critique:</label><input type="number" id="opponent-chance-critique" value="5"></div>
+                        <div class="passive-item"><label for="opponent-degats-critiques">Dégâts critiques:</label><input type="number" id="opponent-degats-critiques" value="50"></div>
+                        <div class="passive-item"><label for="opponent-chance-blocage">Chance de blocage:</label><input type="number" id="opponent-chance-blocage" value="0"></div>
+                        <div class="passive-item"><label for="opponent-regeneration-sante">Régénération santé:</label><input type="number" id="opponent-regeneration-sante" value="0"></div>
+                        <div class="passive-item"><label for="opponent-vol-de-vie">Vol de vie:</label><input type="number" id="opponent-vol-de-vie" value="0"></div>
+                        <div class="passive-item"><label for="opponent-double-chance">Double chance:</label><input type="number" id="opponent-double-chance" value="0"></div>
+                        <div class="passive-item"><label for="opponent-degats">Dégâts:</label><input type="number" id="opponent-degats" value="0"></div>
+                        <div class="passive-item"><label for="opponent-degats-corps-a-corps">Dégâts corps à corps:</label><input type="number" id="opponent-degats-corps-a-corps" value="0"></div>
+                        <div class="passive-item"><label for="opponent-degats-a-distance">Dégâts à distance:</label><input type="number" id="opponent-degats-a-distance" value="0"></div>
+                        <div class="passive-item"><label for="opponent-vitesse-attaque">Vitesse d'attaque:</label><input type="number" id="opponent-vitesse-attaque" value="0"></div>
+                        <div class="passive-item"><label for="opponent-competence-degats">Compétence dégâts:</label><input type="number" id="opponent-competence-degats" value="0"></div>
+                        <div class="passive-item"><label for="opponent-competences-temps-recharge">Compétences temps de recharge:</label><input type="number" id="opponent-competences-temps-recharge" value="0"></div>
+                        <div class="passive-item"><label for="opponent-sante">Santé:</label><input type="number" id="opponent-sante" value="0"></div>
+                    </div>
+                </div>
+
+                <div class="active-skills">
+                    <h3>Active Skills</h3>
+                    <div class="active-skill-item">
+                        <h4>Skill 1</h4>
+                        <select id="opponent-active1-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
+                        <input type="number" id="opponent-active1-value" placeholder="Value" value="500">
+                        <input type="number" id="opponent-active1-cooldown" placeholder="Cooldown (s)" value="10">
+                    </div>
+                    <div class="active-skill-item">
+                        <h4>Skill 2</h4>
+                        <select id="opponent-active2-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
+                        <input type="number" id="opponent-active2-value" placeholder="Value">
+                        <input type="number" id="opponent-active2-cooldown" placeholder="Cooldown (s)">
+                    </div>
+                    <div class="active-skill-item">
+                        <h4>Skill 3</h4>
+                        <select id="opponent-active3-type"><option value="damage">Damage</option><option value="healing">Healing</option></select>
+                        <input type="number" id="opponent-active3-value" placeholder="Value">
+                        <input type="number" id="opponent-active3-cooldown" placeholder="Cooldown (s)">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <button id="compare-button">Compare</button>
+        <button id="simulate-button">Simulate</button>
 
         <div class="results">
             <h2>Results</h2>
             <div id="results-output">
-                <div class="result-item">
-                    <h3>Equipment 1 (New)</h3>
-                    <p><strong>Survival Time:</strong> <span id="survival-time-1">-</span> s</p>
-                    <p><strong>Total Damage Dealt:</strong> <span id="total-damage-1">-</span></p>
-                </div>
-                <div class="result-item">
-                    <h3>Equipment 2 (Old)</h3>
-                    <p><strong>Survival Time:</strong> <span id="survival-time-2">-</span> s</p>
-                    <p><strong>Total Damage Dealt:</strong> <span id="total-damage-2">-</span></p>
-                </div>
+                <!-- Simulation results will be dynamically inserted here -->
             </div>
         </div>
     </div>

@@ -116,3 +116,12 @@ th {
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+
+.simulation-setup {
+    display: flex;
+    justify-content: space-between;
+}
+
+.player-column {
+    width: 48%;
+}
