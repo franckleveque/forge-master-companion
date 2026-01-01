@@ -28,7 +28,7 @@ A detailed combat simulator to help you choose the best equipment in Forge Maste
 ## Combat Assumptions
 
 *   **Simulation Model:** The simulation runs second-by-second until the character's health reaches zero or a 60-second time limit is reached (to align with in-game PvP combat).
-*   **Player Attack Speed:** Calculated based on the "Vitesse d'attaque" passive.
+*   **Player Attack Speed:** The "Vitesse d'attaque" passive reduces the time between attacks. The number of attacks per second is calculated with the formula: `1 / (1 - Bonus %)`. For example, a 50% bonus results in `1 / (1 - 0.5) = 2` attacks per second.
 *   **Weapon Delay:** Melee weapons (both player and enemy) have a 2-second delay before their first attack. Ranged weapons attack immediately.
 *   **Enemy Attack Speed:** Assumed to be 1 hit per second.
 *   **Critical Hits:** Calculated based on "Chance critique" and "Dégâts critiques".

@@ -100,7 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (stats.weaponType === 'corp-a-corp') finalDamage *= (1 + p['degats-corps-a-corps'] / 100);
         if (stats.weaponType === 'a-distance') finalDamage *= (1 + p['degats-a-distance'] / 100);
 
-        const attackSpeed = 1 + p['vitesse-attaque'] / 100;
+        let attackSpeedBonus = p['vitesse-attaque'] / 100;
+        if (attackSpeedBonus >= 1) {
+            attackSpeedBonus = 0.99; // Cap at 99% to prevent division by zero
+        }
+        const attackSpeed = 1 / (1 - attackSpeedBonus);
         const critChance = p['chance-critique'] / 100;
         const critDamage = 1.5 + p['degats-critiques'] / 100;
         const blockChance = p['chance-blocage'] / 100;
