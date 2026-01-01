@@ -78,6 +78,11 @@
         <div class="equipment-comparison">
             <div class="equipment-setup">
                 <h2>Equipment 1 (New)</h2>
+                <label for="equip1-weapon-type">Weapon Type:</label>
+                <select id="equip1-weapon-type">
+                    <option value="corp-a-corp">Corp à corp</option>
+                    <option value="a-distance">À distance</option>
+                </select>
                 <label for="equip1-main-carac">Main Caracteristic:</label>
                 <select id="equip1-main-carac"><option value="damage">Damage</option><option value="health">Health</option></select>
                 <input type="number" id="equip1-main-carac-value" value="100">
@@ -91,6 +96,11 @@
                     <input type="checkbox" id="equip2-unequip">
                     <label for="equip2-unequip">Stats are included in Character Stats (unequip first)</label>
                 </div>
+                <label for="equip2-weapon-type">Weapon Type:</label>
+                <select id="equip2-weapon-type">
+                    <option value="corp-a-corp">Corp à corp</option>
+                    <option value="a-distance">À distance</option>
+                </select>
                 <label for="equip2-main-carac">Main Caracteristic:</label>
                 <select id="equip2-main-carac"><option value="damage">Damage</option><option value="health">Health</option></select>
                 <input type="number" id="equip2-main-carac-value" value="0">
@@ -105,8 +115,16 @@
         <div class="results">
             <h2>Results</h2>
             <div id="results-output">
-                <p><strong>Equipment 1 (New) Survival Time:</strong> <span id="survival-time-1">-</span> s</p>
-                <p><strong>Equipment 2 (Old) Survival Time:</strong> <span id="survival-time-2">-</span> s</p>
+                <div class="result-item">
+                    <h3>Equipment 1 (New)</h3>
+                    <p><strong>Survival Time:</strong> <span id="survival-time-1">-</span> s</p>
+                    <p><strong>Total Damage Dealt:</strong> <span id="total-damage-1">-</span></p>
+                </div>
+                <div class="result-item">
+                    <h3>Equipment 2 (Old)</h3>
+                    <p><strong>Survival Time:</strong> <span id="survival-time-2">-</span> s</p>
+                    <p><strong>Total Damage Dealt:</strong> <span id="total-damage-2">-</span></p>
+                </div>
             </div>
         </div>
     </div>

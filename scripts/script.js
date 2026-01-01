@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getEquipment(index) {
         return {
+            weaponType: document.getElementById(`equip${index}-weapon-type`).value,
             mainCarac: document.getElementById(`equip${index}-main-carac`).value,
             mainCaracValue: parseFloat(document.getElementById(`equip${index}-main-carac-value`).value) || 0,
             passiveSkill: document.getElementById(`equip${index}-passive-skill`).value,
@@ -75,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyEquipment(baseStats, equipment) {
         let stats = JSON.parse(JSON.stringify(baseStats));
+
+        stats.weaponType = equipment.weaponType;
 
         if (equipment.mainCarac === 'damage') {
             stats.totalDamage += equipment.mainCaracValue;
@@ -138,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let critCounter = 0;
         let doubleChanceCounter = 0;
         let blockCounter = 0;
+        let totalDamageDealt = 0;
 
         while (currentHealth > 0 && time < MAX_SIMULATION_TIME) {
             time++;
@@ -163,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 currentHealth += damageDealt * lifesteal;
+                totalDamageDealt += damageDealt;
                 playerAttackTimer--;
             }
 
@@ -171,7 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 skill.timer--;
                 if (skill.timer <= 0) {
                     if (skill.type === 'damage') {
-                        // Per README, lifesteal only applies to auto-attacks, so skill damage does not contribute to survival.
+                        const skillDamage = skill.value * (1 + p['competence-degats'] / 100);
+                        totalDamageDealt += skillDamage;
                     } else if (skill.type === 'healing') {
                         currentHealth += skill.value;
                     }
@@ -195,7 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentHealth > finalHealth) currentHealth = finalHealth;
         }
 
-        return time >= MAX_SIMULATION_TIME ? Infinity : time;
+        const survivalTime = time >= MAX_SIMULATION_TIME ? Infinity : time;
+        return { survivalTime, totalDamageDealt };
     }
 
     function compare() {
@@ -211,11 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const statsOld = applyEquipment(baseStats, equipOld);
         const statsNew = applyEquipment(baseStats, equipNew);
 
-        const survivalOld = simulate(statsOld);
-        const survivalNew = simulate(statsNew);
+        const resultOld = simulate(statsOld);
+        const resultNew = simulate(statsNew);
 
-        survivalTime1.textContent = isFinite(survivalNew) ? survivalNew.toFixed(2) : "Infinite";
-        survivalTime2.textContent = isFinite(survivalOld) ? survivalOld.toFixed(2) : "Infinite";
+        document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('total-damage-1').textContent = resultNew.totalDamageDealt.toLocaleString();
+
+        document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('total-damage-2').textContent = resultOld.totalDamageDealt.toLocaleString();
     }
 
     compareButton.addEventListener('click', compare);
