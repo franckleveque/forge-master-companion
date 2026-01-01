@@ -90,6 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return stats;
     }
 
+    function unequipEquipment(baseStats, equipment) {
+        let stats = JSON.parse(JSON.stringify(baseStats));
+
+        if (equipment.mainCarac === 'damage') {
+            stats.totalDamage -= equipment.mainCaracValue;
+        } else {
+            stats.totalHealth -= equipment.mainCaracValue;
+        }
+
+        const passive = passiveSkills.find(p => p.name === equipment.passiveSkill);
+        if (passive) {
+            stats.basePassiveSkills[passive.id] -= equipment.passiveSkillValue;
+        }
+
+        return stats;
+    }
+
     function simulate(stats) {
         const MAX_SIMULATION_TIME = 60; // 60 seconds for PvP
         const p = stats.basePassiveSkills;
@@ -117,6 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let playerAttackTimer = stats.weaponType === 'corp-a-corp' ? 2 : 0;
         let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? 2 : 0;
 
+        // Deterministic counters
+        let critCounter = 0;
+        let doubleChanceCounter = 0;
+        let blockCounter = 0;
+
         while (currentHealth > 0 && time < MAX_SIMULATION_TIME) {
             time++;
 
@@ -127,10 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
             playerAttackTimer += attackSpeed;
             while(playerAttackTimer >= 1) {
                 let damageDealt = finalDamage;
-                if (Math.random() < critChance) damageDealt *= critDamage;
-                if (Math.random() < doubleChance) damageDealt *= 2;
+
+                critCounter += critChance;
+                if (critCounter >= 1) {
+                    damageDealt *= critDamage;
+                    critCounter--;
+                }
+
+                doubleChanceCounter += doubleChance;
+                if (doubleChanceCounter >= 1) {
+                    damageDealt *= 2;
+                    doubleChanceCounter--;
+                }
+
                 currentHealth += damageDealt * lifesteal;
-                playerAttackTimer --;
+                playerAttackTimer--;
             }
 
             // Active skills
@@ -138,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 skill.timer--;
                 if (skill.timer <= 0) {
                     if (skill.type === 'damage') {
-                        const skillDamage = skill.value * (1 + p['competence-degats'] / 100);
                         // Per README, lifesteal only applies to auto-attacks, so skill damage does not contribute to survival.
                     } else if (skill.type === 'healing') {
                         currentHealth += skill.value;
@@ -150,8 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Enemy attacks
             enemyAttackTimer--;
             if (enemyAttackTimer <= 0) {
-                if (Math.random() > blockChance) {
+                blockCounter += blockChance;
+                if (blockCounter < 1) {
                     currentHealth -= stats.enemy.dps;
+                } else {
+                    blockCounter--;
                 }
                 enemyAttackTimer = 1; // Assuming enemy attack speed is 1
             }
@@ -164,9 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function compare() {
-        const baseStats = getCharacterStats();
+        let baseStats = getCharacterStats();
         const equipNew = getEquipment(1);
         const equipOld = getEquipment(2);
+        const unequipCheckbox = document.getElementById('equip2-unequip');
+
+        if (unequipCheckbox.checked) {
+            baseStats = unequipEquipment(baseStats, equipOld);
+        }
 
         const statsOld = applyEquipment(baseStats, equipOld);
         const statsNew = applyEquipment(baseStats, equipNew);
