@@ -2,7 +2,24 @@
 
 A detailed combat simulator to help you choose the best equipment in Forge Master Idle RPG.
 
-## How to Use
+## How to Run with Docker
+
+This application is containerized and can be easily run using Docker.
+
+1.  **Build the Docker image:**
+    ```bash
+    docker build -t forge-master-companion .
+    ```
+
+2.  **Run the Docker container:**
+    ```bash
+    docker run -d -p 8080:80 forge-master-companion
+    ```
+
+3.  **Access the application:**
+    Open your web browser and navigate to `http://localhost:8080`.
+
+## How to Use (Manual)
 
 1.  **Enter Character Stats:**
     *   Fill in your character's total damage and health.
