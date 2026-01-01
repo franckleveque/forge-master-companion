@@ -1,0 +1,118 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    text-align: center;
+    color: #5a2d0c;
+}
+
+.character-stats, .passive-skills, .equipment-comparison, .results {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background: #5a2d0c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4a2106;
+}
+
+.equipment-comparison {
+    display: flex;
+    justify-content: space-between;
+}
+
+.equipment-setup {
+    width: 48%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.passive-skill-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.passive-skill-item select {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.passive-skill-item input {
+    width: 80px;
+    margin-right: 10px;
+}
+
+.passive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.passive-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.active-skills {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.active-skill-item {
+    width: 32%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
