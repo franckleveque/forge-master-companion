@@ -37,4 +37,5 @@ A detailed combat simulator to help you choose the best equipment in Forge Maste
 *   **Probabilities (Crit, Block, etc.):** All percentage-based chances are normalized. For example, a 10% chance to block will result in exactly 1 blocked attack for every 10 enemy hits.
 *   **Lifesteal:** Heals for a percentage of the damage dealt by auto-attacks.
 *   **Health Regen:** Heals for a percentage of maximum health each second.
-*   **Active Skills:** Assumed to be used off-cooldown. Healing skills contribute to survival. Damage skills contribute to the "Total Damage Dealt" metric and are boosted by the "Compétence dégâts" passive.
+*   **Double Chance:** Triggers a second, independent auto-attack. This second attack uses the same base damage and can also critically hit.
+*   **Active Skills:** Assumed to be used off-cooldown. Healing skills contribute to survival. Damage skills contribute to the "Total Damage Dealt" metric and are boosted by a "Compétence dégâts" passive.

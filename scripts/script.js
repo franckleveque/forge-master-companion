@@ -155,22 +155,36 @@ document.addEventListener('DOMContentLoaded', () => {
             // Player attacks
             playerAttackTimer -= dt;
             while(playerAttackTimer <= 0) {
-                let damageDealt = finalDamage;
+                // --- Main Attack ---
+                let mainAttackDamage = finalDamage;
 
                 critCounter += critChance;
                 if (critCounter >= 1) {
-                    damageDealt *= critDamage;
+                    mainAttackDamage *= critDamage;
                     critCounter--;
                 }
 
+                currentHealth += mainAttackDamage * lifesteal;
+                totalDamageDealt += mainAttackDamage;
+
+                // --- Double Chance Attack ---
                 doubleChanceCounter += doubleChance;
                 if (doubleChanceCounter >= 1) {
-                    damageDealt *= 2;
+                    let secondAttackDamage = finalDamage;
+
+                    // The second attack can also crit
+                    critCounter += critChance;
+                    if (critCounter >= 1) {
+                        secondAttackDamage *= critDamage;
+                        critCounter--;
+                    }
+
+                    currentHealth += secondAttackDamage * lifesteal;
+                    totalDamageDealt += secondAttackDamage;
+
                     doubleChanceCounter--;
                 }
 
-                currentHealth += damageDealt * lifesteal;
-                totalDamageDealt += damageDealt;
                 playerAttackTimer += timePerPlayerAttack;
             }
 
