@@ -18,24 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const equip1PassiveSkill = document.getElementById('equip1-passive-skill');
     const equip2PassiveSkill = document.getElementById('equip2-passive-skill');
     const compareButton = document.getElementById('compare-button');
-    const equip1Category = document.getElementById('equip1-category');
-    const equip2Category = document.getElementById('equip2-category');
+    const equipmentCategory = document.getElementById('equipment-category');
     const equip1WeaponTypeContainer = document.getElementById('equip1-weapon-type-container');
     const equip2WeaponTypeContainer = document.getElementById('equip2-weapon-type-container');
 
-    equip1Category.addEventListener('change', () => {
-        equip2Category.value = equip1Category.value;
-        toggleWeaponTypeDisplay();
-    });
-
-    equip2Category.addEventListener('change', () => {
-        equip1Category.value = equip2Category.value;
-        toggleWeaponTypeDisplay();
-    });
+    equipmentCategory.addEventListener('change', toggleWeaponTypeDisplay);
 
     function toggleWeaponTypeDisplay() {
-        equip1WeaponTypeContainer.style.display = equip1Category.value === 'weapon' ? 'block' : 'none';
-        equip2WeaponTypeContainer.style.display = equip2Category.value === 'weapon' ? 'block' : 'none';
+        const isWeapon = equipmentCategory.value === 'weapon';
+        equip1WeaponTypeContainer.style.display = isWeapon ? 'block' : 'none';
+        equip2WeaponTypeContainer.style.display = isWeapon ? 'block' : 'none';
     }
 
     function populatePassiveSkills() {
@@ -82,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getEquipment(index, baseStats) {
-        const category = document.getElementById(`equip${index}-category`).value;
+        const category = document.getElementById('equipment-category').value;
         const weaponType = category === 'weapon' ? document.getElementById(`equip${index}-weapon-type`).value : baseStats.weaponType;
 
         return {

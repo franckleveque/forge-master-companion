@@ -76,10 +76,9 @@
         </div>
 
         <div class="equipment-comparison">
-            <div class="equipment-setup">
-                <h2>Equipment 1 (New)</h2>
-                <label for="equip1-category">Category:</label>
-                <select id="equip1-category">
+            <div class="shared-category-selector">
+                <label for="equipment-category">Category:</label>
+                <select id="equipment-category">
                     <option value="head">Head</option>
                     <option value="body">Body</option>
                     <option value="hands">Hands</option>
@@ -89,6 +88,9 @@
                     <option value="boots">Boots</option>
                     <option value="belt">Belt</option>
                 </select>
+            </div>
+            <div class="equipment-setup">
+                <h2>Equipment 1 (New)</h2>
                 <div id="equip1-weapon-type-container" style="display: none;">
                     <label for="equip1-weapon-type">Weapon Type:</label>
                     <select id="equip1-weapon-type">
@@ -110,17 +112,6 @@
                     <input type="checkbox" id="equip2-unequip">
                     <label for="equip2-unequip">Stats are included in Character Stats (unequip first)</label>
                 </div>
-                <label for="equip2-category">Category:</label>
-                <select id="equip2-category">
-                    <option value="head">Head</option>
-                    <option value="body">Body</option>
-                    <option value="hands">Hands</option>
-                    <option value="necklace">Necklace</option>
-                    <option value="ring">Ring</option>
-                    <option value="weapon">Weapon</option>
-                    <option value="boots">Boots</option>
-                    <option value="belt">Belt</option>
-                </select>
                 <div id="equip2-weapon-type-container" style="display: none;">
                     <label for="equip2-weapon-type">Weapon Type:</label>
                     <select id="equip2-weapon-type">
