@@ -1,88 +1,80 @@
 document.addEventListener('DOMContentLoaded', () => {
     const passiveSkills = [
-        "Chance critique", "Dégâts critiques", "chance de blocage",
-        "régénération santé", "vol de vie", "double chance", "dégâts",
-        "Dégâts corps à corps", "dégâts à distance", "Vitesse d'attaque",
-        "compétence dégâts", "compétences temps de recharge", "santé"
+        { id: 'chance-critique', name: "Chance critique" },
+        { id: 'degats-critiques', name: "Dégâts critiques" },
+        { id: 'chance-blocage', name: "Chance de blocage" },
+        { id: 'regeneration-sante', name: "Régénération santé" },
+        { id: 'vol-de-vie', name: "Vol de vie" },
+        { id: 'double-chance', name: "Double chance" },
+        { id: 'degats', name: "Dégâts" },
+        { id: 'degats-corps-a-corps', name: "Dégâts corps à corps" },
+        { id: 'degats-a-distance', name: "Dégâts à distance" },
+        { id: 'vitesse-attaque', name: "Vitesse d'attaque" },
+        { id: 'competence-degats', name: "Compétence dégâts" },
+        { id: 'competences-temps-recharge', name: "Compétences temps de recharge" },
+        { id: 'sante', name: "Santé" }
     ];
 
     const equip1PassiveSkill = document.getElementById('equip1-passive-skill');
     const equip2PassiveSkill = document.getElementById('equip2-passive-skill');
-    const passiveSkillsList = document.getElementById('passive-skills-list');
-    const addPassiveSkillButton = document.getElementById('add-passive-skill');
     const compareButton = document.getElementById('compare-button');
-    const resultsOutput = document.getElementById('results-output');
+    const survivalTime1 = document.getElementById('survival-time-1');
+    const survivalTime2 = document.getElementById('survival-time-2');
 
     function populatePassiveSkills() {
         passiveSkills.forEach(skill => {
             const option1 = document.createElement('option');
-            option1.value = skill;
-            option1.textContent = skill;
+            option1.value = skill.name;
+            option1.textContent = skill.name;
             equip1PassiveSkill.appendChild(option1);
 
             const option2 = document.createElement('option');
-            option2.value = skill;
-            option2.textContent = skill;
+            option2.value = skill.name;
+            option2.textContent = skill.name;
             equip2PassiveSkill.appendChild(option2);
         });
     }
 
-    function addPassiveSkill() {
-        const skillContainer = document.createElement('div');
-        skillContainer.classList.add('passive-skill-item');
-
-        const skillSelect = document.createElement('select');
-        passiveSkills.forEach(skill => {
-            const option = document.createElement('option');
-            option.value = skill;
-            option.textContent = skill;
-            skillSelect.appendChild(option);
-        });
-
-        const valueInput = document.createElement('input');
-        valueInput.type = 'number';
-        valueInput.value = '10';
-
-        const removeButton = document.createElement('button');
-        removeButton.textContent = 'Remove';
-        removeButton.addEventListener('click', () => {
-            skillContainer.remove();
-        });
-
-        skillContainer.appendChild(skillSelect);
-        skillContainer.appendChild(valueInput);
-        skillContainer.appendChild(removeButton);
-        passiveSkillsList.appendChild(skillContainer);
-    }
-
     function getCharacterStats() {
-        const passiveSkills = [];
-        document.querySelectorAll('.passive-skill-item').forEach(item => {
-            const skill = item.querySelector('select').value.toLowerCase();
-            const value = parseFloat(item.querySelector('input').value);
-            passiveSkills.push({ skill, value });
+        const basePassiveSkills = {};
+        passiveSkills.forEach(skill => {
+            basePassiveSkills[skill.id] = parseFloat(document.getElementById(skill.id).value) || 0;
         });
+
+        const activeSkills = [];
+        for (let i = 1; i <= 3; i++) {
+            const type = document.getElementById(`active${i}-type`).value;
+            const value = parseFloat(document.getElementById(`active${i}-value`).value);
+            const cooldown = parseFloat(document.getElementById(`active${i}-cooldown`).value);
+            if (value && cooldown) {
+                activeSkills.push({ type, value, cooldown, timer: 0 });
+            }
+        }
 
         return {
-            totalDamage: parseFloat(document.getElementById('total-damage').value),
-            totalHealth: parseFloat(document.getElementById('total-health').value),
+            totalDamage: parseFloat(document.getElementById('total-damage').value) || 0,
+            totalHealth: parseFloat(document.getElementById('total-health').value) || 0,
             weaponType: document.getElementById('weapon-type').value,
-            passiveSkills: passiveSkills,
-            enemyDps: parseFloat(document.getElementById('enemy-dps').value)
+            basePassiveSkills: basePassiveSkills,
+            activeSkills: activeSkills,
+            enemy: {
+                dps: parseFloat(document.getElementById('enemy-dps').value) || 0,
+                weaponType: document.getElementById('enemy-weapon-type').value
+            }
         };
     }
 
     function getEquipment(index) {
         return {
             mainCarac: document.getElementById(`equip${index}-main-carac`).value,
-            mainCaracValue: parseFloat(document.getElementById(`equip${index}-main-carac-value`).value),
-            passiveSkill: document.getElementById(`equip${index}-passive-skill`).value.toLowerCase(),
-            passiveSkillValue: parseFloat(document.getElementById(`equip${index}-passive-skill-value`).value)
+            mainCaracValue: parseFloat(document.getElementById(`equip${index}-main-carac-value`).value) || 0,
+            passiveSkill: document.getElementById(`equip${index}-passive-skill`).value,
+            passiveSkillValue: parseFloat(document.getElementById(`equip${index}-passive-skill-value`).value) || 0
         };
     }
 
-    function calculate(baseStats, equipment) {
-        let stats = JSON.parse(JSON.stringify(baseStats)); // Deep copy
+    function applyEquipment(baseStats, equipment) {
+        let stats = JSON.parse(JSON.stringify(baseStats));
 
         if (equipment.mainCarac === 'damage') {
             stats.totalDamage += equipment.mainCaracValue;
@@ -90,123 +82,98 @@ document.addEventListener('DOMContentLoaded', () => {
             stats.totalHealth += equipment.mainCaracValue;
         }
 
-        stats.passiveSkills.push({
-            skill: equipment.passiveSkill,
-            value: equipment.passiveSkillValue
-        });
+        const passive = passiveSkills.find(p => p.name === equipment.passiveSkill);
+        if (passive) {
+            stats.basePassiveSkills[passive.id] += equipment.passiveSkillValue;
+        }
 
         return stats;
     }
 
     function simulate(stats) {
-        // First, apply passive skills that modify base stats like health.
-        stats.passiveSkills.forEach(({ skill, value }) => {
-            if (skill.toLowerCase() === 'santé') {
-                stats.totalHealth *= (1 + value / 100);
+        const MAX_SIMULATION_TIME = 600; // 10 minutes
+        const p = stats.basePassiveSkills;
+
+        // Calculate final stats
+        let finalHealth = stats.totalHealth * (1 + p.sante / 100);
+        let finalDamage = stats.totalDamage * (1 + p.degats / 100);
+        if (stats.weaponType === 'corp-a-corp') finalDamage *= (1 + p['degats-corps-a-corps'] / 100);
+        if (stats.weaponType === 'a-distance') finalDamage *= (1 + p['degats-a-distance'] / 100);
+
+        const attackSpeed = 1 + p['vitesse-attaque'] / 100;
+        const critChance = p['chance-critique'] / 100;
+        const critDamage = 1.5 + p['degats-critiques'] / 100;
+        const blockChance = p['chance-blocage'] / 100;
+        const healthRegenPerSec = finalHealth * (p['regeneration-sante'] / 100);
+        const lifesteal = p['vol-de-vie'] / 100;
+        const doubleChance = p['double-chance'] / 100;
+
+        let currentHealth = finalHealth;
+        let time = 0;
+        let playerAttackTimer = stats.weaponType === 'corp-a-corp' ? 2 : 0;
+        let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? 2 : 0;
+
+        while (currentHealth > 0 && time < MAX_SIMULATION_TIME) {
+            time++;
+
+            // Healing
+            currentHealth += healthRegenPerSec;
+
+            // Player attacks
+            playerAttackTimer += attackSpeed;
+            while(playerAttackTimer >= 1) {
+                let damageDealt = finalDamage;
+                if (Math.random() < critChance) damageDealt *= critDamage;
+                if (Math.random() < doubleChance) damageDealt *= 2;
+                currentHealth += damageDealt * lifesteal;
+                playerAttackTimer --;
             }
-        });
 
-        // Next, calculate total damage, including passive skill effects.
-        let totalDamage = stats.totalDamage;
-        stats.passiveSkills.forEach(({ skill, value }) => {
-            switch (skill.toLowerCase()) {
-                case 'dégâts':
-                    totalDamage *= (1 + value / 100);
-                    break;
-                case 'dégâts corps à corps':
-                    if (stats.weaponType === 'corp-a-corp') totalDamage *= (1 + value / 100);
-                    break;
-                case 'dégâts à distance':
-                    if (stats.weaponType === 'a-distance') totalDamage *= (1 + value / 100);
-                    break;
-            }
-        });
-
-        // Now, calculate combat variables based on the final stats.
-        let critChance = 0;
-        let critDamage = 1.5; // Base crit damage multiplier
-        let blockChance = 0;
-        let healthRegen = 0;
-        let lifesteal = 0;
-        let attackSpeed = 1; // attacks per second
-
-        stats.passiveSkills.forEach(({ skill, value }) => {
-            switch (skill.toLowerCase()) {
-                case 'chance critique': critChance = value / 100; break;
-                case 'dégâts critiques': critDamage += value / 100; break;
-                case 'chance de blocage': blockChance = value / 100; break;
-                case 'régénération santé': healthRegen = stats.totalHealth * (value / 100); break; // Correctly uses modified health
-                case 'vol de vie': lifesteal = value / 100; break;
-                case 'vitesse d\'attaque': attackSpeed += value / 100; break;
-            }
-        });
-
-        const timeframes = [10, 20, 30, 40];
-        const results = {};
-
-        timeframes.forEach(time => {
-            let totalDamageDealt = 0;
-            const hits = Math.floor(time * attackSpeed);
-            const weaponDelay = stats.weaponType === 'corp-a-corp' ? 2 : 0;
-
-            for (let i = 1; i <= hits; i++) {
-                const hitTime = i / attackSpeed;
-                if (hitTime < weaponDelay) continue;
-
-                let damage = totalDamage;
-                if (Math.random() < critChance) {
-                    damage *= critDamage;
+            // Active skills
+            stats.activeSkills.forEach(skill => {
+                skill.timer--;
+                if (skill.timer <= 0) {
+                    if (skill.type === 'damage') {
+                        const skillDamage = skill.value * (1 + p['competence-degats'] / 100);
+                        // Per README, lifesteal only applies to auto-attacks, so skill damage does not contribute to survival.
+                    } else if (skill.type === 'healing') {
+                        currentHealth += skill.value;
+                    }
+                    skill.timer = skill.cooldown * (1 - p['competences-temps-recharge'] / 100);
                 }
-                totalDamageDealt += damage;
+            });
+
+            // Enemy attacks
+            enemyAttackTimer--;
+            if (enemyAttackTimer <= 0) {
+                if (Math.random() > blockChance) {
+                    currentHealth -= stats.enemy.dps;
+                }
+                enemyAttackTimer = 1; // Assuming enemy attack speed is 1
             }
 
-            const totalDamageTaken = stats.enemyDps * time * (1 - blockChance);
+            // Cap health
+            if (currentHealth > finalHealth) currentHealth = finalHealth;
+        }
 
-            results[time] = {
-                totalDamageDealt: totalDamageDealt.toFixed(2),
-                healthRegen: (healthRegen * time).toFixed(2),
-                lifesteal: (totalDamageDealt * lifesteal).toFixed(2),
-                totalDamageTaken: totalDamageTaken.toFixed(2)
-            };
-        });
-
-        return results;
+        return time >= MAX_SIMULATION_TIME ? Infinity : time;
     }
 
     function compare() {
         const baseStats = getCharacterStats();
-        const equip1 = getEquipment(1);
-        const equip2 = getEquipment(2);
+        const equipNew = getEquipment(1);
+        const equipOld = getEquipment(2);
 
-        const stats1 = calculate(baseStats, equip1);
-        const stats2 = calculate(baseStats, equip2);
+        const statsOld = applyEquipment(baseStats, equipOld);
+        const statsNew = applyEquipment(baseStats, equipNew);
 
-        const results1 = simulate(stats1);
-        const results2 = simulate(stats2);
+        const survivalOld = simulate(statsOld);
+        const survivalNew = simulate(statsNew);
 
-        let output = '<h3>Equipment 1 vs Equipment 2</h3>';
-        output += '<table>';
-        output += '<tr><th>Time</th><th>Equip 1 Damage</th><th>Equip 2 Damage</th><th>Equip 1 Regen</th><th>Equip 2 Regen</th><th>Equip 1 Lifesteal</th><th>Equip 2 Lifesteal</th><th>Equip 1 Dmg Taken</th><th>Equip 2 Dmg Taken</th></tr>';
-
-        [10, 20, 30, 40].forEach(time => {
-            output += `<tr>
-                <td>${time}s</td>
-                <td>${results1[time].totalDamageDealt}</td>
-                <td>${results2[time].totalDamageDealt}</td>
-                <td>${results1[time].healthRegen}</td>
-                <td>${results2[time].healthRegen}</td>
-                <td>${results1[time].lifesteal}</td>
-                <td>${results2[time].lifesteal}</td>
-                <td>${results1[time].totalDamageTaken}</td>
-                <td>${results2[time].totalDamageTaken}</td>
-            </tr>`;
-        });
-        output += '</table>';
-        resultsOutput.innerHTML = output;
+        survivalTime1.textContent = isFinite(survivalNew) ? survivalNew.toFixed(2) : "Infinite";
+        survivalTime2.textContent = isFinite(survivalOld) ? survivalOld.toFixed(2) : "Infinite";
     }
 
-    addPassiveSkillButton.addEventListener('click', addPassiveSkill);
     compareButton.addEventListener('click', compare);
-
     populatePassiveSkills();
 });

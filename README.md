@@ -1,41 +1,39 @@
 # Forge Master Companion
 
-A small app allowing comparison of equipements for the game Forge Master Idle RPG.
+A detailed combat simulator to help you choose the best equipment in Forge Master Idle RPG.
 
 ## How to Use
 
 1.  **Enter Character Stats:**
-    *   **Total Damage:** Your character's total damage.
-    *   **Total Health:** Your character's total health.
-    *   **Weapon Type:** Select "Corp à corp" (Melee) or "À distance" (Ranged).
+    *   Fill in your character's total damage and health.
+    *   Select your weapon type (Melee or Ranged).
 
-2.  **Enter Enemy Stats:**
-    *   **Enemy Damage per Second:** The amount of damage the enemy deals per second.
+2.  **Enter Base Passive Skills:**
+    *   Input all of your character's existing passive skill percentages. These are the stats you have *before* equipping either of the items you want to compare.
 
-3.  **Add Passive Skills:**
-    *   Click "Add Passive Skill" to add a new passive skill.
-    *   Select the skill from the dropdown and enter its value.
+3.  **Configure Active Skills:**
+    *   Set up your three active skills by selecting their type (Damage or Healing), their base value, and their cooldown in seconds.
 
-4.  **Enter Equipment to Compare:**
-    *   For each of the two equipment slots, enter the main characteristic (damage or health) and its value.
-    *   Select the passive skill and its value.
+4.  **Enter Enemy Stats:**
+    *   Input the enemy's damage per second (DPS) and their weapon type.
 
-4.  **Compare:**
-    *   Click the "Compare" button to see the results.
+5.  **Enter Equipment to Compare:**
+    *   **Equipment 1 (New):** This is the new piece of gear you are considering.
+    *   **Equipment 2 (Old):** This should represent what you are currently wearing (or the second new item to compare).
+    *   For each piece, enter its main stat and the passive skill it provides.
+
+6.  **Compare:**
+    *   Click the "Compare" button to see the results. The application will simulate a fight to the death for each equipment setup, and the primary result is the **Survival Time**. A longer survival time is generally better.
 
 ## Combat Assumptions
 
-*   **Base Attack Speed:** 1 hit per second.
-*   **Ranged Weapon:** Hits immediately.
-*   **Melee Weapon:** 2 seconds delay before the first hit.
-*   **Evaluation Timeframes:** 10, 20, 30, and 40 seconds.
-*   **Critical Hits:**
-    *   Crit Chance = %
-    *   Crit Damage = %
-*   **Lifesteal:** % of damage dealt.
-*   **Regen:** % of max HP per second.
-*   **Block:** % chance to negate 100% of incoming damage.
-*   **Double Chance:** Not yet implemented.
-*   **Skill Damage:** Not yet implemented.
-*   **Skill Cooldown Reduction:** Not yet implemented.
-*   **Active Skills:** Not yet implemented.
+*   **Simulation Model:** The simulation runs second-by-second until the character's health reaches zero or a 10-minute time limit is reached.
+*   **Player Attack Speed:** Calculated based on the "Vitesse d'attaque" passive.
+*   **Weapon Delay:** Melee weapons (both player and enemy) have a 2-second delay before their first attack. Ranged weapons attack immediately.
+*   **Enemy Attack Speed:** Assumed to be 1 hit per second.
+*   **Critical Hits:** Calculated based on "Chance critique" and "Dégâts critiques".
+*   **Lifesteal:** Heals for a percentage of the damage dealt by auto-attacks.
+*   **Health Regen:** Heals for a percentage of maximum health each second.
+*   **Block:** Provides a percentage chance to completely negate one instance of enemy damage.
+*   **Active Skills:** Assumed to be used off-cooldown. Healing skills are applied instantly. Damage skills are now implemented and are boosted by the "Compétence dégâts" passive.
+*   **Double Chance:** Provides a percentage chance to deal double damage on an auto-attack.

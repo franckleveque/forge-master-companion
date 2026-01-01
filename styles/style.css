@@ -92,3 +92,27 @@ th {
     width: 80px;
     margin-right: 10px;
 }
+
+.passive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.passive-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.active-skills {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.active-skill-item {
+    width: 32%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
