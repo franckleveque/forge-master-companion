@@ -15,33 +15,35 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'sante', name: "Santé" }
     ];
 
-    const allActiveSkills = [
-        { name: "None" },
-        { name: "Barrage de canon", type: "damage", cooldown: 10, value: 733, scaling: { damage: 0.66, health: 5.28 } },
-        { name: "Berserk", type: "buff", cooldown: 20, duration: 10, effect: { stat: "totalDamage", value: 2200, scaling: { damage: 0.66, health: 5.28 } } },
-        { name: "Shurikens", type: "damage", cooldown: 8, value: 440, scaling: { damage: 0.66, health: 5.28 } },
-        { name: "Cri", type: "damage", cooldown: 5, value: 33, scaling: { damage: 0.36, health: 2.77 } },
-        { name: "Viande", type: "buff", cooldown: 20, duration: 10, effect: { stat: "totalHealth", value: 173, scaling: { damage: 0.23, health: 1.79 } } }
-    ];
-
     const equip1PassiveSkill = document.getElementById('equip1-passive-skill');
     const equip2PassiveSkill = document.getElementById('equip2-passive-skill');
     const compareButton = document.getElementById('compare-button');
     const survivalTime1 = document.getElementById('survival-time-1');
     const survivalTime2 = document.getElementById('survival-time-2');
 
-    function populateActiveSkills() {
-        const skillSelectors = [document.getElementById('active1-skill'), document.getElementById('active2-skill'), document.getElementById('active3-skill')];
-        skillSelectors.forEach(selector => {
-            if (selector) {
-                allActiveSkills.forEach(skill => {
-                    const option = document.createElement('option');
-                    option.value = skill.name;
-                    option.textContent = skill.name;
-                    selector.appendChild(option);
-                });
+    function setupActiveSkillUI() {
+        for (let i = 1; i <= 3; i++) {
+            const typeSelector = document.getElementById(`active${i}-type`);
+            const paramsDiv = document.getElementById(`active${i}-params`);
+            const buffParamsDiv = document.getElementById(`active${i}-buff-params`);
+
+            function toggleParams() {
+                const selectedType = typeSelector.value;
+                if (selectedType === 'none') {
+                    paramsDiv.style.display = 'none';
+                } else {
+                    paramsDiv.style.display = 'block';
+                    if (selectedType === 'buff') {
+                        buffParamsDiv.style.display = 'block';
+                    } else {
+                        buffParamsDiv.style.display = 'none';
+                    }
+                }
             }
-        });
+
+            typeSelector.addEventListener('change', toggleParams);
+            toggleParams(); // Initial setup
+        }
     }
 
     function populatePassiveSkills() {
@@ -66,11 +68,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const activeSkills = [];
         for (let i = 1; i <= 3; i++) {
-            const skillName = document.getElementById(`active${i}-skill`).value;
-            if (skillName && skillName !== "None") {
-                const skill = allActiveSkills.find(s => s.name === skillName);
-                if (skill) {
-                    activeSkills.push({ ...skill, timer: 0 });
+            const type = document.getElementById(`active${i}-type`).value;
+            if (type !== 'none') {
+                const skill = {
+                    type: type,
+                    cooldown: parseFloat(document.getElementById(`active${i}-cooldown`).value) || 0,
+                    value: parseFloat(document.getElementById(`active${i}-value`).value) || 0,
+                    damageScaling: parseFloat(document.getElementById(`active${i}-damage-scaling`).value) || 0,
+                    healthScaling: parseFloat(document.getElementById(`active${i}-health-scaling`).value) || 0,
+                    timer: 0
+                };
+
+                if (type === 'buff') {
+                    skill.duration = parseFloat(document.getElementById(`active${i}-duration`).value) || 0;
+                    skill.buffStat = document.getElementById(`active${i}-buff-stat`).value;
+                }
+
+                if (skill.cooldown > 0) {
+                    activeSkills.push(skill);
                 }
             }
         }
@@ -185,13 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentMaxHealth = finalHealth;
 
             activeBuffs.forEach(buff => {
-                if (buff.effect.stat === 'totalDamage') {
-                    currentDamage += buff.effect.value;
-                } else if (buff.effect.stat === 'totalHealth') {
-                    currentMaxHealth += buff.effect.value;
+                if (buff.buffStat === 'totalDamage') {
+                    currentDamage += buff.value;
+                } else if (buff.buffStat === 'totalHealth') {
+                    currentMaxHealth += buff.value;
                 }
             });
-
 
             // Healing
             currentHealth += healthRegenPerSec * dt;
@@ -236,15 +250,16 @@ document.addEventListener('DOMContentLoaded', () => {
             stats.activeSkills.forEach(skill => {
                 skill.timer -= dt;
                 if (skill.timer <= 0) {
+                    const scaledValue = skill.value + (skill.damageScaling / 100 * finalDamage) + (skill.healthScaling / 100 * finalHealth);
+
                     if (skill.type === 'damage') {
-                        const skillDamage = (skill.value + skill.scaling.damage * finalDamage + skill.scaling.health * finalHealth) * (1 + p['competence-degats'] / 100);
+                        const skillDamage = scaledValue * (1 + p['competence-degats'] / 100);
                         totalDamageDealt += skillDamage;
                     } else if (skill.type === 'buff') {
-                        const buffValue = skill.effect.value + skill.scaling.damage * finalDamage + skill.scaling.health * finalHealth;
                         activeBuffs.push({
-                            ...skill,
-                            duration: skill.duration,
-                            effect: { ...skill.effect, value: buffValue }
+                            buffStat: skill.buffStat,
+                            value: scaledValue,
+                            duration: skill.duration
                         });
                     }
                     const cooldown = skill.cooldown * (1 - p['competences-temps-recharge'] / 100);
@@ -297,5 +312,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     compareButton.addEventListener('click', compare);
     populatePassiveSkills();
-    populateActiveSkills();
+    setupActiveSkillUI();
 });

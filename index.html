@@ -44,17 +44,71 @@
 
         <div class="active-skills">
             <h2>Active Skills</h2>
+            <!-- Skill 1 -->
             <div class="active-skill-item">
                 <h3>Skill 1</h3>
-                <select id="active1-skill"></select>
+                <select id="active1-type">
+                    <option value="none">None</option>
+                    <option value="damage">Damage</option>
+                    <option value="buff">Buff</option>
+                </select>
+                <div id="active1-params" class="skill-params">
+                    <input type="number" id="active1-cooldown" placeholder="Cooldown">
+                    <input type="number" id="active1-value" placeholder="Base Value">
+                    <input type="number" id="active1-damage-scaling" placeholder="Damage Scaling (%)">
+                    <input type="number" id="active1-health-scaling" placeholder="Health Scaling (%)">
+                    <div id="active1-buff-params" class="buff-params">
+                        <input type="number" id="active1-duration" placeholder="Duration">
+                        <select id="active1-buff-stat">
+                            <option value="totalDamage">Damage</option>
+                            <option value="totalHealth">Health</option>
+                        </select>
+                    </div>
+                </div>
             </div>
+            <!-- Skill 2 -->
             <div class="active-skill-item">
                 <h3>Skill 2</h3>
-                <select id="active2-skill"></select>
+                <select id="active2-type">
+                    <option value="none">None</option>
+                    <option value="damage">Damage</option>
+                    <option value="buff">Buff</option>
+                </select>
+                <div id="active2-params" class="skill-params">
+                    <input type="number" id="active2-cooldown" placeholder="Cooldown">
+                    <input type="number" id="active2-value" placeholder="Base Value">
+                    <input type="number" id="active2-damage-scaling" placeholder="Damage Scaling (%)">
+                    <input type="number" id="active2-health-scaling" placeholder="Health Scaling (%)">
+                    <div id="active2-buff-params" class="buff-params">
+                        <input type="number" id="active2-duration" placeholder="Duration">
+                        <select id="active2-buff-stat">
+                            <option value="totalDamage">Damage</option>
+                            <option value="totalHealth">Health</option>
+                        </select>
+                    </div>
+                </div>
             </div>
+            <!-- Skill 3 -->
             <div class="active-skill-item">
                 <h3>Skill 3</h3>
-                <select id="active3-skill"></select>
+                <select id="active3-type">
+                    <option value="none">None</option>
+                    <option value="damage">Damage</option>
+                    <option value="buff">Buff</option>
+                </select>
+                <div id="active3-params" class="skill-params">
+                    <input type="number" id="active3-cooldown" placeholder="Cooldown">
+                    <input type="number" id="active3-value" placeholder="Base Value">
+                    <input type="number" id="active3-damage-scaling" placeholder="Damage Scaling (%)">
+                    <input type="number" id="active3-health-scaling" placeholder="Health Scaling (%)">
+                    <div id="active3-buff-params" class="buff-params">
+                        <input type="number" id="active3-duration" placeholder="Duration">
+                        <select id="active3-buff-stat">
+                            <option value="totalDamage">Damage</option>
+                            <option value="totalHealth">Health</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
 
