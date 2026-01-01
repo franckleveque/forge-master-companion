@@ -33,11 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     paramsDiv.style.display = 'none';
                 } else {
                     paramsDiv.style.display = 'block';
-                    if (selectedType === 'buff') {
-                        buffParamsDiv.style.display = 'block';
-                    } else {
-                        buffParamsDiv.style.display = 'none';
-                    }
+                    buffParamsDiv.style.display = selectedType === 'buff' ? 'block' : 'none';
                 }
             }
 
@@ -74,8 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: type,
                     cooldown: parseFloat(document.getElementById(`active${i}-cooldown`).value) || 0,
                     value: parseFloat(document.getElementById(`active${i}-value`).value) || 0,
-                    damageScaling: parseFloat(document.getElementById(`active${i}-damage-scaling`).value) || 0,
-                    healthScaling: parseFloat(document.getElementById(`active${i}-health-scaling`).value) || 0,
+                    damageBonus: parseFloat(document.getElementById(`active${i}-damage-bonus`).value) || 0,
+                    healthBonus: parseFloat(document.getElementById(`active${i}-health-bonus`).value) || 0,
                     timer: 0
                 };
 
@@ -250,12 +246,17 @@ document.addEventListener('DOMContentLoaded', () => {
             stats.activeSkills.forEach(skill => {
                 skill.timer -= dt;
                 if (skill.timer <= 0) {
-                    const scaledValue = skill.value + (skill.damageScaling / 100 * finalDamage) + (skill.healthScaling / 100 * finalHealth);
+                    const scaledValue = skill.value + skill.damageBonus + skill.healthBonus;
 
                     if (skill.type === 'damage') {
                         const skillDamage = scaledValue * (1 + p['competence-degats'] / 100);
                         totalDamageDealt += skillDamage;
+                    } else if (skill.type === 'healing') {
+                        currentHealth += scaledValue;
                     } else if (skill.type === 'buff') {
+                        if (skill.buffStat === 'totalHealth') {
+                            currentHealth += scaledValue;
+                        }
                         activeBuffs.push({
                             buffStat: skill.buffStat,
                             value: scaledValue,
