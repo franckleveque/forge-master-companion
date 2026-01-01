@@ -6,17 +6,31 @@ A detailed combat simulator to help you choose the best equipment in Forge Maste
 
 This application is containerized and can be easily run using Docker.
 
+### Building from local sources
+
 1.  **Build the Docker image:**
     ```bash
     docker build -t forge-master-companion .
     ```
 
-2.  **Run the Docker container:**
+### Building from GitHub
+
+You can also build the Docker image directly from the GitHub repository.
+
+1.  **Build the Docker image:**
+    ```bash
+    docker build -t forge-master-companion https://github.com/franckleveque/forge-master-companion.git
+    ```
+    **Note:** You must use the `.git` URL for Docker to correctly fetch the repository. Using a direct HTTPS link will fail because Docker will receive an HTML page instead of the repository contents.
+
+Once the image is built, you can run it.
+
+1.  **Run the Docker container:**
     ```bash
     docker run -d -p 8080:80 forge-master-companion
     ```
 
-3.  **Access the application:**
+2.  **Access the application:**
     Open your web browser and navigate to `http://localhost:8080`.
 
 ## How to Use (Manual)
