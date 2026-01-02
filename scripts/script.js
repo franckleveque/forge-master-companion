@@ -208,14 +208,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const equipOld = getEquipment(2, baseStats);
         const unequipCheckbox = document.getElementById('equip2-unequip');
         if (unequipCheckbox.checked) baseStats = unequipEquipment(baseStats, equipOld);
-        const statsOld = applyEquipment(baseStats, equipOld);
+
         const statsNew = applyEquipment(baseStats, equipNew);
-        const resultOld = simulate(statsOld);
+        const statsOld = applyEquipment(baseStats, equipOld);
+
         const resultNew = simulate(statsNew);
+        const resultOld = simulate(statsOld);
+
         document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinite";
         document.getElementById('total-damage-1').textContent = resultNew.totalDamageDealt.toLocaleString();
         document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinite";
         document.getElementById('total-damage-2').textContent = resultOld.totalDamageDealt.toLocaleString();
+
+        const resultItem1 = document.getElementById('result-item-1');
+        const resultItem2 = document.getElementById('result-item-2');
+
+        // Reset classes
+        resultItem1.className = 'result-item';
+        resultItem2.className = 'result-item';
+
+        // Determine best equipment based on survivability first, then damage
+        if (resultNew.survivalTime > resultOld.survivalTime) {
+            resultItem1.classList.add('best-equipment');
+        } else if (resultOld.survivalTime > resultNew.survivalTime) {
+            resultItem2.classList.add('best-equipment');
+        } else {
+            // Survival times are equal, so we decide based on damage
+            if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
+                resultItem1.classList.add('best-equipment');
+            } else {
+                resultItem2.classList.add('best-equipment');
+            }
+        }
     }
 
     equipmentCategory.addEventListener('change', toggleWeaponTypeDisplay);
