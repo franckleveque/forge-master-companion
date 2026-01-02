@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-    max-width: 1000px; /* Increased max-width for PvP layout */
+    max-width: 1200px;
     margin: auto;
     background: #fff;
     padding: 20px;
@@ -109,11 +109,10 @@ button:hover {
     border-radius: 4px;
 }
 
-/* PvP Simulation Layout */
-.simulation-setup {
+/* Main Layout */
+.main-layout {
     display: flex;
-    justify-content: space-between;
-    gap: 2%; /* Add gap between columns */
+    gap: 2%;
 }
 
 .player-column {
@@ -123,6 +122,12 @@ button:hover {
     border-radius: 5px;
 }
 
-.result-details {
-    margin-top: 15px;
+.right-column {
+    width: 49%;
+}
+
+.opponent-column {
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
 }
