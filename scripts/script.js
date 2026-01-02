@@ -226,16 +226,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const simulateButton = document.getElementById('simulate-button');
 
     function getCharacterStatsPvp(prefix) {
+        const id_prefix = prefix === 'player' ? '' : `${prefix}-`;
+
         const basePassiveSkills = {};
         passiveSkills.forEach(skill => {
-            basePassiveSkills[skill.id] = parseFloat(document.getElementById(`${prefix}-${skill.id}`).value) || 0;
+            basePassiveSkills[skill.id] = parseFloat(document.getElementById(`${id_prefix}${skill.id}`).value) || 0;
         });
 
         const activeSkills = [];
         for (let i = 1; i <= 3; i++) {
-            const type = document.getElementById(`${prefix}-active${i}-type`).value;
-            const value = parseFloat(document.getElementById(`${prefix}-active${i}-value`).value);
-            const cooldown = parseFloat(document.getElementById(`${prefix}-active${i}-cooldown`).value);
+            const type = document.getElementById(`${id_prefix}active${i}-type`).value;
+            const value = parseFloat(document.getElementById(`${id_prefix}active${i}-value`).value);
+            const cooldown = parseFloat(document.getElementById(`${id_prefix}active${i}-cooldown`).value);
             if (value && cooldown) {
                 activeSkills.push({ type, value, cooldown, timer: 0 });
             }
@@ -243,9 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
             name: prefix.charAt(0).toUpperCase() + prefix.slice(1),
-            totalDamage: parseFloat(document.getElementById(`${prefix}-total-damage`).value) || 0,
-            totalHealth: parseFloat(document.getElementById(`${prefix}-total-health`).value) || 0,
-            weaponType: document.getElementById(`${prefix}-weapon-type`).value,
+            totalDamage: parseFloat(document.getElementById(`${id_prefix}total-damage`).value) || 0,
+            totalHealth: parseFloat(document.getElementById(`${id_prefix}total-health`).value) || 0,
+            weaponType: document.getElementById(`${id_prefix}weapon-type`).value,
             basePassiveSkills: basePassiveSkills,
             activeSkills: activeSkills
         };
@@ -458,19 +460,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ['player', 'opponent'].forEach(prefix => {
             const charData = data[prefix];
-            charData.character_stats.total_damage = getElementValue(`${prefix}-total-damage`);
-            charData.character_stats.total_health = getElementValue(`${prefix}-total-health`);
-            charData.character_stats.weapon_type = getElementValue(`${prefix}-weapon-type`);
+            const id_prefix = prefix === 'player' ? '' : `${prefix}-`;
+
+            charData.character_stats.total_damage = getElementValue(`${id_prefix}total-damage`);
+            charData.character_stats.total_health = getElementValue(`${id_prefix}total-health`);
+            charData.character_stats.weapon_type = getElementValue(`${id_prefix}weapon-type`);
 
             passiveSkills.forEach(skill => {
-                charData.passive_skills[skill.id] = getElementValue(`${prefix}-${skill.id}`);
+                charData.passive_skills[skill.id] = getElementValue(`${id_prefix}${skill.id}`);
             });
 
             for (let i = 1; i <= 3; i++) {
                 charData.active_skills.push({
-                    type: getElementValue(`${prefix}-active${i}-type`),
-                    value: getElementValue(`${prefix}-active${i}-value`),
-                    cooldown: getElementValue(`${prefix}-active${i}-cooldown`)
+                    type: getElementValue(`${id_prefix}active${i}-type`),
+                    value: getElementValue(`${id_prefix}active${i}-value`),
+                    cooldown: getElementValue(`${id_prefix}active${i}-cooldown`)
                 });
             }
         });
@@ -554,23 +558,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function importPvpData(data) {
-        ['player', 'opponent'].forEach(prefix => {
-            const charData = data[prefix];
-            setElementValue(`${prefix}-total-damage`, charData.character_stats.total_damage);
-            setElementValue(`${prefix}-total-health`, charData.character_stats.total_health);
-            setElementValue(`${prefix}-weapon-type`, charData.character_stats.weapon_type);
-
-            passiveSkills.forEach(skill => {
-                setElementValue(`${prefix}-${skill.id}`, charData.passive_skills[skill.id]);
-            });
-
-            for (let i = 1; i <= 3; i++) {
-                setElementValue(`${prefix}-active${i}-type`, charData.active_skills[i - 1].type);
-                setElementValue(`${prefix}-active${i}-value`, charData.active_skills[i - 1].value);
-                setElementValue(`${prefix}-active${i}-cooldown`, charData.active_skills[i - 1].cooldown);
-            }
+        // Player Data
+        const playerData = data.player;
+        setElementValue('total-damage', playerData.character_stats.total_damage);
+        setElementValue('total-health', playerData.character_stats.total_health);
+        setElementValue('weapon-type', playerData.character_stats.weapon_type);
+        passiveSkills.forEach(skill => {
+            setElementValue(skill.id, playerData.passive_skills[skill.id]);
         });
+        for (let i = 1; i <= 3; i++) {
+            setElementValue(`active${i}-type`, playerData.active_skills[i - 1].type);
+            setElementValue(`active${i}-value`, playerData.active_skills[i - 1].value);
+            setElementValue(`active${i}-cooldown`, playerData.active_skills[i - 1].cooldown);
+        }
+
+        // Opponent Data
+        const opponentData = data.opponent;
+        setElementValue('opponent-total-damage', opponentData.character_stats.total_damage);
+        setElementValue('opponent-total-health', opponentData.character_stats.total_health);
+        setElementValue('opponent-weapon-type', opponentData.character_stats.weapon_type);
+        passiveSkills.forEach(skill => {
+            setElementValue(`opponent-${skill.id}`, opponentData.passive_skills[skill.id]);
+        });
+        for (let i = 1; i <= 3; i++) {
+            setElementValue(`opponent-active${i}-type`, opponentData.active_skills[i - 1].type);
+            setElementValue(`opponent-active${i}-value`, opponentData.active_skills[i - 1].value);
+            setElementValue(`opponent-active${i}-cooldown`, opponentData.active_skills[i - 1].cooldown);
+        }
     }
+
 
     function importData(event) {
         const file = event.target.files[0];
