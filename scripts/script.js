@@ -379,4 +379,225 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     simulateButton.addEventListener('click', runPvpSimulation);
+
+    // --- IMPORT/EXPORT LOGIC ---
+    function getElementValue(id) {
+        const element = document.getElementById(id);
+        if (!element) return null;
+        if (element.type === 'checkbox') return element.checked;
+        return element.value;
+    }
+
+    function getEquipmentComparisonData() {
+        const data = {
+            type: 'equipment_comparison',
+            character_stats: {},
+            passive_skills: {},
+            active_skills: [],
+            enemy_stats: {},
+            equipment: {
+                equip1: {},
+                equip2: {}
+            }
+        };
+
+        // Character Stats
+        data.character_stats.total_damage = getElementValue('total-damage');
+        data.character_stats.total_health = getElementValue('total-health');
+        data.character_stats.weapon_type = getElementValue('weapon-type');
+
+        // Passive Skills
+        passiveSkills.forEach(skill => {
+            data.passive_skills[skill.id] = getElementValue(skill.id);
+        });
+
+        // Active Skills
+        for (let i = 1; i <= 3; i++) {
+            data.active_skills.push({
+                type: getElementValue(`active${i}-type`),
+                value: getElementValue(`active${i}-value`),
+                cooldown: getElementValue(`active${i}-cooldown`)
+            });
+        }
+
+        // Enemy Stats
+        data.enemy_stats.dps = getElementValue('enemy-dps');
+        data.enemy_stats.weapon_type = getElementValue('enemy-weapon-type');
+
+        // Equipment
+        data.equipment.category = getElementValue('equipment-category');
+        data.equipment.equip1.weapon_type = getElementValue('equip1-weapon-type');
+        data.equipment.equip1.damage = getElementValue('equip1-damage-value');
+        data.equipment.equip1.health = getElementValue('equip1-health-value');
+        data.equipment.equip1.passive_skill = getElementValue('equip1-passive-skill');
+        data.equipment.equip1.passive_skill_value = getElementValue('equip1-passive-skill-value');
+        data.equipment.equip2.unequip = getElementValue('equip2-unequip');
+        data.equipment.equip2.weapon_type = getElementValue('equip2-weapon-type');
+        data.equipment.equip2.damage = getElementValue('equip2-damage-value');
+        data.equipment.equip2.health = getElementValue('equip2-health-value');
+        data.equipment.equip2.passive_skill = getElementValue('equip2-passive-skill');
+        data.equipment.equip2.passive_skill_value = getElementValue('equip2-passive-skill-value');
+
+        return data;
+    }
+
+    function getPvpData() {
+        const data = {
+            type: 'pvp_simulation',
+            player: {
+                character_stats: {},
+                passive_skills: {},
+                active_skills: []
+            },
+            opponent: {
+                character_stats: {},
+                passive_skills: {},
+                active_skills: []
+            }
+        };
+
+        ['player', 'opponent'].forEach(prefix => {
+            const charData = data[prefix];
+            charData.character_stats.total_damage = getElementValue(`${prefix}-total-damage`);
+            charData.character_stats.total_health = getElementValue(`${prefix}-total-health`);
+            charData.character_stats.weapon_type = getElementValue(`${prefix}-weapon-type`);
+
+            passiveSkills.forEach(skill => {
+                charData.passive_skills[skill.id] = getElementValue(`${prefix}-${skill.id}`);
+            });
+
+            for (let i = 1; i <= 3; i++) {
+                charData.active_skills.push({
+                    type: getElementValue(`${prefix}-active${i}-type`),
+                    value: getElementValue(`${prefix}-active${i}-value`),
+                    cooldown: getElementValue(`${prefix}-active${i}-cooldown`)
+                });
+            }
+        });
+
+        return data;
+    }
+
+    function exportData(mode) {
+        let data;
+        let filename;
+
+        if (mode === 'equipment') {
+            data = getEquipmentComparisonData();
+            filename = 'equipment_comparison_data.json';
+        } else if (mode === 'pvp') {
+            data = getPvpData();
+            filename = 'pvp_simulation_data.json';
+        } else {
+            return;
+        }
+
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function setElementValue(id, value) {
+        const element = document.getElementById(id);
+        if (!element) return;
+        if (element.type === 'checkbox') {
+            element.checked = value;
+        } else {
+            element.value = value;
+        }
+    }
+
+    function importEquipmentComparisonData(data) {
+        // Character Stats
+        setElementValue('total-damage', data.character_stats.total_damage);
+        setElementValue('total-health', data.character_stats.total_health);
+        setElementValue('weapon-type', data.character_stats.weapon_type);
+
+        // Passive Skills
+        passiveSkills.forEach(skill => {
+            setElementValue(skill.id, data.passive_skills[skill.id]);
+        });
+
+        // Active Skills
+        for (let i = 1; i <= 3; i++) {
+            setElementValue(`active${i}-type`, data.active_skills[i - 1].type);
+            setElementValue(`active${i}-value`, data.active_skills[i - 1].value);
+            setElementValue(`active${i}-cooldown`, data.active_skills[i - 1].cooldown);
+        }
+
+        // Enemy Stats
+        setElementValue('enemy-dps', data.enemy_stats.dps);
+        setElementValue('enemy-weapon-type', data.enemy_stats.weapon_type);
+
+        // Equipment
+        setElementValue('equipment-category', data.equipment.category);
+        setElementValue('equip1-weapon-type', data.equipment.equip1.weapon_type);
+        setElementValue('equip1-damage-value', data.equipment.equip1.damage);
+        setElementValue('equip1-health-value', data.equipment.equip1.health);
+        setElementValue('equip1-passive-skill', data.equipment.equip1.passive_skill);
+        setElementValue('equip1-passive-skill-value', data.equipment.equip1.passive_skill_value);
+        setElementValue('equip2-unequip', data.equipment.equip2.unequip);
+        setElementValue('equip2-weapon-type', data.equipment.equip2.weapon_type);
+        setElementValue('equip2-damage-value', data.equipment.equip2.damage);
+        setElementValue('equip2-health-value', data.equipment.equip2.health);
+        setElementValue('equip2-passive-skill', data.equipment.equip2.passive_skill);
+        setElementValue('equip2-passive-skill-value', data.equipment.equip2.passive_skill_value);
+
+        toggleWeaponTypeDisplay();
+    }
+
+    function importPvpData(data) {
+        ['player', 'opponent'].forEach(prefix => {
+            const charData = data[prefix];
+            setElementValue(`${prefix}-total-damage`, charData.character_stats.total_damage);
+            setElementValue(`${prefix}-total-health`, charData.character_stats.total_health);
+            setElementValue(`${prefix}-weapon-type`, charData.character_stats.weapon_type);
+
+            passiveSkills.forEach(skill => {
+                setElementValue(`${prefix}-${skill.id}`, charData.passive_skills[skill.id]);
+            });
+
+            for (let i = 1; i <= 3; i++) {
+                setElementValue(`${prefix}-active${i}-type`, charData.active_skills[i - 1].type);
+                setElementValue(`${prefix}-active${i}-value`, charData.active_skills[i - 1].value);
+                setElementValue(`${prefix}-active${i}-cooldown`, charData.active_skills[i - 1].cooldown);
+            }
+        });
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.type === 'equipment_comparison' && modeEquipmentButton.classList.contains('active')) {
+                    importEquipmentComparisonData(data);
+                } else if (data.type === 'pvp_simulation' && modePvpButton.classList.contains('active')) {
+                    importPvpData(data);
+                } else {
+                    alert('The selected file does not match the active tab or is invalid.');
+                }
+            } catch (error) {
+                alert('Error parsing JSON file.');
+                console.error('Error parsing JSON:', error);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    document.getElementById('export-equipment').addEventListener('click', () => exportData('equipment'));
+    document.getElementById('export-pvp').addEventListener('click', () => exportData('pvp'));
+    document.getElementById('import-equipment').addEventListener('click', () => document.getElementById('import-file').click());
+    document.getElementById('import-pvp').addEventListener('click', () => document.getElementById('import-file').click());
+    document.getElementById('import-file').addEventListener('change', importData);
 });
