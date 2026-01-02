@@ -226,30 +226,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const simulateButton = document.getElementById('simulate-button');
 
     function getCharacterStatsPvp(prefix) {
-        if (prefix === 'player') {
-            return getCharacterStats();
-        }
-
         const basePassiveSkills = {};
         passiveSkills.forEach(skill => {
-            basePassiveSkills[skill.id] = parseFloat(document.getElementById(`${prefix}-${skill.id}`).value) || 0;
+            const elementId = (prefix === 'player') ? skill.id : `${prefix}-${skill.id}`;
+            basePassiveSkills[skill.id] = parseFloat(document.getElementById(elementId).value) || 0;
         });
 
         const activeSkills = [];
         for (let i = 1; i <= 3; i++) {
-            const type = document.getElementById(`${prefix}-active${i}-type`).value;
-            const value = parseFloat(document.getElementById(`${prefix}-active${i}-value`).value);
-            const cooldown = parseFloat(document.getElementById(`${prefix}-active${i}-cooldown`).value);
+            const typeId = (prefix === 'player') ? `active${i}-type` : `${prefix}-active${i}-type`;
+            const valueId = (prefix === 'player') ? `active${i}-value` : `${prefix}-active${i}-value`;
+            const cooldownId = (prefix === 'player') ? `active${i}-cooldown` : `${prefix}-active${i}-cooldown`;
+
+            const type = document.getElementById(typeId).value;
+            const value = parseFloat(document.getElementById(valueId).value);
+            const cooldown = parseFloat(document.getElementById(cooldownId).value);
             if (value && cooldown) {
                 activeSkills.push({ type, value, cooldown, timer: 0 });
             }
         }
 
+        const damageId = (prefix === 'player') ? 'total-damage' : `${prefix}-total-damage`;
+        const healthId = (prefix === 'player') ? 'total-health' : `${prefix}-total-health`;
+        const weaponId = (prefix === 'player') ? 'weapon-type' : `${prefix}-weapon-type`;
+
         return {
             name: prefix.charAt(0).toUpperCase() + prefix.slice(1),
-            totalDamage: parseFloat(document.getElementById(`${prefix}-total-damage`).value) || 0,
-            totalHealth: parseFloat(document.getElementById(`${prefix}-total-health`).value) || 0,
-            weaponType: document.getElementById(`${prefix}-weapon-type`).value,
+            totalDamage: parseFloat(document.getElementById(damageId).value) || 0,
+            totalHealth: parseFloat(document.getElementById(healthId).value) || 0,
+            weaponType: document.getElementById(weaponId).value,
             basePassiveSkills: basePassiveSkills,
             activeSkills: activeSkills
         };
