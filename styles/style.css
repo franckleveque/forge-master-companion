@@ -145,30 +145,17 @@ button:hover {
     display: flex;
     align-items: center;
 }
-.highlight-best, .highlight-runner-up {
+.highlight-best {
     display: inline-block;
     width: 15px;
     height: 15px;
     margin-right: 8px;
     border-radius: 3px;
-}
-.highlight-best {
     background-color: #d4edda; /* Light green */
-}
-.highlight-runner-up {
-    background-color: #fff3cd; /* Light yellow */
 }
 .best-equipment {
     border: 2px solid #28a745; /* Green border */
     background-color: #d4edda;
-}
-.runner-up {
-    border: 2px solid #ffc107; /* Yellow border */
-    background-color: #fff3cd;
-}
-.default-result {
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
 }
 .result-item {
     padding: 10px;

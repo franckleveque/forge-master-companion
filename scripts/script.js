@@ -228,33 +228,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resultItem2.className = 'result-item';
 
         // Determine best equipment based on survivability first, then damage
-        const isNewBestSurvival = resultNew.survivalTime > resultOld.survivalTime;
-        const isOldBestSurvival = resultOld.survivalTime > resultNew.survivalTime;
-
-        if (isNewBestSurvival) {
+        if (resultNew.survivalTime > resultOld.survivalTime) {
             resultItem1.classList.add('best-equipment');
-            // If the old item (worse for survival) does more damage, it's the runner up
-            if (resultOld.totalDamageDealt > resultNew.totalDamageDealt) {
-                resultItem2.classList.add('runner-up');
-            } else {
-                resultItem2.classList.add('default-result');
-            }
-        } else if (isOldBestSurvival) {
+        } else if (resultOld.survivalTime > resultNew.survivalTime) {
             resultItem2.classList.add('best-equipment');
-            // If the new item (worse for survival) does more damage, it's the runner up
-            if (resultNew.totalDamageDealt > resultOld.totalDamageDealt) {
-                resultItem1.classList.add('runner-up');
-            } else {
-                resultItem1.classList.add('default-result');
-            }
         } else {
             // Survival times are equal, so we decide based on damage
             if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
                 resultItem1.classList.add('best-equipment');
-                resultItem2.classList.add('runner-up');
             } else {
                 resultItem2.classList.add('best-equipment');
-                resultItem1.classList.add('runner-up');
             }
         }
     }
