@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modePvpButton.classList.remove('active');
         equipmentSection.style.display = 'block';
         pvpSection.style.display = 'none';
+        syncPlayerStats('pvp-to-equipment');
     });
 
     modePvpButton.addEventListener('click', () => {
@@ -17,7 +18,32 @@ document.addEventListener('DOMContentLoaded', () => {
         modeEquipmentButton.classList.remove('active');
         pvpSection.style.display = 'block';
         equipmentSection.style.display = 'none';
+        syncPlayerStats('equipment-to-pvp');
     });
+
+    function syncPlayerStats(direction) {
+        const fromPrefix = direction === 'equipment-to-pvp' ? '' : 'player-';
+        const toPrefix = direction === 'equipment-to-pvp' ? 'player-' : '';
+
+        // Sync character stats
+        document.getElementById(`${toPrefix}total-damage`).value = document.getElementById(`${fromPrefix}total-damage`).value;
+        document.getElementById(`${toPrefix}total-health`).value = document.getElementById(`${fromPrefix}total-health`).value;
+        document.getElementById(`${toPrefix}weapon-type`).value = document.getElementById(`${fromPrefix}weapon-type`).value;
+
+        // Sync passive skills
+        passiveSkills.forEach(skill => {
+            const fromId = `${fromPrefix}${skill.id}`;
+            const toId = `${toPrefix}${skill.id}`;
+            document.getElementById(toId).value = document.getElementById(fromId).value;
+        });
+
+        // Sync active skills
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById(`${toPrefix}active${i}-type`).value = document.getElementById(`${fromPrefix}active${i}-type`).value;
+            document.getElementById(`${toPrefix}active${i}-value`).value = document.getElementById(`${fromPrefix}active${i}-value`).value;
+            document.getElementById(`${toPrefix}active${i}-cooldown`).value = document.getElementById(`${fromPrefix}active${i}-cooldown`).value;
+        }
+    }
 
     // --- SHARED DATA ---
     const passiveSkills = [
