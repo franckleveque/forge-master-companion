@@ -72,6 +72,11 @@
 
             <button id="compare-button">Compare</button>
 
+            <div class="io-buttons">
+                <button id="export-equipment">Export</button>
+                <button id="import-equipment">Import</button>
+            </div>
+
             <div class="results"><h2>Results</h2><div id="results-output"><div class="result-item"><h3>Equipment 1 (New)</h3><p><strong>Survival Time:</strong> <span id="survival-time-1">-</span> s</p><p><strong>Total Damage Dealt:</strong> <span id="total-damage-1">-</span></p></div><div class="result-item"><h3>Equipment 2 (Old)</h3><p><strong>Survival Time:</strong> <span id="survival-time-2">-</span> s</p><p><strong>Total Damage Dealt:</strong> <span id="total-damage-2">-</span></p></div></div></div>
         </div>
 
@@ -92,10 +97,15 @@
                 </div>
             </div>
             <button id="simulate-button">Simulate</button>
+            <div class="io-buttons">
+                <button id="export-pvp">Export</button>
+                <button id="import-pvp">Import</button>
+            </div>
             <div class="results"><div id="pvp-results-output"></div></div>
         </div>
     </div>
 
+    <input type="file" id="import-file" accept=".json" style="display: none;">
     <script src="scripts/script.js"></script>
 </body>
 </html>
