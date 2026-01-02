@@ -324,7 +324,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (skill.timer <= 0) {
                         const p = attacker.basePassiveSkills;
                         if (skill.type === 'damage') {
-                            const skillDamage = skill.value * (1 + p['competence-degats'] / 100);
+                        // Skill damage scales with character's total damage
+                        const skillDamage = (skill.value + attacker.finalDamage) * (1 + p['competence-degats'] / 100);
                             defender.blockCounter += defender.blockChance;
                             if (defender.blockCounter < 1) {
                                 defender.currentHealth -= skillDamage;
