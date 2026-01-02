@@ -7,12 +7,26 @@ body {
 }
 
 .container {
-    max-width: 1000px; /* Increased max-width for PvP layout */
+    max-width: 1200px;
     margin: auto;
     background: #fff;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.main-layout {
+    display: flex;
+    justify-content: space-between;
+    gap: 2%;
+}
+
+.player-stats-column {
+    width: 49%;
+}
+
+.content-column {
+    width: 49%;
 }
 
 h1, h2, h3, h4 {
