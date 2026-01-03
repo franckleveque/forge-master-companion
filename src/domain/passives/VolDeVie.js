@@ -7,7 +7,11 @@ export class VolDeVie extends PassiveSkill {
         super('vol-de-vie', 'Vol de vie', value);
     }
 
-    onAttack(attacker, defender, damage) {
-        attacker.currentHealth += damage * (this.value / 100);
+    onCalculateStats(character) {
+        character.lifesteal += this.value / 100;
+    }
+
+    onAfterAttackDealt(attacker, defender, damageDealt) {
+        attacker.currentHealth += damageDealt * attacker.lifesteal;
     }
 }

@@ -22,13 +22,11 @@ class SimulationService {
             doubleChance: 0,
             competenceDegatsMod: 1.0,
             competenceCooldownMod: 1.0,
-            critCounter: 0,
-            doubleChanceCounter: 0,
-            blockCounter: 0,
             totalDamageDealt: 0
         };
 
         passiveSkills.forEach(skill => skill.onCalculateStats(calculatedStats));
+        passiveSkills.forEach(skill => skill.onInitialize(calculatedStats));
 
         calculatedStats.currentHealth = calculatedStats.finalHealth;
         calculatedStats.attackTimer = character.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
@@ -52,25 +50,38 @@ class SimulationService {
             player.attackTimer -= dt;
 
             while (player.attackTimer <= 0) {
-                let mainAttackDamage = player.finalDamage;
-                player.critCounter += player.critChance;
-                if (player.critCounter >= 1) { mainAttackDamage *= player.critDamage; player.critCounter--; }
+                function performAttack(baseDamage) {
+                    let damage = baseDamage;
 
-                player.passiveSkills.forEach(skill => skill.onAttack(player, null, mainAttackDamage));
+                    // Outgoing damage modifications (e.g., crit)
+                    player.passiveSkills.forEach(skill => {
+                        damage = skill.onModifyOutgoingDamage(player, null, damage);
+                    });
 
-                player.totalDamageDealt += mainAttackDamage;
+                    // Note: Incoming damage modification (block) is handled by the enemy,
+                    // but since the enemy is simplified in this simulation, we check the player's block.
+                    // A full implementation would have the enemy's skills handle this.
 
-                player.doubleChanceCounter += player.doubleChance;
-                if (player.doubleChanceCounter >= 1) {
-                    let secondAttackDamage = player.finalDamage;
-                    player.critCounter += player.critChance;
-                    if (player.critCounter >= 1) { secondAttackDamage *= player.critDamage; player.critCounter--; }
+                    player.totalDamageDealt += damage;
 
-                    player.passiveSkills.forEach(skill => skill.onAttack(player, null, secondAttackDamage));
+                    // Post-attack effects (e.g., lifesteal)
+                    player.passiveSkills.forEach(skill => skill.onAfterAttackDealt(player, null, damage));
 
-                    player.totalDamageDealt += secondAttackDamage;
-                    player.doubleChanceCounter--;
+                    // Check for follow-up actions (e.g., double chance)
+                    let performExtraAttack = false;
+                    player.passiveSkills.forEach(skill => {
+                        if (skill.onAfterAttackProcessed(player, null)) {
+                            performExtraAttack = true;
+                        }
+                    });
+
+                    return performExtraAttack;
                 }
+
+                if (performAttack(player.finalDamage)) {
+                    performAttack(player.finalDamage);
+                }
+
                 player.attackTimer += player.timePerAttack;
             }
 
@@ -89,12 +100,11 @@ class SimulationService {
 
             enemyAttackTimer -= dt;
             while (enemyAttackTimer <= 0) {
-                player.blockCounter += player.blockChance;
-                if (player.blockCounter < 1) {
-                    player.currentHealth -= stats.enemy.dps * timePerEnemyAttack;
-                } else {
-                    player.blockCounter--;
-                }
+                let incomingDamage = stats.enemy.dps * timePerEnemyAttack;
+                player.passiveSkills.forEach(skill => {
+                    incomingDamage = skill.onModifyIncomingDamage(player, null, incomingDamage);
+                });
+                player.currentHealth -= incomingDamage;
                 enemyAttackTimer += timePerEnemyAttack;
             }
 
@@ -122,13 +132,11 @@ class SimulationService {
                     skill.timer -= dt;
                     if (skill.timer <= 0) {
                         if (skill.type === 'damage') {
-                            const skillDamage = skill.value * attacker.competenceDegatsMod;
-                            defender.blockCounter += defender.blockChance;
-                            if (defender.blockCounter < 1) {
-                                defender.currentHealth -= skillDamage;
-                            } else {
-                                defender.blockCounter--;
-                            }
+                            let skillDamage = skill.value * attacker.competenceDegatsMod;
+                            defender.passiveSkills.forEach(s => {
+                                skillDamage = s.onModifyIncomingDamage(defender, attacker, skillDamage);
+                            });
+                            defender.currentHealth -= skillDamage;
                             attacker.totalDamageDealt += skillDamage;
                         } else if (skill.type === 'healing') {
                             attacker.currentHealth += skill.value;
@@ -141,26 +149,33 @@ class SimulationService {
                 while (attacker.attackTimer <= 0) {
                     function performAttack(baseDamage) {
                         let damage = baseDamage;
-                        attacker.critCounter += attacker.critChance;
-                        if (attacker.critCounter >= 1) { damage *= attacker.critDamage; attacker.critCounter--; }
 
-                        defender.blockCounter += defender.blockChance;
-                        if (defender.blockCounter < 1) {
-                            defender.currentHealth -= damage;
-                        } else {
-                            defender.blockCounter--;
-                        }
+                        attacker.passiveSkills.forEach(s => {
+                            damage = s.onModifyOutgoingDamage(attacker, defender, damage);
+                        });
 
-                        attacker.passiveSkills.forEach(skill => skill.onAttack(attacker, defender, damage));
+                        defender.passiveSkills.forEach(s => {
+                            damage = s.onModifyIncomingDamage(defender, attacker, damage);
+                        });
+
+                        defender.currentHealth -= damage;
                         attacker.totalDamageDealt += damage;
-                    }
-                    performAttack(attacker.finalDamage);
 
-                    attacker.doubleChanceCounter += attacker.doubleChance;
-                    if (attacker.doubleChanceCounter >= 1) {
-                        performAttack(attacker.finalDamage);
-                        attacker.doubleChanceCounter--;
+                        attacker.passiveSkills.forEach(s => s.onAfterAttackDealt(attacker, defender, damage));
+
+                        let performExtra = false;
+                        attacker.passiveSkills.forEach(s => {
+                            if(s.onAfterAttackProcessed(attacker, defender)) {
+                                performExtra = true;
+                            }
+                        });
+                        return performExtra;
                     }
+
+                    if (performAttack(attacker.finalDamage)) {
+                        performAttack(attacker.finalDamage);
+                    }
+
                     attacker.attackTimer += attacker.timePerAttack;
                 }
 

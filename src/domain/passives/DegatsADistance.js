@@ -1,4 +1,4 @@
-// src-new/domain/passives/DegatsADistance.js
+// src/domain/passives/DegatsADistance.js
 
 import { PassiveSkill } from './PassiveSkill.js';
 
