@@ -7,11 +7,7 @@ export class RegenerationSante extends PassiveSkill {
         super('regeneration-sante', 'Régénération santé', value);
     }
 
-    onCalculateStats(character) {
-        character.healthRegenPerSec = (character.healthRegenPerSec || 0) + this.value;
-    }
-
     onTick(character, dt) {
-        character.currentHealth += (character.healthRegenPerSec || 0) * dt;
+        character.currentHealth += character.finalHealth * (this.value / 100) * dt;
     }
 }
