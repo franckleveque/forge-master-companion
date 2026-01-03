@@ -1,6 +1,6 @@
 // src/domain/Character.js
 
-class Character {
+export class Character {
     constructor({
         name,
         totalDamage,

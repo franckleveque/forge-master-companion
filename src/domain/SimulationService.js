@@ -2,7 +2,7 @@
 
 import { PassiveSkillFactory } from './passives/PassiveSkillFactory.js';
 
-class SimulationService {
+export class SimulationService {
     _calculateCharacterStats(character) {
         const passiveSkills = Object.entries(character.basePassiveSkills)
             .map(([id, value]) => PassiveSkillFactory.create(id, value))
