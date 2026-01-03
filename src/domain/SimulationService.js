@@ -1,6 +1,7 @@
 // src/domain/SimulationService.js
 
 import { PassiveSkillFactory } from './passives/PassiveSkillFactory.js';
+import { DamageSkill, BuffSkill } from './Skills.js';
 
 export class SimulationService {
     _calculateCharacterStats(character) {
@@ -13,8 +14,16 @@ export class SimulationService {
         const calculatedStats = {
             ...character,
             passiveSkills,
-            finalHealth: character.baseHealth,
-            finalDamage: character.baseDamage,
+            activeSkills: character.activeSkills.map(skill => {
+                if (skill.type === 'damage') {
+                    return new DamageSkill(skill);
+                } else if (skill.type === 'buff') {
+                    return new BuffSkill(skill);
+                }
+                return skill;
+            }),
+            finalHealth: character.totalHealth,
+            finalDamage: character.totalDamage,
             timePerAttack: 1.0,
             critChance: 0,
             critDamage: 1.5,
@@ -24,7 +33,8 @@ export class SimulationService {
             doubleChance: 0,
             competenceDegatsMod: 1.0,
             competenceCooldownMod: 1.0,
-            totalDamageDealt: 0
+            totalDamageDealt: 0,
+            activeBuffs: []
         };
 
         // onCalculateStats will now only handle secondary stats like crit, attack speed, etc.
@@ -81,19 +91,6 @@ export class SimulationService {
                 player.attackTimer += player.timePerAttack;
             }
 
-            stats.activeSkills.forEach(skill => {
-                skill.timer -= dt;
-                if (skill.timer <= 0) {
-                    if (skill.type === 'damage') {
-                        const skillDamage = skill.value * player.competenceDegatsMod;
-                        player.totalDamageDealt += skillDamage;
-                    } else if (skill.type === 'healing') {
-                        player.currentHealth += skill.value;
-                    }
-                    skill.timer += skill.cooldown * player.competenceCooldownMod;
-                }
-            });
-
             enemyAttackTimer -= dt;
             while (enemyAttackTimer <= 0) {
                 let incomingDamage = stats.enemy.dps * timePerEnemyAttack;
@@ -139,24 +136,54 @@ export class SimulationService {
         };
     }
 
-    _processTick(attacker, defender, dt) {
-        attacker.passiveSkills.forEach(skill => skill.onTick(attacker, dt));
-        attacker.activeSkills.forEach(skill => {
-            skill.timer -= dt;
-            if (skill.timer <= 0) {
-                if (skill.type === 'damage') {
-                    let skillDamage = skill.value * attacker.competenceDegatsMod;
-                    defender.passiveSkills.forEach(s => {
-                        skillDamage = s.onModifyIncomingDamage(defender, attacker, skillDamage);
-                    });
-                    defender.currentHealth -= skillDamage;
-                    attacker.totalDamageDealt += skillDamage;
-                } else if (skill.type === 'healing') {
-                    attacker.currentHealth += skill.value;
+    _applyBuffs(character, buff) {
+        character.activeBuffs.push(buff);
+        character.finalDamage += buff.damageBuff;
+        character.finalHealth += buff.healthBuff;
+        character.currentHealth += buff.healthBuff;
+    }
+
+    _revertBuffs(character, buff) {
+        character.activeBuffs = character.activeBuffs.filter(b => b !== buff);
+        character.finalDamage -= buff.damageBuff;
+        character.finalHealth -= buff.healthBuff;
+        if (character.currentHealth > character.finalHealth) {
+            character.currentHealth = character.finalHealth;
+        }
+    }
+
+    _processActiveSkills(character, opponent, dt) {
+        character.activeSkills.forEach(skill => {
+            skill.tick(dt);
+
+            if (skill.isReady()) {
+                if (skill instanceof DamageSkill) {
+                    for (let i = 0; i < skill.hits; i++) {
+                        let skillDamage = skill.value * character.competenceDegatsMod;
+                        if (opponent) {
+                            opponent.passiveSkills.forEach(s => {
+                                skillDamage = s.onModifyIncomingDamage(opponent, character, skillDamage);
+                            });
+                            opponent.currentHealth -= skillDamage;
+                        }
+                        character.totalDamageDealt += skillDamage;
+                    }
+                    skill.reset();
+                } else if (skill instanceof BuffSkill) {
+                    this._applyBuffs(character, skill);
+                    skill.trigger();
                 }
-                skill.timer += skill.cooldown * attacker.competenceCooldownMod;
+            }
+
+            if (skill instanceof BuffSkill && skill.isActive() && skill.durationTimer <= 0) {
+                this._revertBuffs(character, skill);
             }
         });
+    }
+
+    _processTick(attacker, defender, dt) {
+        attacker.passiveSkills.forEach(skill => skill.onTick(attacker, dt));
+        this._processActiveSkills(attacker, defender, dt);
 
         attacker.attackTimer -= dt;
         while (attacker.attackTimer <= 0) {

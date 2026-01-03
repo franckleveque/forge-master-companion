@@ -8,28 +8,48 @@ class DomAdapter {
         this.passiveSkillService = passiveSkillService;
     }
 
+    getActiveSkills(prefix) {
+        const activeSkills = [];
+        for (let i = 1; i <= 3; i++) {
+            const id_prefix = prefix ? `${prefix}-` : '';
+            const skillId = `${id_prefix}active${i}`;
+            const type = this.getElementValue(`${skillId}-type`);
+            if (!type) continue;
+
+            const baseDamage = parseFloat(this.getElementValue(`${skillId}-baseDamage`)) || 0;
+            const baseHealth = parseFloat(this.getElementValue(`${skillId}-baseHealth`)) || 0;
+            const cooldown = parseFloat(this.getElementValue(`${skillId}-cooldown`)) || 0;
+
+            if (type === 'damage') {
+                const value = parseFloat(this.getElementValue(`${skillId}-value`)) || 0;
+                const hits = parseFloat(this.getElementValue(`${skillId}-hits`)) || 1;
+                if (value && cooldown) {
+                    activeSkills.push(new DamageSkill({ baseDamage, baseHealth, cooldown, value, hits }));
+                }
+            } else if (type === 'buff') {
+                const damageBuff = parseFloat(this.getElementValue(`${skillId}-damageBuff`)) || 0;
+                const healthBuff = parseFloat(this.getElementValue(`${skillId}-healthBuff`)) || 0;
+                const duration = parseFloat(this.getElementValue(`${skillId}-duration`)) || 0;
+                if (duration && cooldown) {
+                    activeSkills.push(new BuffSkill({ baseDamage, baseHealth, cooldown, damageBuff, healthBuff, duration }));
+                }
+            }
+        }
+        return activeSkills;
+    }
+
     getCharacterStats() {
         const basePassiveSkills = {};
         this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
             basePassiveSkills[skillId] = parseFloat(document.getElementById(skillId).value) || 0;
         });
 
-        const activeSkills = [];
-        for (let i = 1; i <= 3; i++) {
-            const type = document.getElementById(`active${i}-type`).value;
-            const value = parseFloat(document.getElementById(`active${i}-value`).value);
-            const cooldown = parseFloat(document.getElementById(`active${i}-cooldown`).value);
-            if (value && cooldown) {
-                activeSkills.push(new ActiveSkill(type, value, cooldown));
-            }
-        }
-
         return new Character({
             totalDamage: parseFloat(document.getElementById('total-damage').value) || 0,
             totalHealth: parseFloat(document.getElementById('total-health').value) || 0,
             weaponType: document.getElementById('weapon-type').value,
             basePassiveSkills: basePassiveSkills,
-            activeSkills: activeSkills,
+            activeSkills: this.getActiveSkills('player'),
             enemy: {
                 dps: parseFloat(document.getElementById('enemy-dps').value) || 0,
                 weaponType: document.getElementById('enemy-weapon-type').value
@@ -88,23 +108,13 @@ class DomAdapter {
             basePassiveSkills[skillId] = parseFloat(document.getElementById(`${id_prefix}${skillId}`).value) || 0;
         });
 
-        const activeSkills = [];
-        for (let i = 1; i <= 3; i++) {
-            const type = document.getElementById(`${id_prefix}active${i}-type`).value;
-            const value = parseFloat(document.getElementById(`${id_prefix}active${i}-value`).value);
-            const cooldown = parseFloat(document.getElementById(`${id_prefix}active${i}-cooldown`).value);
-            if (value && cooldown) {
-                activeSkills.push(new ActiveSkill(type, value, cooldown));
-            }
-        }
-
         return new Character({
             name: prefix.charAt(0).toUpperCase() + prefix.slice(1),
             totalDamage: parseFloat(document.getElementById(`${id_prefix}total-damage`).value) || 0,
             totalHealth: parseFloat(document.getElementById(`${id_prefix}total-health`).value) || 0,
             weaponType: document.getElementById(`${id_prefix}weapon-type`).value,
             basePassiveSkills: basePassiveSkills,
-            activeSkills: activeSkills
+            activeSkills: this.getActiveSkills(prefix)
         });
     }
 
@@ -166,10 +176,17 @@ class DomAdapter {
         });
 
         for (let i = 1; i <= 3; i++) {
+            const skillId = `player-active${i}`;
             data.active_skills.push({
-                type: this.getElementValue(`active${i}-type`),
-                value: this.getElementValue(`active${i}-value`),
-                cooldown: this.getElementValue(`active${i}-cooldown`)
+                type: this.getElementValue(`${skillId}-type`),
+                baseDamage: this.getElementValue(`${skillId}-baseDamage`),
+                baseHealth: this.getElementValue(`${skillId}-baseHealth`),
+                cooldown: this.getElementValue(`${skillId}-cooldown`),
+                value: this.getElementValue(`${skillId}-value`),
+                hits: this.getElementValue(`${skillId}-hits`),
+                damageBuff: this.getElementValue(`${skillId}-damageBuff`),
+                healthBuff: this.getElementValue(`${skillId}-healthBuff`),
+                duration: this.getElementValue(`${skillId}-duration`)
             });
         }
 
@@ -220,10 +237,17 @@ class DomAdapter {
             });
 
             for (let i = 1; i <= 3; i++) {
+                const skillId = `${id_prefix}active${i}`;
                 charData.active_skills.push({
-                    type: this.getElementValue(`${id_prefix}active${i}-type`),
-                    value: this.getElementValue(`${id_prefix}active${i}-value`),
-                    cooldown: this.getElementValue(`${id_prefix}active${i}-cooldown`)
+                    type: this.getElementValue(`${skillId}-type`),
+                    baseDamage: this.getElementValue(`${skillId}-baseDamage`),
+                    baseHealth: this.getElementValue(`${skillId}-baseHealth`),
+                    cooldown: this.getElementValue(`${skillId}-cooldown`),
+                    value: this.getElementValue(`${skillId}-value`),
+                    hits: this.getElementValue(`${skillId}-hits`),
+                    damageBuff: this.getElementValue(`${skillId}-damageBuff`),
+                    healthBuff: this.getElementValue(`${skillId}-healthBuff`),
+                    duration: this.getElementValue(`${skillId}-duration`)
                 });
             }
         });
@@ -241,9 +265,18 @@ class DomAdapter {
         });
 
         for (let i = 1; i <= 3; i++) {
-            this.setElementValue(`active${i}-type`, data.active_skills[i - 1].type);
-            this.setElementValue(`active${i}-value`, data.active_skills[i - 1].value);
-            this.setElementValue(`active${i}-cooldown`, data.active_skills[i - 1].cooldown);
+            const skillId = `player-active${i}`;
+            const skillData = data.active_skills[i - 1];
+            this.setElementValue(`${skillId}-type`, skillData.type);
+            this.setElementValue(`${skillId}-baseDamage`, skillData.baseDamage);
+            this.setElementValue(`${skillId}-baseHealth`, skillData.baseHealth);
+            this.setElementValue(`${skillId}-cooldown`, skillData.cooldown);
+            this.setElementValue(`${skillId}-value`, skillData.value);
+            this.setElementValue(`${skillId}-hits`, skillData.hits);
+            this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff);
+            this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff);
+            this.setElementValue(`${skillId}-duration`, skillData.duration);
+            toggleSkillParams(skillId);
         }
 
         this.setElementValue('enemy-dps', data.enemy_stats.dps);
@@ -272,9 +305,18 @@ class DomAdapter {
             this.setElementValue(skillId, playerData.passive_skills[skillId]);
         });
         for (let i = 1; i <= 3; i++) {
-            this.setElementValue(`active${i}-type`, playerData.active_skills[i - 1].type);
-            this.setElementValue(`active${i}-value`, playerData.active_skills[i - 1].value);
-            this.setElementValue(`active${i}-cooldown`, playerData.active_skills[i - 1].cooldown);
+            const skillId = `player-active${i}`;
+            const skillData = playerData.active_skills[i - 1];
+            this.setElementValue(`${skillId}-type`, skillData.type);
+            this.setElementValue(`${skillId}-baseDamage`, skillData.baseDamage);
+            this.setElementValue(`${skillId}-baseHealth`, skillData.baseHealth);
+            this.setElementValue(`${skillId}-cooldown`, skillData.cooldown);
+            this.setElementValue(`${skillId}-value`, skillData.value);
+            this.setElementValue(`${skillId}-hits`, skillData.hits);
+            this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff);
+            this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff);
+            this.setElementValue(`${skillId}-duration`, skillData.duration);
+            toggleSkillParams(skillId);
         }
 
         const opponentData = data.opponent;
@@ -285,9 +327,18 @@ class DomAdapter {
             this.setElementValue(`opponent-${skill.id}`, opponentData.passive_skills[skill.id]);
         });
         for (let i = 1; i <= 3; i++) {
-            this.setElementValue(`opponent-active${i}-type`, opponentData.active_skills[i - 1].type);
-            this.setElementValue(`opponent-active${i}-value`, opponentData.active_skills[i - 1].value);
-            this.setElementValue(`opponent-active${i}-cooldown`, opponentData.active_skills[i - 1].cooldown);
+            const skillId = `opponent-active${i}`;
+            const skillData = opponentData.active_skills[i - 1];
+            this.setElementValue(`${skillId}-type`, skillData.type);
+            this.setElementValue(`${skillId}-baseDamage`, skillData.baseDamage);
+            this.setElementValue(`${skillId}-baseHealth`, skillData.baseHealth);
+            this.setElementValue(`${skillId}-cooldown`, skillData.cooldown);
+            this.setElementValue(`${skillId}-value`, skillData.value);
+            this.setElementValue(`${skillId}-hits`, skillData.hits);
+            this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff);
+            this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff);
+            this.setElementValue(`${skillId}-duration`, skillData.duration);
+            toggleSkillParams(skillId);
         }
     }
 }

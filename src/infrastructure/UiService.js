@@ -26,6 +26,9 @@ class UiService {
         this.importPvpButton = document.getElementById('import-pvp');
         this.importFile = document.getElementById('import-file');
 
+        this.playerActiveSkillsContainer = document.getElementById('player-active-skills-container');
+        this.opponentActiveSkillsContainer = document.getElementById('opponent-active-skills-container');
+
         this.equipmentCategory.addEventListener('change', () => this.toggleWeaponTypeDisplay());
     }
 
