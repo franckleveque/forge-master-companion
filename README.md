@@ -33,6 +33,31 @@ Once the image is built, you can run it.
 2.  **Access the application:**
     Open your web browser and navigate to `http://localhost:8080`.
 
+## For Developers
+
+### Setup
+
+To set up the project for local development, you will need Node.js and npm installed.
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/franckleveque/forge-master-companion.git
+    cd forge-master-companion
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+### Testing
+
+This project uses Jest for unit and integration testing.
+
+1.  **Run the test suite:**
+    ```bash
+    npm test
+    ```
+
 ## How to Use (Manual)
 
 1.  **Enter Character Stats:**
@@ -67,6 +92,6 @@ Once the image is built, you can run it.
 *   **Enemy Attack Speed:** Assumed to be 1 hit per second.
 *   **Probabilities (Crit, Block, etc.):** All percentage-based chances are normalized. For example, a 10% chance to block will result in exactly 1 blocked attack for every 10 enemy hits.
 *   **Lifesteal:** Heals for a percentage of the damage dealt by auto-attacks.
-*   **Health Regen:** Heals for a percentage of maximum health each second.
+*   **Health Regen:** Heals for a flat value each second.
 *   **Double Chance:** Triggers a second, independent auto-attack. This second attack uses the same base damage and can also critically hit.
 *   **Active Skills:** Assumed to be used off-cooldown. Healing skills contribute to survival. Damage skills contribute to the "Total Damage Dealt" metric and are boosted by a "Compétence dégâts" passive.
