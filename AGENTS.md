@@ -19,17 +19,32 @@ The codebase is organized following a Hexagonal (Ports & Adapters) architecture.
 - **Dependency Inversion:** The core logic in the `domain` is completely independent of the UI and other external services. This allows for easier testing and maintenance.
 - **Ports and Adapters:** The `DomAdapter` and `FileService` are examples of adapters that connect to the "ports" of the application (the methods exposed by the domain services).
 
-## Coding Conventions
+### Stat Calculation Architecture
 
-- Follow standard HTML, CSS, and JavaScript best practices.
-- Use descriptive variable and function names.
-- Comment code where necessary to explain complex logic.
+A critical aspect of this architecture is the distinction between pre-simulation stat calculations and simulation-time logic.
 
-## Development Process
+-   **Pre-simulation Stat Calculations (`CharacterService`):** Passives that grant direct, non-conditional stat bonuses like **Santé**, **Dégâts**, **Dégâts corps à corps**, and **Dégâts à distance** are handled exclusively by the `CharacterService`. The `CharacterService` is responsible for:
+    1.  Taking the **total stats** provided by the UI.
+    2.  Calculating the character's **base stats** by reversing the effects of these passive skills.
+    3.  Applying equipment changes to the **base stats**.
+    4.  Recalculating the **total stats** from the modified base stats before a simulation begins.
 
-1. Understand the user's request and the project goals.
-2. Formulate a plan to implement the requested changes, respecting the existing architecture.
-3. Write clean, efficient, and well-documented code.
-4. Test the changes thoroughly to ensure they work as expected.
-5. Update the documentation to reflect any changes.
-6. Submit the changes with a clear and concise commit message.
+    The passive skill classes for these stats (`Sante.js`, `Degats.js`, etc.) are intentionally simple data containers and should not contain any logic in their hooks (`onCalculateStats`, `onModifyOutgoingDamage`, etc.).
+
+-   **Simulation-Time Logic (PassiveSkill Classes):** Passives that have conditional or event-driven effects during combat (e.g., **Vol de vie**, **Vitesse d'attaque**, **Chance critique**, **Régénération santé**) contain their logic directly within their respective classes. These skills are instantiated by the `SimulationService` and their hooks (`onTick`, `onAfterAttackDealt`, etc.) are called during the simulation loop.
+
+## Development Process & Testing
+
+**All development must follow a Test-Driven Development (TDD) workflow.** This is a mandatory requirement for all future changes, whether they are new features or bug fixes.
+
+### TDD Workflow:
+1.  **Write a Failing Test:** Before writing any implementation code, create a new test case that clearly defines the desired functionality or reproduces the bug. This test must fail.
+2.  **Write Code to Pass the Test:** Write the minimum amount of code required to make the failing test pass.
+3.  **Refactor:** Once the test is passing, refactor the code for clarity, efficiency, and adherence to architectural principles.
+
+### Testing Strategy:
+-   **CharacterService Tests:** When modifying stat calculation logic, write tests for the `CharacterService`. These tests should verify that the service correctly calculates base stats from total stats and recalculates total stats after applying modifiers.
+-   **PassiveSkill Unit Tests:** For simulation-time passives, write isolated unit tests for the passive skill class itself. Mock the character object and verify that the skill's hooks produce the correct output.
+-   **Simulation Integration Tests:** For complex interactions between multiple skills or time-based mechanics (like attack speed), add a test case to `tests/SimulationIntegration.test.js`.
+
+By following these principles, we ensure the codebase remains robust, maintainable, and well-tested.
