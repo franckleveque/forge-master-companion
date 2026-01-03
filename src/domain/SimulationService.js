@@ -1,130 +1,128 @@
 // src/domain/SimulationService.js
 
+import { PassiveSkillFactory } from './passives/PassiveSkillFactory.js';
+
 class SimulationService {
+    _calculateCharacterStats(character) {
+        const passiveSkills = Object.entries(character.basePassiveSkills)
+            .map(([id, value]) => PassiveSkillFactory.create(id, value))
+            .filter(Boolean);
+
+        const calculatedStats = {
+            ...character,
+            passiveSkills,
+            finalHealth: character.totalHealth,
+            finalDamage: character.totalDamage,
+            timePerAttack: 1.0,
+            critChance: 0,
+            critDamage: 1.5,
+            blockChance: 0,
+            healthRegenPerSec: 0,
+            lifesteal: 0,
+            doubleChance: 0,
+            competenceDegatsMod: 1.0,
+            competenceCooldownMod: 1.0,
+            critCounter: 0,
+            doubleChanceCounter: 0,
+            blockCounter: 0,
+            totalDamageDealt: 0
+        };
+
+        passiveSkills.forEach(skill => skill.onCalculateStats(calculatedStats));
+
+        calculatedStats.currentHealth = calculatedStats.finalHealth;
+        calculatedStats.attackTimer = character.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
+
+        return calculatedStats;
+    }
+
     simulate(stats) {
         const MAX_SIMULATION_TIME = 60;
         const dt = 0.01;
-        const p = stats.basePassiveSkills;
-        let finalHealth = stats.totalHealth * (1 + p.sante / 100);
-        let finalDamage = stats.totalDamage * (1 + p.degats / 100);
-        if (stats.weaponType === 'corp-a-corp') finalDamage *= (1 + p['degats-corps-a-corps'] / 100);
-        if (stats.weaponType === 'a-distance') finalDamage *= (1 + p['degats-a-distance'] / 100);
-        const attackSpeedBonus = p['vitesse-attaque'] / 100;
-        const timePerPlayerAttack = 1 / (1 / Math.pow(0.5, attackSpeedBonus));
-        const critChance = p['chance-critique'] / 100;
-        const critDamage = 1.5 + p['degats-critiques'] / 100;
-        const blockChance = p['chance-blocage'] / 100;
-        const healthRegenPerSec = finalHealth * (p['regeneration-sante'] / 100);
-        const lifesteal = p['vol-de-vie'] / 100;
-        const doubleChance = p['double-chance'] / 100;
-        let currentHealth = finalHealth;
+
+        const player = this._calculateCharacterStats(stats);
+
         let time = 0;
-        let playerAttackTimer = stats.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
         let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
         const timePerEnemyAttack = 1.0;
-        let critCounter = 0;
-        let doubleChanceCounter = 0;
-        let blockCounter = 0;
-        let totalDamageDealt = 0;
 
-        while (currentHealth > 0 && time < MAX_SIMULATION_TIME) {
+        while (player.currentHealth > 0 && time < MAX_SIMULATION_TIME) {
             time += dt;
-            currentHealth += healthRegenPerSec * dt;
-            playerAttackTimer -= dt;
-            while (playerAttackTimer <= 0) {
-                let mainAttackDamage = finalDamage;
-                critCounter += critChance;
-                if (critCounter >= 1) { mainAttackDamage *= critDamage; critCounter--; }
-                currentHealth += mainAttackDamage * lifesteal;
-                totalDamageDealt += mainAttackDamage;
-                doubleChanceCounter += doubleChance;
-                if (doubleChanceCounter >= 1) {
-                    let secondAttackDamage = finalDamage;
-                    critCounter += critChance;
-                    if (critCounter >= 1) { secondAttackDamage *= critDamage; critCounter--; }
-                    currentHealth += secondAttackDamage * lifesteal;
-                    totalDamageDealt += secondAttackDamage;
-                    doubleChanceCounter--;
+            player.passiveSkills.forEach(skill => skill.onTick(player, dt));
+            player.attackTimer -= dt;
+
+            while (player.attackTimer <= 0) {
+                let mainAttackDamage = player.finalDamage;
+                player.critCounter += player.critChance;
+                if (player.critCounter >= 1) { mainAttackDamage *= player.critDamage; player.critCounter--; }
+
+                player.passiveSkills.forEach(skill => skill.onAttack(player, null, mainAttackDamage));
+
+                player.totalDamageDealt += mainAttackDamage;
+
+                player.doubleChanceCounter += player.doubleChance;
+                if (player.doubleChanceCounter >= 1) {
+                    let secondAttackDamage = player.finalDamage;
+                    player.critCounter += player.critChance;
+                    if (player.critCounter >= 1) { secondAttackDamage *= player.critDamage; player.critCounter--; }
+
+                    player.passiveSkills.forEach(skill => skill.onAttack(player, null, secondAttackDamage));
+
+                    player.totalDamageDealt += secondAttackDamage;
+                    player.doubleChanceCounter--;
                 }
-                playerAttackTimer += timePerPlayerAttack;
+                player.attackTimer += player.timePerAttack;
             }
+
             stats.activeSkills.forEach(skill => {
                 skill.timer -= dt;
                 if (skill.timer <= 0) {
                     if (skill.type === 'damage') {
-                        const skillDamage = skill.value * (1 + p['competence-degats'] / 100);
-                        totalDamageDealt += skillDamage;
+                        const skillDamage = skill.value * player.competenceDegatsMod;
+                        player.totalDamageDealt += skillDamage;
                     } else if (skill.type === 'healing') {
-                        currentHealth += skill.value;
+                        player.currentHealth += skill.value;
                     }
-                    const cooldown = skill.cooldown * (1 - p['competences-temps-recharge'] / 100);
-                    skill.timer += cooldown;
+                    skill.timer += skill.cooldown * player.competenceCooldownMod;
                 }
             });
+
             enemyAttackTimer -= dt;
             while (enemyAttackTimer <= 0) {
-                blockCounter += blockChance;
-                if (blockCounter < 1) {
-                    currentHealth -= stats.enemy.dps * timePerEnemyAttack;
+                player.blockCounter += player.blockChance;
+                if (player.blockCounter < 1) {
+                    player.currentHealth -= stats.enemy.dps * timePerEnemyAttack;
                 } else {
-                    blockCounter--;
+                    player.blockCounter--;
                 }
                 enemyAttackTimer += timePerEnemyAttack;
             }
-            if (currentHealth > finalHealth) currentHealth = finalHealth;
+
+            if (player.currentHealth > player.finalHealth) player.currentHealth = player.finalHealth;
         }
+
         const survivalTime = time >= MAX_SIMULATION_TIME ? Infinity : time;
-        return { survivalTime, totalDamageDealt };
+        return { survivalTime, totalDamageDealt: player.totalDamageDealt };
     }
 
     simulatePvp(player, opponent) {
         const MAX_SIMULATION_TIME = 60;
         const dt = 0.01;
 
-        function calculateFinalStats(character) {
-            const p = character.basePassiveSkills;
-            const finalHealth = character.totalHealth * (1 + p.sante / 100);
-            let finalDamage = character.totalDamage * (1 + p.degats / 100);
-            if (character.weaponType === 'corp-a-corp') finalDamage *= (1 + p['degats-corps-a-corps'] / 100);
-            if (character.weaponType === 'a-distance') finalDamage *= (1 + p['degats-a-distance'] / 100);
-            const attackSpeedBonus = p['vitesse-attaque'] / 100;
-            const timePerAttack = 1 / (1 / Math.pow(0.5, attackSpeedBonus));
-
-            return {
-                ...character,
-                finalHealth,
-                currentHealth: finalHealth,
-                finalDamage,
-                timePerAttack,
-                attackTimer: character.weaponType === 'corp-a-corp' ? 2.0 : 0.0,
-                critChance: p['chance-critique'] / 100,
-                critDamage: 1.5 + p['degats-critiques'] / 100,
-                blockChance: p['chance-blocage'] / 100,
-                healthRegenPerSec: finalHealth * (p['regeneration-sante'] / 100),
-                lifesteal: p['vol-de-vie'] / 100,
-                doubleChance: p['double-chance'] / 100,
-                critCounter: 0,
-                doubleChanceCounter: 0,
-                blockCounter: 0,
-                totalDamageDealt: 0
-            };
-        }
-
-        let p1 = calculateFinalStats(player);
-        let p2 = calculateFinalStats(opponent);
+        let p1 = this._calculateCharacterStats(player);
+        let p2 = this._calculateCharacterStats(opponent);
         let time = 0;
 
         while (p1.currentHealth > 0 && p2.currentHealth > 0 && time < MAX_SIMULATION_TIME) {
             time += dt;
 
             function processTick(attacker, defender) {
-                attacker.currentHealth += attacker.healthRegenPerSec * dt;
+                attacker.passiveSkills.forEach(skill => skill.onTick(attacker, dt));
                 attacker.activeSkills.forEach(skill => {
                     skill.timer -= dt;
                     if (skill.timer <= 0) {
-                        const p = attacker.basePassiveSkills;
                         if (skill.type === 'damage') {
-                            const skillDamage = skill.value * (1 + p['competence-degats'] / 100);
+                            const skillDamage = skill.value * attacker.competenceDegatsMod;
                             defender.blockCounter += defender.blockChance;
                             if (defender.blockCounter < 1) {
                                 defender.currentHealth -= skillDamage;
@@ -135,26 +133,29 @@ class SimulationService {
                         } else if (skill.type === 'healing') {
                             attacker.currentHealth += skill.value;
                         }
-                        const cooldown = skill.cooldown * (1 - p['competences-temps-recharge'] / 100);
-                        skill.timer += cooldown;
+                        skill.timer += skill.cooldown * attacker.competenceCooldownMod;
                     }
                 });
+
                 attacker.attackTimer -= dt;
                 while (attacker.attackTimer <= 0) {
                     function performAttack(baseDamage) {
                         let damage = baseDamage;
                         attacker.critCounter += attacker.critChance;
                         if (attacker.critCounter >= 1) { damage *= attacker.critDamage; attacker.critCounter--; }
+
                         defender.blockCounter += defender.blockChance;
                         if (defender.blockCounter < 1) {
                             defender.currentHealth -= damage;
                         } else {
                             defender.blockCounter--;
                         }
-                        attacker.currentHealth += damage * attacker.lifesteal;
+
+                        attacker.passiveSkills.forEach(skill => skill.onAttack(attacker, defender, damage));
                         attacker.totalDamageDealt += damage;
                     }
                     performAttack(attacker.finalDamage);
+
                     attacker.doubleChanceCounter += attacker.doubleChance;
                     if (attacker.doubleChanceCounter >= 1) {
                         performAttack(attacker.finalDamage);
@@ -162,6 +163,7 @@ class SimulationService {
                     }
                     attacker.attackTimer += attacker.timePerAttack;
                 }
+
                 if (attacker.currentHealth > attacker.finalHealth) attacker.currentHealth = attacker.finalHealth;
             }
 

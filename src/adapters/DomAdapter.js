@@ -1,14 +1,17 @@
 // src/adapters/DomAdapter.js
 
+import { PassiveSkillService } from '../domain/PassiveSkillService.js';
+
 class DomAdapter {
-    constructor(characterService) {
+    constructor(characterService, passiveSkillService) {
         this.characterService = characterService;
+        this.passiveSkillService = passiveSkillService;
     }
 
     getCharacterStats() {
         const basePassiveSkills = {};
-        this.characterService.getPassiveSkills().forEach(skill => {
-            basePassiveSkills[skill.id] = parseFloat(document.getElementById(skill.id).value) || 0;
+        this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
+            basePassiveSkills[skillId] = parseFloat(document.getElementById(skillId).value) || 0;
         });
 
         const activeSkills = [];
@@ -81,8 +84,8 @@ class DomAdapter {
         const id_prefix = prefix === 'player' ? '' : `${prefix}-`;
 
         const basePassiveSkills = {};
-        this.characterService.getPassiveSkills().forEach(skill => {
-            basePassiveSkills[skill.id] = parseFloat(document.getElementById(`${id_prefix}${skill.id}`).value) || 0;
+        this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
+            basePassiveSkills[skillId] = parseFloat(document.getElementById(`${id_prefix}${skillId}`).value) || 0;
         });
 
         const activeSkills = [];
@@ -158,8 +161,8 @@ class DomAdapter {
         data.character_stats.total_health = this.getElementValue('total-health');
         data.character_stats.weapon_type = this.getElementValue('weapon-type');
 
-        this.characterService.getPassiveSkills().forEach(skill => {
-            data.passive_skills[skill.id] = this.getElementValue(skill.id);
+        this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
+            data.passive_skills[skillId] = this.getElementValue(skillId);
         });
 
         for (let i = 1; i <= 3; i++) {
@@ -212,8 +215,8 @@ class DomAdapter {
             charData.character_stats.total_health = this.getElementValue(`${id_prefix}total-health`);
             charData.character_stats.weapon_type = this.getElementValue(`${id_prefix}weapon-type`);
 
-            this.characterService.getPassiveSkills().forEach(skill => {
-                charData.passive_skills[skill.id] = this.getElementValue(`${id_prefix}${skill.id}`);
+            this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
+                charData.passive_skills[skillId] = this.getElementValue(`${id_prefix}${skillId}`);
             });
 
             for (let i = 1; i <= 3; i++) {
@@ -233,8 +236,8 @@ class DomAdapter {
         this.setElementValue('total-health', data.character_stats.total_health);
         this.setElementValue('weapon-type', data.character_stats.weapon_type);
 
-        this.characterService.getPassiveSkills().forEach(skill => {
-            this.setElementValue(skill.id, data.passive_skills[skill.id]);
+        this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
+            this.setElementValue(skillId, data.passive_skills[skillId]);
         });
 
         for (let i = 1; i <= 3; i++) {
@@ -265,8 +268,8 @@ class DomAdapter {
         this.setElementValue('total-damage', playerData.character_stats.total_damage);
         this.setElementValue('total-health', playerData.character_stats.total_health);
         this.setElementValue('weapon-type', playerData.character_stats.weapon_type);
-        this.characterService.getPassiveSkills().forEach(skill => {
-            this.setElementValue(skill.id, playerData.passive_skills[skill.id]);
+        this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
+            this.setElementValue(skillId, playerData.passive_skills[skillId]);
         });
         for (let i = 1; i <= 3; i++) {
             this.setElementValue(`active${i}-type`, playerData.active_skills[i - 1].type);

@@ -1,9 +1,17 @@
 // src/application/App.js
 
+import { CharacterService } from '../domain/CharacterService.js';
+import { UiService } from '../infrastructure/UiService.js';
+import { DomAdapter } from '../adapters/DomAdapter.js';
+import { SimulationService } from '../domain/SimulationService.js';
+import { FileService } from '../infrastructure/FileService.js';
+import { PassiveSkillService } from '../domain/PassiveSkillService.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const characterService = new CharacterService();
     const uiService = new UiService();
-    const domAdapter = new DomAdapter(characterService);
+    const passiveSkillService = new PassiveSkillService();
+    const domAdapter = new DomAdapter(characterService, passiveSkillService);
     const simulationService = new SimulationService();
     const fileService = new FileService();
 
@@ -62,5 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial population of passive skills
-    uiService.populatePassiveSkills(characterService.getPassiveSkills());
+    const passiveSkillsForUi = characterService.getPassiveSkills();
+    uiService.populatePassiveSkills(passiveSkillsForUi);
 });
