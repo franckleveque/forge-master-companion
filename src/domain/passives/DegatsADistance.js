@@ -7,9 +7,9 @@ export class DegatsADistance extends PassiveSkill {
         super('degats-a-distance', 'Dégâts à distance', value);
     }
 
+    // The primary damage calculation is now handled by CharacterService before the simulation starts.
+    // This hook is kept for potential future use if the skill gains other effects.
     onCalculateStats(character) {
-        if (character.weaponType === 'a-distance') {
-            character.finalDamage *= 1 + this.value / 100;
-        }
+        // No longer modifies finalDamage directly.
     }
 }

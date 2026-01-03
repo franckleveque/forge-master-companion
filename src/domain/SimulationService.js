@@ -8,6 +8,8 @@ class SimulationService {
             .map(([id, value]) => PassiveSkillFactory.create(id, value))
             .filter(Boolean);
 
+        // The totalDamage and totalHealth are now pre-calculated by CharacterService.
+        // The simulation service will use them directly as the final base stats for combat.
         const calculatedStats = {
             ...character,
             passiveSkills,
@@ -25,6 +27,7 @@ class SimulationService {
             totalDamageDealt: 0
         };
 
+        // onCalculateStats will now only handle secondary stats like crit, attack speed, etc.
         passiveSkills.forEach(skill => skill.onCalculateStats(calculatedStats));
         passiveSkills.forEach(skill => skill.onInitialize(calculatedStats));
 
@@ -53,21 +56,14 @@ class SimulationService {
                 function performAttack(baseDamage) {
                     let damage = baseDamage;
 
-                    // Outgoing damage modifications (e.g., crit)
                     player.passiveSkills.forEach(skill => {
                         damage = skill.onModifyOutgoingDamage(player, null, damage);
                     });
 
-                    // Note: Incoming damage modification (block) is handled by the enemy,
-                    // but since the enemy is simplified in this simulation, we check the player's block.
-                    // A full implementation would have the enemy's skills handle this.
-
                     player.totalDamageDealt += damage;
 
-                    // Post-attack effects (e.g., lifesteal)
                     player.passiveSkills.forEach(skill => skill.onAfterAttackDealt(player, null, damage));
 
-                    // Check for follow-up actions (e.g., double chance)
                     let performExtraAttack = false;
                     player.passiveSkills.forEach(skill => {
                         if (skill.onAfterAttackProcessed(player, null)) {
