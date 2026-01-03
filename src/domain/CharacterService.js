@@ -59,6 +59,18 @@ export class CharacterService {
         stats.totalDamage = characterStats.baseDamage * totalDamageModifier;
         stats.totalHealth = characterStats.baseHealth * totalHealthModifier;
 
+        if (stats.activeSkills && Array.isArray(stats.activeSkills)) {
+            const competenceDegatsMod = 1 + (p['competence-degats'] || 0) / 100;
+            stats.activeSkills.forEach(skill => {
+                if (skill.baseDamage) {
+                    stats.totalDamage += skill.baseDamage * competenceDegatsMod;
+                }
+                if (skill.baseHealth) {
+                    stats.totalHealth += skill.baseHealth * competenceDegatsMod;
+                }
+            });
+        }
+
         return stats;
     }
 
