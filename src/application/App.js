@@ -21,38 +21,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for equipment comparison
     uiService.compareButton.addEventListener('click', () => {
-        // 1. Get the character's full current stats from the character sheet.
-        const characterSheetStats = domAdapter.getCharacterStats();
+        // 1. Get the character's stats as displayed on the character sheet.
+        const sheetStats = domAdapter.getCharacterStats();
 
-        // 2. Get the equipment objects for comparison.
-        const equipNew = domAdapter.getEquipment(1, characterSheetStats);
-        const equipOld = domAdapter.getEquipment(2, characterSheetStats);
+        // 2. Calculate the character's true base stats (flat damage/health before passives).
+        const baseStats = characterService.getCharacterBaseStats(sheetStats);
 
-        // 3. Create a baseline stat object by sequentially "un-applying" the old equipment.
-        // This creates the character's state as if the old equipment was never there.
-        const statsWithoutOldEquip = characterService.unequipEquipment(characterSheetStats, equipOld);
+        // 3. Get the equipment to be compared.
+        const equipNew = domAdapter.getEquipment(1, baseStats);
+        const equipOld = domAdapter.getEquipment(2, baseStats);
 
-        // 4. Create the two scenarios for simulation.
+        // 4. Create a clean baseline by removing the old equipment's flat stats and passives from the base stats.
+        const cleanBaseStats = characterService.unequipEquipment(baseStats, equipOld);
 
-        // Scenario A: The character with the new equipment.
-        // We take the baseline and apply the new equipment to it.
-        const statsForNewEquip = characterService.applyEquipment(statsWithoutOldEquip, equipNew);
+        // 5. Build the two scenarios for comparison.
 
-        // Scenario B: The character with the old equipment (or unequipped).
-        let statsForOldEquip;
+        // Scenario A: Character with the new equipment.
+        let statsWithNewEquip = characterService.applyEquipment(cleanBaseStats, equipNew);
+        let finalStatsNew = characterService.recalculateTotalStats(statsWithNewEquip);
+
+        // Scenario B: Character with the old equipment (or unequipped).
+        let statsForOldScenario;
         if (domAdapter.isUnequipChecked()) {
-            // If "unequip" is checked, the comparison is against the character with the slot empty.
-            statsForOldEquip = statsWithoutOldEquip;
+            // If unequipping, the old scenario is just the clean base.
+            statsForOldScenario = cleanBaseStats;
         } else {
-            // Otherwise, the comparison is against the original character sheet stats.
-            statsForOldEquip = characterSheetStats;
+            // Otherwise, re-apply the old equipment to the clean base.
+            statsForOldScenario = characterService.applyEquipment(cleanBaseStats, equipOld);
         }
+        let finalStatsOld = characterService.recalculateTotalStats(statsForOldScenario);
 
-        // 5. Run the simulations.
-        const resultNew = simulationService.simulate(statsForNewEquip);
-        const resultOld = simulationService.simulate(statsForOldEquip);
+        // 6. Run simulations with the final, recalculated stats.
+        const resultNew = simulationService.simulate(finalStatsNew);
+        const resultOld = simulationService.simulate(finalStatsOld);
 
-        // 6. Display the results.
+        // 7. Display the results.
         domAdapter.displayComparisonResults(resultNew, resultOld);
     });
 
