@@ -33,6 +33,31 @@ Once the image is built, you can run it.
 2.  **Access the application:**
     Open your web browser and navigate to `http://localhost:8080`.
 
+## For Developers
+
+### Setup
+
+To set up the project for local development, you will need Node.js and npm installed.
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/franckleveque/forge-master-companion.git
+    cd forge-master-companion
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+### Testing
+
+This project uses Jest for unit and integration testing.
+
+1.  **Run the test suite:**
+    ```bash
+    npm test
+    ```
+
 ## How to Use (Manual)
 
 1.  **Enter Character Stats:**

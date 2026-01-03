@@ -1,6 +1,6 @@
 // src/domain/Equipment.js
 
-class Equipment {
+export class Equipment {
     constructor({
         category,
         weaponType,

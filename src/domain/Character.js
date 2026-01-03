@@ -1,8 +1,10 @@
 // src/domain/Character.js
 
-class Character {
+export class Character {
     constructor({
         name,
+        baseDamage,
+        baseHealth,
         totalDamage,
         totalHealth,
         weaponType,
@@ -10,6 +12,8 @@ class Character {
         activeSkills
     }) {
         this.name = name;
+        this.baseDamage = baseDamage;
+        this.baseHealth = baseHealth;
         this.totalDamage = totalDamage;
         this.totalHealth = totalHealth;
         this.weaponType = weaponType;

@@ -8,6 +8,6 @@ export class CompetencesTempsRecharge extends PassiveSkill {
     }
 
     onCalculateStats(character) {
-        character.competenceCooldownMod *= 1 - this.value / 100;
+        character.competenceCooldownMod *= Math.pow(0.5, this.value / 100);
     }
 }

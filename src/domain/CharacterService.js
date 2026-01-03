@@ -1,6 +1,6 @@
 // src/domain/CharacterService.js
 
-class CharacterService {
+export class CharacterService {
     constructor() {
         this.passiveSkills = [
             { id: 'sante', name: "Santé" },
