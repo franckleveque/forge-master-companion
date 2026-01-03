@@ -1,9 +1,17 @@
 // src/application/App.js
 
+import { CharacterService } from '../domain/CharacterService.js';
+import { UiService } from '../infrastructure/UiService.js';
+import { DomAdapter } from '../adapters/DomAdapter.js';
+import { SimulationService } from '../domain/SimulationService.js';
+import { FileService } from '../infrastructure/FileService.js';
+import { PassiveSkillService } from '../domain/PassiveSkillService.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const characterService = new CharacterService();
     const uiService = new UiService();
-    const domAdapter = new DomAdapter(characterService);
+    const passiveSkillService = new PassiveSkillService();
+    const domAdapter = new DomAdapter(characterService, passiveSkillService);
     const simulationService = new SimulationService();
     const fileService = new FileService();
 
@@ -13,20 +21,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for equipment comparison
     uiService.compareButton.addEventListener('click', () => {
-        let baseStats = domAdapter.getCharacterStats();
+        // 1. Get the character's stats as displayed on the character sheet.
+        const sheetStats = domAdapter.getCharacterStats();
+
+        // 2. Calculate the character's true base stats (flat damage/health before passives).
+        const baseStats = characterService.getCharacterBaseStats(sheetStats);
+
+        // 3. Get the equipment to be compared.
         const equipNew = domAdapter.getEquipment(1, baseStats);
         const equipOld = domAdapter.getEquipment(2, baseStats);
 
+        // 4. Create a clean baseline by removing the old equipment's flat stats and passives from the base stats.
+        const cleanBaseStats = characterService.unequipEquipment(baseStats, equipOld);
+
+        // 5. Build the two scenarios for comparison.
+
+        // Scenario A: Character with the new equipment.
+        let statsWithNewEquip = characterService.applyEquipment(cleanBaseStats, equipNew);
+        let finalStatsNew = characterService.recalculateTotalStats(statsWithNewEquip);
+
+        // Scenario B: Character with the old equipment (or unequipped).
+        let statsForOldScenario;
         if (domAdapter.isUnequipChecked()) {
-            baseStats = characterService.unequipEquipment(baseStats, equipOld);
+            // If unequipping, the old scenario is just the clean base.
+            statsForOldScenario = cleanBaseStats;
+        } else {
+            // Otherwise, re-apply the old equipment to the clean base.
+            statsForOldScenario = characterService.applyEquipment(cleanBaseStats, equipOld);
         }
+        let finalStatsOld = characterService.recalculateTotalStats(statsForOldScenario);
 
-        const statsNew = characterService.applyEquipment(baseStats, equipNew);
-        const statsOld = characterService.applyEquipment(baseStats, equipOld);
+        // 6. Run simulations with the final, recalculated stats.
+        const resultNew = simulationService.simulate(finalStatsNew);
+        const resultOld = simulationService.simulate(finalStatsOld);
 
-        const resultNew = simulationService.simulate(statsNew);
-        const resultOld = simulationService.simulate(statsOld);
-
+        // 7. Display the results.
         domAdapter.displayComparisonResults(resultNew, resultOld);
     });
 
@@ -62,5 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial population of passive skills
-    uiService.populatePassiveSkills(characterService.getPassiveSkills());
+    const passiveSkillsForUi = characterService.getPassiveSkills();
+    uiService.populatePassiveSkills(passiveSkillsForUi);
 });
