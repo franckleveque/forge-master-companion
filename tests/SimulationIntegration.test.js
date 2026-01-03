@@ -60,4 +60,33 @@ describe('SimulationService Integration Tests', () => {
 
     attackSpy.mockRestore();
   });
+
+  test('should stack global and melee damage passives correctly', () => {
+    player.baseDamage = 1000;
+    player.weaponType = 'corp-a-corp';
+    player.basePassiveSkills = {
+      'degats': 50,
+      'degats-corps-a-corps': 25
+    };
+
+    const p1 = simulationService._calculateCharacterStats(player);
+    const finalDamage = p1.passiveSkills.reduce((dmg, skill) => skill.onModifyOutgoingDamage(p1, null, dmg), p1.finalDamage);
+
+    expect(finalDamage).toBeCloseTo(1750);
+  });
+
+  test('should stack global and ranged damage passives correctly and ignore melee', () => {
+    player.baseDamage = 1000;
+    player.weaponType = 'a-distance';
+    player.basePassiveSkills = {
+      'degats': 50,
+      'degats-a-distance': 25,
+      'degats-corps-a-corps': 30 // This should be ignored
+    };
+
+    const p1 = simulationService._calculateCharacterStats(player);
+    const finalDamage = p1.passiveSkills.reduce((dmg, skill) => skill.onModifyOutgoingDamage(p1, null, dmg), p1.finalDamage);
+
+    expect(finalDamage).toBeCloseTo(1750);
+  });
 });

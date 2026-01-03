@@ -9,7 +9,8 @@ export class DegatsADistance extends PassiveSkill {
 
     onModifyOutgoingDamage(character, target, damage) {
         if (character.weaponType === 'a-distance') {
-            return damage * (1 + this.value / 100);
+            // Add damage based on the base damage to ensure additive stacking
+            return damage + character.baseDamage * (this.value / 100);
         }
         return damage;
     }
