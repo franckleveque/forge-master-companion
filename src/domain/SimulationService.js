@@ -2,7 +2,7 @@
 
 import { PassiveSkillFactory } from './passives/PassiveSkillFactory.js';
 
-class SimulationService {
+export class SimulationService {
     _calculateCharacterStats(character) {
         const passiveSkills = Object.entries(character.basePassiveSkills)
             .map(([id, value]) => PassiveSkillFactory.create(id, value))
@@ -32,7 +32,7 @@ class SimulationService {
         passiveSkills.forEach(skill => skill.onInitialize(calculatedStats));
 
         calculatedStats.currentHealth = calculatedStats.finalHealth;
-        calculatedStats.attackTimer = character.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
+        calculatedStats.attackTimer = character.weaponType === 'corp-a-corp' ? 2.0 : calculatedStats.timePerAttack;
 
         return calculatedStats;
     }

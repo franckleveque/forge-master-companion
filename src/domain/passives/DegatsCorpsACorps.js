@@ -7,9 +7,10 @@ export class DegatsCorpsACorps extends PassiveSkill {
         super('degats-corps-a-corps', 'Dégâts corps à corps', value);
     }
 
-    // The primary damage calculation is now handled by CharacterService before the simulation starts.
-    // This hook is kept for potential future use if the skill gains other effects.
-    onCalculateStats(character) {
-        // No longer modifies finalDamage directly.
+    onModifyOutgoingDamage(character, target, damage) {
+        if (character.weaponType === 'corp-a-corp') {
+            return damage * (1 + this.value / 100);
+        }
+        return damage;
     }
 }
