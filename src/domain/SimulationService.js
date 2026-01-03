@@ -13,8 +13,8 @@ export class SimulationService {
         const calculatedStats = {
             ...character,
             passiveSkills,
-            finalHealth: character.totalHealth,
-            finalDamage: character.totalDamage,
+            finalHealth: character.baseHealth,
+            finalDamage: character.baseDamage,
             timePerAttack: 1.0,
             critChance: 0,
             critDamage: 1.5,
@@ -122,65 +122,9 @@ export class SimulationService {
         while (p1.currentHealth > 0 && p2.currentHealth > 0 && time < MAX_SIMULATION_TIME) {
             time += dt;
 
-            function processTick(attacker, defender) {
-                attacker.passiveSkills.forEach(skill => skill.onTick(attacker, dt));
-                attacker.activeSkills.forEach(skill => {
-                    skill.timer -= dt;
-                    if (skill.timer <= 0) {
-                        if (skill.type === 'damage') {
-                            let skillDamage = skill.value * attacker.competenceDegatsMod;
-                            defender.passiveSkills.forEach(s => {
-                                skillDamage = s.onModifyIncomingDamage(defender, attacker, skillDamage);
-                            });
-                            defender.currentHealth -= skillDamage;
-                            attacker.totalDamageDealt += skillDamage;
-                        } else if (skill.type === 'healing') {
-                            attacker.currentHealth += skill.value;
-                        }
-                        skill.timer += skill.cooldown * attacker.competenceCooldownMod;
-                    }
-                });
-
-                attacker.attackTimer -= dt;
-                while (attacker.attackTimer <= 0) {
-                    function performAttack(baseDamage) {
-                        let damage = baseDamage;
-
-                        attacker.passiveSkills.forEach(s => {
-                            damage = s.onModifyOutgoingDamage(attacker, defender, damage);
-                        });
-
-                        defender.passiveSkills.forEach(s => {
-                            damage = s.onModifyIncomingDamage(defender, attacker, damage);
-                        });
-
-                        defender.currentHealth -= damage;
-                        attacker.totalDamageDealt += damage;
-
-                        attacker.passiveSkills.forEach(s => s.onAfterAttackDealt(attacker, defender, damage));
-
-                        let performExtra = false;
-                        attacker.passiveSkills.forEach(s => {
-                            if(s.onAfterAttackProcessed(attacker, defender)) {
-                                performExtra = true;
-                            }
-                        });
-                        return performExtra;
-                    }
-
-                    if (performAttack(attacker.finalDamage)) {
-                        performAttack(attacker.finalDamage);
-                    }
-
-                    attacker.attackTimer += attacker.timePerAttack;
-                }
-
-                if (attacker.currentHealth > attacker.finalHealth) attacker.currentHealth = attacker.finalHealth;
-            }
-
-            processTick(p1, p2);
+            this._processTick(p1, p2, dt);
             if (p2.currentHealth <= 0) break;
-            processTick(p2, p1);
+            this._processTick(p2, p1, dt);
         }
 
         let winner = null;
@@ -193,5 +137,61 @@ export class SimulationService {
             player1: { name: p1.name, totalDamageDealt: p1.totalDamageDealt, healthRemaining: p1.currentHealth, maxHealth: p1.finalHealth },
             player2: { name: p2.name, totalDamageDealt: p2.totalDamageDealt, healthRemaining: p2.currentHealth, maxHealth: p2.finalHealth }
         };
+    }
+
+    _processTick(attacker, defender, dt) {
+        attacker.passiveSkills.forEach(skill => skill.onTick(attacker, dt));
+        attacker.activeSkills.forEach(skill => {
+            skill.timer -= dt;
+            if (skill.timer <= 0) {
+                if (skill.type === 'damage') {
+                    let skillDamage = skill.value * attacker.competenceDegatsMod;
+                    defender.passiveSkills.forEach(s => {
+                        skillDamage = s.onModifyIncomingDamage(defender, attacker, skillDamage);
+                    });
+                    defender.currentHealth -= skillDamage;
+                    attacker.totalDamageDealt += skillDamage;
+                } else if (skill.type === 'healing') {
+                    attacker.currentHealth += skill.value;
+                }
+                skill.timer += skill.cooldown * attacker.competenceCooldownMod;
+            }
+        });
+
+        attacker.attackTimer -= dt;
+        while (attacker.attackTimer <= 0) {
+            if (this._performAttack(attacker, defender, attacker.finalDamage)) {
+                this._performAttack(attacker, defender, attacker.finalDamage);
+            }
+
+            attacker.attackTimer += attacker.timePerAttack;
+        }
+
+        if (attacker.currentHealth > attacker.finalHealth) attacker.currentHealth = attacker.finalHealth;
+    }
+
+    _performAttack(attacker, defender, baseDamage) {
+        let damage = baseDamage;
+
+        attacker.passiveSkills.forEach(s => {
+            damage = s.onModifyOutgoingDamage(attacker, defender, damage);
+        });
+
+        defender.passiveSkills.forEach(s => {
+            damage = s.onModifyIncomingDamage(defender, attacker, damage);
+        });
+
+        defender.currentHealth -= damage;
+        attacker.totalDamageDealt += damage;
+
+        attacker.passiveSkills.forEach(s => s.onAfterAttackDealt(attacker, defender, damage));
+
+        let performExtra = false;
+        attacker.passiveSkills.forEach(s => {
+            if (s.onAfterAttackProcessed(attacker, defender)) {
+                performExtra = true;
+            }
+        });
+        return performExtra;
     }
 }

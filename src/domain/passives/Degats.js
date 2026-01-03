@@ -8,6 +8,6 @@ export class Degats extends PassiveSkill {
     }
 
     onCalculateStats(character) {
-        character.finalDamage *= (1 + this.value / 100);
+        character.finalDamage = character.baseDamage * (1 + this.value / 100);
     }
 }

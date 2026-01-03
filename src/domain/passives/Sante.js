@@ -8,6 +8,6 @@ export class Sante extends PassiveSkill {
     }
 
     onCalculateStats(character) {
-        character.finalHealth *= (1 + this.value / 100);
+        character.finalHealth = character.baseHealth * (1 + this.value / 100);
     }
 }
