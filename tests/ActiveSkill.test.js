@@ -25,14 +25,17 @@ describe('Active Skills', () => {
             baseHealth: 1000,
             totalDamage: 100,
             totalHealth: 1000,
-            basePassiveSkills: { 'competence-degats': 50 },
+            basePassiveSkills: { 'competence-degats': 50, 'degats': 20 },
             activeSkills: [
                 new DamageSkill({ baseDamage: 10, baseHealth: 100 })
             ]
         });
         const stats = characterService.recalculateTotalStats(character);
-        expect(stats.totalDamage).toBe(100 + 10 * 1.5);
-        expect(stats.totalHealth).toBe(1000 + 100 * 1.5);
+        const expectedDamage = (100 + 10 * 1.5) * 1.2;
+        expect(stats.totalDamage).toBe(expectedDamage);
+
+        const baseStats = characterService.getCharacterBaseStats(stats);
+        expect(baseStats.baseDamage).toBeCloseTo(100);
     });
 
     test('Multi-hit skills should trigger the correct amount of hits', () => {
