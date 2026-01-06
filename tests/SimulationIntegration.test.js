@@ -32,9 +32,6 @@ describe('SimulationService Integration Tests', () => {
     const p1 = simulationService._calculateCharacterStats(player);
     const p2 = simulationService._calculateCharacterStats(opponent);
 
-    p1.timePerAttack = 0.25;
-    p1.attackTimer = p1.timePerAttack;
-
     // Spy on the performAttack method to track calls
     const attackSpy = jest.spyOn(simulationService, '_performAttack');
 

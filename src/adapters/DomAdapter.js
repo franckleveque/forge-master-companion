@@ -112,7 +112,6 @@ export class DomAdapter {
         });
 
         return new Character({
-            id: prefix,
             name: prefix.charAt(0).toUpperCase() + prefix.slice(1),
             totalDamage: parseFloat(document.getElementById(`${id_prefix}total-damage`).value) || 0,
             totalHealth: parseFloat(document.getElementById(`${id_prefix}total-health`).value) || 0,
