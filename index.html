@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forge Master Companion</title>
     <link rel="stylesheet" href="styles/style.css">
+    <style>
+        .skill-param { display: none; }
+        .skill-param.visible { display: block; }
+    </style>
 </head>
 <body>
     <h1>Forge Master Companion</h1>
@@ -50,9 +54,7 @@
                 </div>
                 <div class="active-skills">
                     <h3>Active Skills</h3>
-                    <div class="active-skill-item"><h4>Skill 1</h4><select id="active1-type"><option value="damage">Damage</option><option value="healing">Healing</option></select><input type="number" id="active1-value" placeholder="Value" value="500"><input type="number" id="active1-cooldown" placeholder="Cooldown (s)" value="10"></div>
-                    <div class="active-skill-item"><h4>Skill 2</h4><select id="active2-type"><option value="damage">Damage</option><option value="healing">Healing</option></select><input type="number" id="active2-value" placeholder="Value"><input type="number" id="active2-cooldown" placeholder="Cooldown (s)"></div>
-                    <div class="active-skill-item"><h4>Skill 3</h4><select id="active3-type"><option value="damage">Damage</option><option value="healing">Healing</option></select><input type="number" id="active3-value" placeholder="Value"><input type="number" id="active3-cooldown" placeholder="Cooldown (s)"></div>
+                    <div id="player-active-skills-container"></div>
                 </div>
             </div>
 
@@ -99,7 +101,10 @@
                         <h2>Opponent</h2>
                         <div class="character-stats"><h3>Character Stats</h3><label for="opponent-total-damage">Total Damage:</label><input type="number" id="opponent-total-damage" value="1000"><label for="opponent-total-health">Total Health:</label><input type="number" id="opponent-total-health" value="10000"><label for="opponent-weapon-type">Weapon Type:</label><select id="opponent-weapon-type"><option value="corp-a-corp">Corp à corp</option><option value="a-distance">À distance</option></select></div>
                         <div class="passive-skills"><h3>Base Passive Skills (%)</h3><div class="passive-grid"><div class="passive-item"><label for="opponent-chance-critique">Chance critique:</label><input type="number" id="opponent-chance-critique" value="5"></div><div class="passive-item"><label for="opponent-degats-critiques">Dégâts critiques:</label><input type="number" id="opponent-degats-critiques" value="50"></div><div class="passive-item"><label for="opponent-chance-blocage">Chance de blocage:</label><input type="number" id="opponent-chance-blocage" value="0"></div><div class="passive-item"><label for="opponent-regeneration-sante">Régénération santé:</label><input type="number" id="opponent-regeneration-sante" value="0"></div><div class="passive-item"><label for="opponent-vol-de-vie">Vol de vie:</label><input type="number" id="opponent-vol-de-vie" value="0"></div><div class="passive-item"><label for="opponent-double-chance">Double chance:</label><input type="number" id="opponent-double-chance" value="0"></div><div class="passive-item"><label for="opponent-degats">Dégâts:</label><input type="number" id="opponent-degats" value="0"></div><div class="passive-item"><label for="opponent-degats-corps-a-corps">Dégâts corps à corps:</label><input type="number" id="opponent-degats-corps-a-corps" value="0"></div><div class="passive-item"><label for="opponent-degats-a-distance">Dégâts à distance:</label><input type="number" id="opponent-degats-a-distance" value="0"></div><div class="passive-item"><label for="opponent-vitesse-attaque">Vitesse d'attaque:</label><input type="number" id="opponent-vitesse-attaque" value="0"></div><div class="passive-item"><label for="opponent-competence-degats">Compétence dégâts:</label><input type="number" id="opponent-competence-degats" value="0"></div><div class="passive-item"><label for="opponent-competences-temps-recharge">Compétences temps de recharge:</label><input type="number" id="opponent-competences-temps-recharge" value="0"></div><div class="passive-item"><label for="opponent-sante">Santé:</label><input type="number" id="opponent-sante" value="0"></div></div></div>
-                        <div class="active-skills"><h3>Active Skills</h3><div class="active-skill-item"><h4>Skill 1</h4><select id="opponent-active1-type"><option value="damage">Damage</option><option value="healing">Healing</option></select><input type="number" id="opponent-active1-value" placeholder="Value" value="500"><input type="number" id="opponent-active1-cooldown" placeholder="Cooldown (s)" value="10"></div><div class="active-skill-item"><h4>Skill 2</h4><select id="opponent-active2-type"><option value="damage">Damage</option><option value="healing">Healing</option></select><input type="number" id="opponent-active2-value" placeholder="Value"><input type="number" id="opponent-active2-cooldown" placeholder="Cooldown (s)"></div><div class="active-skill-item"><h4>Skill 3</h4><select id="opponent-active3-type"><option value="damage">Damage</option><option value="healing">Healing</option></select><input type="number" id="opponent-active3-value" placeholder="Value"><input type="number" id="opponent-active3-cooldown" placeholder="Cooldown (s)"></div></div>
+                        <div class="active-skills">
+                            <h3>Active Skills</h3>
+                            <div id="opponent-active-skills-container"></div>
+                        </div>
                     </div>
                     <button id="simulate-button">Simulate</button>
                     <div class="io-buttons">
@@ -122,5 +127,47 @@
     <script src="src/infrastructure/UiService.js"></script>
     <script src="src/infrastructure/FileService.js"></script>
     <script src="src/application/App.js"></script>
-</body>
+    <script>
+        function createActiveSkillUI(containerId, prefix) {
+            const container = document.getElementById(containerId);
+            for (let i = 1; i <= 3; i++) {
+                const skillId = `${prefix}-active${i}`;
+                const skillDiv = document.createElement('div');
+                skillDiv.className = 'active-skill-item';
+                skillDiv.innerHTML = `
+                    <h4>Skill ${i}</h4>
+                    <select id="${skillId}-type" onchange="toggleSkillParams('${skillId}')">
+                        <option value="damage">Damage</option>
+                        <option value="buff">Buff</option>
+                    </select>
+                    <input type="number" id="${skillId}-baseDamage" placeholder="Base Dmg">
+                    <input type="number" id="${skillId}-baseHealth" placeholder="Base Health">
+                    <input type="number" id="${skillId}-cooldown" placeholder="Cooldown (s)">
+                    <div id="${skillId}-damage-params" class="skill-param">
+                        <input type="number" id="${skillId}-value" placeholder="Value">
+                        <input type="number" id="${skillId}-hits" placeholder="Hits">
+                    </div>
+                    <div id="${skillId}-buff-params" class="skill-param">
+                        <input type="number" id="${skillId}-damageBuff" placeholder="Dmg Buff">
+                        <input type="number" id="${skillId}-healthBuff" placeholder="Health Buff">
+                        <input type="number" id="${skillId}-duration" placeholder="Duration (s)">
+                    </div>
+                `;
+                container.appendChild(skillDiv);
+                toggleSkillParams(skillId); // Initial setup
+            }
+        }
+
+        function toggleSkillParams(skillId) {
+            const type = document.getElementById(`${skillId}-type`).value;
+            const damageParams = document.getElementById(`${skillId}-damage-params`);
+            const buffParams = document.getElementById(`${skillId}-buff-params`);
+
+            damageParams.style.display = type === 'damage' ? 'block' : 'none';
+            buffParams.style.display = type === 'buff' ? 'block' : 'none';
+        }
+
+        createActiveSkillUI('player-active-skills-container', 'player');
+        createActiveSkillUI('opponent-active-skills-container', 'opponent');
+    </g>
 </html>
