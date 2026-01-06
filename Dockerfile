@@ -3,7 +3,7 @@ FROM nginx:alpine
 
 # Copy the application files to the nginx public directory
 COPY index.html /usr/share/nginx/html/
-COPY scripts/ /usr/share/nginx/html/scripts/
+COPY src/ /usr/share/nginx/html/src/
 COPY styles/ /usr/share/nginx/html/styles/
 
 # Expose port 80
