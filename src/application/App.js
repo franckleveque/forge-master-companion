@@ -61,8 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for PvP simulation
     uiService.simulateButton.addEventListener('click', () => {
-        const player = domAdapter.getCharacterStatsPvp('player');
-        const opponent = domAdapter.getCharacterStatsPvp('opponent');
+        const playerSheetStats = domAdapter.getCharacterStatsPvp('player');
+        const opponentSheetStats = domAdapter.getCharacterStatsPvp('opponent');
+
+        const player = characterService.getCharacterBaseStats(playerSheetStats);
+        const opponent = characterService.getCharacterBaseStats(opponentSheetStats);
+
         const result = simulationService.simulatePvp(player, opponent);
         domAdapter.displayPvpResults(result);
     });
