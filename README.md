@@ -51,12 +51,25 @@ To set up the project for local development, you will need Node.js and npm insta
 
 ### Testing
 
-This project uses Jest for unit and integration testing.
+This project uses Jest for unit and integration testing and Playwright for E2E testing.
 
-1.  **Run the test suite:**
+1.  **Run the unit test suite:**
     ```bash
     npm test
     ```
+
+2. **Run the E2E test suite:**
+   - **Setup:**
+     ```bash
+     python -m pip install --upgrade pip
+     pip install -r requirements.txt
+     playwright install --with-deps
+     ```
+   - **Execution:**
+     ```bash
+     python -m http.server 8000 &
+     pytest tests_e2e/
+     ```
 
 ## How to Use (Manual)
 
