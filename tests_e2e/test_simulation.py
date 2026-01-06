@@ -43,4 +43,4 @@ def test_pvp_simulation(page):
 
     # Check for results
     expect(page.locator("#pvp-results-output")).to_be_visible()
-    expect(page.locator("#pvp-results-output")).to_contain_text("Player wins")
+    expect(page.locator("#pvp-results-output")).to_contain_text("Winner: Player")
