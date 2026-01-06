@@ -1,6 +1,6 @@
 // src/infrastructure/FileService.js
 
-class FileService {
+export class FileService {
     exportData(mode, data) {
         let filename;
         if (mode === 'equipment') {

@@ -1,6 +1,6 @@
 // src/infrastructure/UiService.js
 
-class UiService {
+export class UiService {
     constructor() {
         // Mode switching elements
         this.modeEquipmentButton = document.getElementById('mode-equipment');
@@ -30,6 +30,51 @@ class UiService {
         this.opponentActiveSkillsContainer = document.getElementById('opponent-active-skills-container');
 
         this.equipmentCategory.addEventListener('change', () => this.toggleWeaponTypeDisplay());
+
+        this.createActiveSkillUI('player-active-skills-container', 'player');
+        this.createActiveSkillUI('opponent-active-skills-container', 'opponent');
+    }
+
+    createActiveSkillUI(containerId, prefix) {
+        const container = document.getElementById(containerId);
+        for (let i = 1; i <= 3; i++) {
+            const skillId = `${prefix}-active${i}`;
+            const skillDiv = document.createElement('div');
+            skillDiv.className = 'active-skill-item';
+            skillDiv.innerHTML = `
+                <h4>Skill ${i}</h4>
+                <select id="${skillId}-type">
+                    <option value="damage">Damage</option>
+                    <option value="buff">Buff</option>
+                </select>
+                <input type="number" id="${skillId}-baseDamage" placeholder="Base Dmg">
+                <input type="number" id="${skillId}-baseHealth" placeholder="Base Health">
+                <input type="number" id="${skillId}-cooldown" placeholder="Cooldown (s)">
+                <div id="${skillId}-damage-params" class="skill-param">
+                    <input type="number" id="${skillId}-value" placeholder="Value">
+                    <input type="number" id="${skillId}-hits" placeholder="Hits">
+                </div>
+                <div id="${skillId}-buff-params" class="skill-param">
+                    <input type="number" id="${skillId}-damageBuff" placeholder="Dmg Buff">
+                    <input type="number" id="${skillId}-healthBuff" placeholder="Health Buff">
+                    <input type="number" id="${skillId}-duration" placeholder="Duration (s)">
+                </div>
+            `;
+            container.appendChild(skillDiv);
+
+            const typeSelector = skillDiv.querySelector(`#${skillId}-type`);
+            typeSelector.addEventListener('change', () => this.toggleSkillParams(skillId));
+            this.toggleSkillParams(skillId); // Initial setup
+        }
+    }
+
+    toggleSkillParams(skillId) {
+        const type = document.getElementById(`${skillId}-type`).value;
+        const damageParams = document.getElementById(`${skillId}-damage-params`);
+        const buffParams = document.getElementById(`${skillId}-buff-params`);
+
+        damageParams.style.display = type === 'damage' ? 'block' : 'none';
+        buffParams.style.display = type === 'buff' ? 'block' : 'none';
     }
 
     switchToEquipmentMode() {
