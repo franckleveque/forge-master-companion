@@ -1,6 +1,6 @@
 // src/infrastructure/UiService.js
 
-class UiService {
+export class UiService {
     constructor() {
         // Mode switching elements
         this.modeEquipmentButton = document.getElementById('mode-equipment');

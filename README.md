@@ -58,6 +58,30 @@ This project uses Jest for unit and integration testing.
     npm test
     ```
 
+### E2E Testing
+
+This project uses Playwright for end-to-end testing.
+
+1.  **Install Python dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2.  **Install Playwright browsers:**
+    ```bash
+    playwright install
+    ```
+
+3.  **Run the E2E test suite:**
+    Before running the tests, make sure the application is running on `http://localhost:8080`. You can start it with a simple Python server:
+    ```bash
+    python3 -m http.server 8080 &
+    ```
+    Then, run the tests:
+    ```bash
+    pytest tests/e2e/
+    ```
+
 ## How to Use (Manual)
 
 1.  **Enter Character Stats:**

@@ -118,15 +118,7 @@
     </div>
 
     <input type="file" id="import-file" accept=".json" style="display: none;">
-    <script src="src/domain/Skills.js"></script>
-    <script src="src/domain/CharacterService.js"></script>
-    <script src="src/domain/SimulationService.js"></script>
-    <script src="src/domain/Character.js"></script>
-    <script src="src/domain/Equipment.js"></script>
-    <script src="src/adapters/DomAdapter.js"></script>
-    <script src="src/infrastructure/UiService.js"></script>
-    <script src="src/infrastructure/FileService.js"></script>
-    <script src="src/application/App.js"></script>
+    <script type="module" src="src/application/App.js"></script>
     <script>
         function createActiveSkillUI(containerId, prefix) {
             const container = document.getElementById(containerId);
