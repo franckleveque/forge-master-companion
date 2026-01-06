@@ -101,6 +101,8 @@ export class DomAdapter {
                 resultItem2.classList.add('best-equipment');
             }
         }
+
+        document.querySelector('[data-testid="equipment-log-controls"]').style.display = 'block';
     }
 
     getCharacterStatsPvp(prefix) {
@@ -140,6 +142,8 @@ export class DomAdapter {
                 <p>Total Damage Dealt: ${result.player2.totalDamageDealt.toLocaleString()}</p>
                 <p>Health Remaining: ${result.player2.healthRemaining.toLocaleString()} / ${result.player2.maxHealth.toLocaleString()}</p>
             </div>`;
+
+        document.querySelector('[data-testid="pvp-log-controls"]').style.display = 'block';
     }
 
     getElementValue(id) {

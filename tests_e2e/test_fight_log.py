@@ -9,8 +9,18 @@ def test_fight_log_visibility_and_export(page: Page):
     # Switch to PvP mode
     page.click("text=PvP Simulation")
 
+    # Check that the log controls are initially hidden
+    log_controls = page.locator('[data-testid="pvp-log-controls"]')
+    expect(log_controls).to_be_hidden()
+
     # Run the simulation
     page.click("text=Simulate")
+
+    # Wait for results to appear as a signal that the simulation is done
+    expect(page.locator("#pvp-results-output")).not_to_be_empty()
+
+    # Check that the log controls are now visible
+    expect(log_controls).to_be_visible()
 
     # Check that the log container is initially hidden
     log_container = page.locator("#log-container-pvp")

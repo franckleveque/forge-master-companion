@@ -30,12 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const equipOld = domAdapter.getEquipment(2, baseStats);
         const cleanBaseStats = characterService.unequipEquipment(baseStats, equipOld);
 
+        // Run simulation for new equipment
         let statsWithNewEquip = characterService.applyEquipment(cleanBaseStats, equipNew);
         let finalStatsNew = characterService.recalculateTotalStats(statsWithNewEquip);
+        finalStatsNew.enemy = sheetStats.enemy; // Make sure enemy stats are passed
         const resultNew = simulationService.simulate(finalStatsNew);
-        domAdapter.displayLogs('equipment', resultNew.log); // For now, only show log for the new item
 
-        loggerService.clear();
+        loggerService.log('\n\n--- LOG FOR OLD EQUIPMENT ---\n');
+
+        // Run simulation for old equipment
         let statsForOldScenario;
         if (domAdapter.isUnequipChecked()) {
             statsForOldScenario = cleanBaseStats;
@@ -43,9 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
             statsForOldScenario = characterService.applyEquipment(cleanBaseStats, equipOld);
         }
         let finalStatsOld = characterService.recalculateTotalStats(statsForOldScenario);
+        finalStatsOld.enemy = sheetStats.enemy; // Make sure enemy stats are passed
         const resultOld = simulationService.simulate(finalStatsOld);
 
+        // Display results and combined log
         domAdapter.displayComparisonResults(resultNew, resultOld);
+        domAdapter.displayLogs('equipment', loggerService.getLogs());
     });
 
     // Event listener for PvP simulation
