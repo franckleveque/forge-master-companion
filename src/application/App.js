@@ -8,9 +8,13 @@ import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
     const characterService = new CharacterService();
+    console.log('CharacterService instantiated');
     const uiService = new UiService();
+    console.log('UiService instantiated:', uiService);
     const passiveSkillService = new PassiveSkillService();
+    console.log('PassiveSkillService instantiated');
     const domAdapter = new DomAdapter(characterService, passiveSkillService);
     const simulationService = new SimulationService();
     const fileService = new FileService();

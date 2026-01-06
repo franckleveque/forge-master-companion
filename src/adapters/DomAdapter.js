@@ -2,7 +2,7 @@
 
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 
-class DomAdapter {
+export class DomAdapter {
     constructor(characterService, passiveSkillService) {
         this.characterService = characterService;
         this.passiveSkillService = passiveSkillService;
