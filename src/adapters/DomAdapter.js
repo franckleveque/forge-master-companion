@@ -122,6 +122,8 @@ export class DomAdapter {
     }
 
     displayPvpResults(result) {
+        this.displayLogs('pvp', result.log);
+
         const resultsOutput = document.getElementById('pvp-results-output');
         resultsOutput.innerHTML = `
             <h3>Simulation Result</h3>
@@ -343,5 +345,16 @@ export class DomAdapter {
             this.setElementValue(`${skillId}-duration`, skillData.duration);
             toggleSkillParams(skillId);
         }
+    }
+
+    displayLogs(prefix, log) {
+        const logContent = document.getElementById(`log-content-${prefix}`);
+        logContent.textContent = log.join('\n');
+    }
+
+    toggleLogVisibility(prefix) {
+        const logContainer = document.getElementById(`log-container-${prefix}`);
+        const currentDisplay = logContainer.style.display;
+        logContainer.style.display = currentDisplay === 'none' ? 'block' : 'none';
     }
 }

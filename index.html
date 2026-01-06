@@ -92,6 +92,14 @@
                             <div id="result-item-1" class="result-item"><h3>Equipment 1 (New)</h3><p><strong>Survival Time:</strong> <span id="survival-time-1">-</span> s</p><p><strong>Total Damage Dealt:</strong> <span id="total-damage-1">-</span></p></div>
                             <div id="result-item-2" class="result-item"><h3>Equipment 2 (Old)</h3><p><strong>Survival Time:</strong> <span id="survival-time-2">-</span> s</p><p><strong>Total Damage Dealt:</strong> <span id="total-damage-2">-</span></p></div>
                         </div>
+                        <div class="log-controls">
+                            <button id="view-log-equipment">View Log</button>
+                            <button id="export-log-equipment">Export Log</button>
+                        </div>
+                        <div id="log-container-equipment" class="log-container" style="display: none;">
+                            <h3>Fight Log</h3>
+                            <pre id="log-content-equipment"></pre>
+                        </div>
                     </div>
                 </div>
 
@@ -111,7 +119,17 @@
                         <button id="export-pvp">Export</button>
                         <button id="import-pvp">Import</button>
                     </div>
-                    <div class="results"><div id="pvp-results-output"></div></div>
+                    <div class="results">
+                        <div id="pvp-results-output"></div>
+                        <div class="log-controls">
+                            <button id="view-log-pvp">View Log</button>
+                            <button id="export-log-pvp">Export Log</button>
+                        </div>
+                        <div id="log-container-pvp" class="log-container" style="display: none;">
+                            <h3>Fight Log</h3>
+                            <pre id="log-content-pvp"></pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

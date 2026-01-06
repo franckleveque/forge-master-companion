@@ -6,13 +6,15 @@ import { DomAdapter } from '../adapters/DomAdapter.js';
 import { SimulationService } from '../domain/SimulationService.js';
 import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
+import { LoggerService } from '../infrastructure/LoggerService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const characterService = new CharacterService();
     const uiService = new UiService();
     const passiveSkillService = new PassiveSkillService();
     const domAdapter = new DomAdapter(characterService, passiveSkillService);
-    const simulationService = new SimulationService();
+    const loggerService = new LoggerService();
+    const simulationService = new SimulationService(loggerService);
     const fileService = new FileService();
 
     // Event listeners for mode switching
@@ -21,46 +23,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for equipment comparison
     uiService.compareButton.addEventListener('click', () => {
-        // 1. Get the character's stats as displayed on the character sheet.
+        loggerService.clear();
         const sheetStats = domAdapter.getCharacterStats();
-
-        // 2. Calculate the character's true base stats (flat damage/health before passives).
         const baseStats = characterService.getCharacterBaseStats(sheetStats);
-
-        // 3. Get the equipment to be compared.
         const equipNew = domAdapter.getEquipment(1, baseStats);
         const equipOld = domAdapter.getEquipment(2, baseStats);
-
-        // 4. Create a clean baseline by removing the old equipment's flat stats and passives from the base stats.
         const cleanBaseStats = characterService.unequipEquipment(baseStats, equipOld);
 
-        // 5. Build the two scenarios for comparison.
-
-        // Scenario A: Character with the new equipment.
         let statsWithNewEquip = characterService.applyEquipment(cleanBaseStats, equipNew);
         let finalStatsNew = characterService.recalculateTotalStats(statsWithNewEquip);
+        const resultNew = simulationService.simulate(finalStatsNew);
+        domAdapter.displayLogs('equipment', resultNew.log); // For now, only show log for the new item
 
-        // Scenario B: Character with the old equipment (or unequipped).
+        loggerService.clear();
         let statsForOldScenario;
         if (domAdapter.isUnequipChecked()) {
-            // If unequipping, the old scenario is just the clean base.
             statsForOldScenario = cleanBaseStats;
         } else {
-            // Otherwise, re-apply the old equipment to the clean base.
             statsForOldScenario = characterService.applyEquipment(cleanBaseStats, equipOld);
         }
         let finalStatsOld = characterService.recalculateTotalStats(statsForOldScenario);
-
-        // 6. Run simulations with the final, recalculated stats.
-        const resultNew = simulationService.simulate(finalStatsNew);
         const resultOld = simulationService.simulate(finalStatsOld);
 
-        // 7. Display the results.
         domAdapter.displayComparisonResults(resultNew, resultOld);
     });
 
     // Event listener for PvP simulation
     uiService.simulateButton.addEventListener('click', () => {
+        loggerService.clear();
         const playerSheetStats = domAdapter.getCharacterStatsPvp('player');
         const opponentSheetStats = domAdapter.getCharacterStatsPvp('opponent');
 
@@ -69,6 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const result = simulationService.simulatePvp(player, opponent);
         domAdapter.displayPvpResults(result);
+    });
+
+    // Log view listeners
+    uiService.viewLogEquipmentButton.addEventListener('click', () => domAdapter.toggleLogVisibility('equipment'));
+    uiService.viewLogPvpButton.addEventListener('click', () => domAdapter.toggleLogVisibility('pvp'));
+
+    uiService.exportLogEquipmentButton.addEventListener('click', () => {
+        const log = loggerService.getLogs();
+        fileService.exportLog('equipment', log);
+    });
+
+    uiService.exportLogPvpButton.addEventListener('click', () => {
+        const log = loggerService.getLogs();
+        fileService.exportLog('pvp', log);
     });
 
     // Event listeners for import/export
