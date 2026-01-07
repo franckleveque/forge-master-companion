@@ -11,7 +11,7 @@ export class EquipmentComparisonService {
     createDummyEnemy(character) {
         const charCopy = JSON.parse(JSON.stringify(character));
         return new Character({
-            id: 'Ennemi',
+            name: 'Ennemi',
             totalDamage: charCopy.totalDamage,
             totalHealth: charCopy.totalHealth,
             weaponType: 'corp-a-corp',
@@ -30,10 +30,10 @@ export class EquipmentComparisonService {
         const finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
 
         const characterForNewSim = new Character(finalStatsNew);
-        characterForNewSim.id = "Player (New Equip)";
+        characterForNewSim.name = "Player";
         const pvpResultNew = this.simulationService.simulatePvp(characterForNewSim, JSON.parse(JSON.stringify(dummyEnemy)));
         const resultNew = {
-            survivalTime: pvpResultNew.time,
+            survivalTime: pvpResultNew.winner === characterForNewSim.name ? Infinity : pvpResultNew.time,
             totalDamageDealt: pvpResultNew.player1.totalDamageDealt,
             healthRemaining: pvpResultNew.player1.healthRemaining,
             maxHealth: characterForNewSim.totalHealth,
@@ -41,10 +41,10 @@ export class EquipmentComparisonService {
         };
 
         const characterForOldSim = new Character(initialCharacterState);
-        characterForOldSim.id = "Player (Old Equip)";
+        characterForOldSim.name = "Player";
         const pvpResultOld = this.simulationService.simulatePvp(characterForOldSim, JSON.parse(JSON.stringify(dummyEnemy)));
         const resultOld = {
-            survivalTime: pvpResultOld.time,
+            survivalTime: pvpResultOld.winner === characterForOldSim.name ? Infinity : pvpResultOld.time,
             totalDamageDealt: pvpResultOld.player1.totalDamageDealt,
             healthRemaining: pvpResultOld.player1.healthRemaining,
             maxHealth: characterForOldSim.totalHealth,

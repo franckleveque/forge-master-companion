@@ -7,9 +7,10 @@ import { DamageSkill } from '../domain/skills/DamageSkill.js';
 import { BuffSkill } from '../domain/skills/BuffSkill.js';
 
 export class DomAdapter {
-    constructor(characterService, passiveSkillService) {
+    constructor(characterService, passiveSkillService, uiService) {
         this.characterService = characterService;
         this.passiveSkillService = passiveSkillService;
+        this.uiService = uiService;
     }
 
     getActiveSkills(prefix) {
@@ -255,7 +256,7 @@ export class DomAdapter {
             this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff);
             this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff);
             this.setElementValue(`${skillId}-duration`, skillData.duration);
-            toggleSkillParams(skillId);
+            this.uiService.toggleSkillParams(skillId);
         }
 
         this.setElementValue('equipment-category', data.equipment.category);
@@ -293,7 +294,7 @@ export class DomAdapter {
             this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff || '');
             this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff || '');
             this.setElementValue(`${skillId}-duration`, skillData.duration || '');
-            toggleSkillParams(skillId);
+            this.uiService.toggleSkillParams(skillId);
         }
 
         // Opponent Data
