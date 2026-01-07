@@ -15,10 +15,9 @@ def test_equipment_comparison_simulation(page):
     page.click("text=Compare")
 
     # Check for results
-    expect(page.locator("#equipment-comparison-section .results").first).to_be_visible()
-    expect(page.locator("#result-item-1")).to_be_visible()
-    expect(page.locator("#result-item-2")).to_be_visible()
-    expect(page.locator(".highlight-best")).to_be_visible()
+    results_output = page.locator("#results-output")
+    expect(results_output).to_be_visible()
+    expect(results_output.locator('p:has-text("Best Equipment:")')).to_contain_text("Old Equip")
 
 def test_pvp_simulation(page):
     # Switch to PvP Simulation

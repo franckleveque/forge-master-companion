@@ -71,47 +71,26 @@ export class DomAdapter {
         });
     }
 
-    displayComparisonResults(resultNew, resultOld) {
-        document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinity";
-        document.getElementById('health-remaining-1').textContent = resultNew.healthRemaining.toLocaleString();
-        document.getElementById('total-damage-1').textContent = resultNew.totalDamageDealt.toLocaleString();
+    displayComparisonResults(result) {
+        this.displayLogs('equipment', result.log);
 
-        document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinity";
-        document.getElementById('health-remaining-2').textContent = resultOld.healthRemaining.toLocaleString();
-        document.getElementById('total-damage-2').textContent = resultOld.totalDamageDealt.toLocaleString();
+        const resultsOutput = document.getElementById('results-output');
+        resultsOutput.innerHTML = `
+            <h3>Comparison Result</h3>
+            <p><strong>Best Equipment:</strong> ${result.winner}</p>
+            <p><strong>Fight Duration:</strong> ${result.time.toFixed(2)}s</p>
+            <hr>
+            <div class="result-details">
+                <h4>${result.player1.name}</h4>
+                <p>Total Damage Dealt: ${result.player1.totalDamageDealt.toLocaleString()}</p>
+                <p>Health Remaining: ${result.player1.healthRemaining.toLocaleString()} / ${result.player1.maxHealth.toLocaleString()}</p>
+            </div>
+            <div class="result-details">
+                <h4>${result.player2.name}</h4>
+                <p>Total Damage Dealt: ${result.player2.totalDamageDealt.toLocaleString()}</p>
+                <p>Health Remaining: ${result.player2.healthRemaining.toLocaleString()} / ${result.player2.maxHealth.toLocaleString()}</p>
+            </div>`;
 
-        const resultItem1 = document.getElementById('result-item-1');
-        const resultItem2 = document.getElementById('result-item-2');
-
-        resultItem1.className = 'result-item';
-        resultItem2.className = 'result-item';
-
-        // Tie-breaker logic:
-        // 1. Higher survival time wins.
-        // 2. If survival time is equal, higher max health wins.
-        // 3. If max health is also equal, higher total damage wins.
-        // 4. If all are equal, new equipment wins by default.
-        if (resultNew.survivalTime > resultOld.survivalTime) {
-            resultItem1.classList.add('best-equipment');
-        } else if (resultOld.survivalTime > resultNew.survivalTime) {
-            resultItem2.classList.add('best-equipment');
-        } else {
-            // Survival times are equal, check max health
-            if (resultNew.maxHealth > resultOld.maxHealth) {
-                resultItem1.classList.add('best-equipment');
-            } else if (resultOld.maxHealth > resultNew.maxHealth) {
-                resultItem2.classList.add('best-equipment');
-            } else {
-                // Max health is equal, check total damage
-                if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
-                    resultItem1.classList.add('best-equipment');
-                } else {
-                    resultItem2.classList.add('best-equipment');
-                }
-            }
-        }
-
-        this.displayLogs('equipment', `--- Simulation with New Equip ---\n${resultNew.log.join('\n')}\n\n--- Simulation with Old Equip ---\n${resultOld.log.join('\n')}`);
         document.querySelector('[data-testid="equipment-log-controls"]').style.display = 'block';
     }
 
