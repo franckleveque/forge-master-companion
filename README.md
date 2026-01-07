@@ -2,6 +2,12 @@
 
 A detailed combat simulator to help you choose the best equipment in Forge Master Idle RPG.
 
+## Features
+
+-   **Equipment Comparison:** Run a detailed simulation to determine which of two pieces of equipment will perform better in a fight.
+-   **PvP Simulation:** Pit two fully customized characters against each other to see who comes out on top.
+-   **Import / Export:** Save your character setups as a JSON file and load them back in later, making it easy to manage multiple configurations.
+
 ## How to Run with Docker
 
 This application is containerized and can be easily run using Docker.
@@ -21,7 +27,7 @@ You can also build the Docker image directly from the GitHub repository.
     ```bash
     docker build -t forge-master-companion https://github.com/franckleveque/forge-master-companion.git
     ```
-    **Note:** You must use the `.git` URL for Docker to correctly fetch the repository. Using a direct HTTPS link will fail because Docker will receive an HTML page instead of the repository contents.
+    **Note:** You must use the `.git` URL for Docker to correctly fetch the repository.
 
 Once the image is built, you can run it.
 
@@ -37,21 +43,36 @@ Once the image is built, you can run it.
 
 ### Setup
 
-To set up the project for local development, you will need Node.js and npm installed.
+To set up the project for local development, you will need Node.js, npm, and Python installed.
 
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/franckleveque/forge-master-companion.git
     cd forge-master-companion
     ```
-2.  **Install dependencies:**
+2.  **Install JavaScript dependencies:**
     ```bash
     npm install
     ```
+3.  **Install Python dependencies (for E2E tests):**
+    ```bash
+    pip install -r requirements.txt
+    playwright install --with-deps
+    ```
+
+### Running Locally
+
+To run the application for manual testing or development, start a simple web server from the project root:
+
+```bash
+python -m http.server 8000
+```
+
+Then, open your browser to `http://localhost:8000`.
 
 ### Testing
 
-This project uses Jest for unit and integration testing and Playwright for E2E testing.
+This project uses Jest for unit/integration testing and Playwright for E2E testing.
 
 1.  **Run the unit test suite:**
     ```bash
@@ -59,52 +80,44 @@ This project uses Jest for unit and integration testing and Playwright for E2E t
     ```
 
 2. **Run the E2E test suite:**
-   - **Setup:**
-     ```bash
-     python -m pip install --upgrade pip
-     pip install -r requirements.txt
-     playwright install --with-deps
-     ```
-   - **Execution:**
-     ```bash
-     python -m http.server 8000 &
-     pytest tests_e2e/
-     ```
+   ```bash
+   python -m pytest tests_e2e/
+   ```
+   *Note: The E2E test suite automatically starts and stops its own web server.*
 
-## How to Use (Manual)
+## Usage
 
-1.  **Enter Character Stats:**
-    *   Fill in your character's total damage and health.
-    *   Select your weapon type (Melee or Ranged).
+### Equipment Comparison
 
-2.  **Enter Base Passive Skills:**
-    *   Input all of your character's existing passive skill percentages. These are the stats you have *before* equipping either of the items you want to compare.
-
-3.  **Configure Active Skills:**
-    *   Set up your three active skills by selecting their type (Damage or Healing), their base value, and their cooldown in seconds.
-
-4.  **Enter Enemy Stats:**
-    *   Input the enemy's damage per second (DPS) and their weapon type.
-
+1.  **Select the "Equipment Comparison" Tab.**
+2.  **Enter Character Stats:** Fill in your character's total damage, health, and weapon type.
+3.  **Enter Base Passive Skills:** Input your character's passive skill percentages *before* equipping either of the items you want to compare.
+4.  **Configure Active Skills:** Set up your three active skills (type, base value, cooldown).
 5.  **Enter Equipment to Compare:**
-    *   For each piece of equipment, you must select its **Weapon Type** (Corp à corp or À distance). This is crucial for accurately comparing items with different combat styles.
-    *   Enter the main stat and the passive skill for each item.
-    *   **Important:** If your in-game Character Stats already include the stats from your old equipment, check the **"Stats are included..."** box. This will automatically subtract the old item's stats before running the comparison.
+    *   For each piece of equipment, enter its main stat and any passive skill bonuses it provides.
+    *   **Important:** If your in-game stats already include the old equipment, check the **"Stats are included..."** box. This correctly subtracts the old item's stats before running the comparison.
+6.  **Compare:** Click the "Compare Equipment" button. The tool will simulate combat with each item and declare the best one based on a combined score of survival time and total damage dealt.
 
-6.  **Compare:**
-    *   Click the "Compare" button to see the results. The application provides two key metrics:
-        *   **Survival Time:** How long your character survives in the fight.
-        *   **Total Damage Dealt:** The total damage your character inflicts during their survival time.
-    *   A better item is usually one that offers a good balance of both high survival time and high damage.
+### PvP Simulation
+
+1.  **Select the "PvP Simulation" Tab.**
+2.  **Configure Player & Opponent:** For both your character and your opponent, fill in their total damage, health, weapon type, passive skills, and active skills.
+3.  **Simulate:** Click the "Start Simulation" button to run the fight. The winner will be announced, and a detailed combat log will be available.
+
+### Import / Export Data
+
+You can save and load your configurations for either mode.
+
+-   **To Export:** Click the "Export to JSON" button. Your current setup (stats, skills, equipment) for the active tab will be saved to a file named `comparison_data.json` or `pvp_data.json`.
+-   **To Import:** Click the "Import from JSON" button and select a previously saved file. The data will populate the form automatically.
 
 ## Combat Assumptions
 
-*   **Simulation Model:** The simulation is **deterministic** and runs on a high-precision time step (0.01 seconds) to accurately model the timing of attacks and events. It continues until the character's health reaches zero or a 60-second time limit is reached. It does not use random chance, ensuring that the results are stable and reflect the "on-average" performance of a gear setup.
-*   **Player Attack Speed:** The "Vitesse d'attaque" passive reduces the time between attacks based on an exponential model. Every 100% of bonus attack speed halves the time per attack (doubling the number of attacks). The formula is: `Attacks per Second = 1 / (0.5 ^ Bonus %)`. For example, a 200% bonus results in `1 / (0.5 ^ 2) = 4` attacks per second.
-*   **Weapon Delay:** The simulation correctly uses the weapon type selected for each piece of equipment. Melee weapons have a 2-second delay before their first attack, while ranged weapons attack immediately.
-*   **Enemy Attack Speed:** Assumed to be 1 hit per second.
-*   **Probabilities (Crit, Block, etc.):** All percentage-based chances are normalized. For example, a 10% chance to block will result in exactly 1 blocked attack for every 10 enemy hits.
-*   **Lifesteal:** Heals for a percentage of the damage dealt by auto-attacks.
-*   **Health Regen:** Heals for a percentage of maximum health each second.
-*   **Double Chance:** Triggers a second, independent auto-attack. This second attack uses the same base damage and can also critically hit.
-*   **Active Skills:** Assumed to be used off-cooldown. Healing skills contribute to survival. Damage skills contribute to the "Total Damage Dealt" metric and are boosted by a "Compétence dégâts" passive.
+*   **Simulation Model:** The simulation is **deterministic**, running on a high-precision time step (0.01s). It continues until a character's health reaches zero or a 60-second time limit is reached. This ensures consistent, reproducible results.
+*   **Player Attack Speed:** The "Vitesse d'attaque" passive reduces the time between attacks based on an exponential model. Every 100% bonus halves the time per attack.
+*   **Weapon Delay:** Melee weapons have a 2-second delay before their first attack.
+*   **Probabilities (Crit, Block, etc.):** All percentage-based chances are normalized for consistency. For example, a 10% chance to block will result in exactly 1 blocked attack for every 10 enemy hits.
+*   **Lifesteal:** Heals based on a percentage of auto-attack damage.
+*   **Health Regen:** Heals based on a percentage of maximum health per second.
+*   **Double Chance:** Triggers a second, independent auto-attack that can also critically hit.
+*   **Active Skills:** Are used as soon as their cooldown is available.
