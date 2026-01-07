@@ -79,14 +79,13 @@ export class Character {
             let performExtraAttack = false;
             this.passiveSkills.forEach(skill => {
                 if (skill.onAfterAttackProcessed) {
-                    if (skill.onAfterAttackProcessed(this, this.enemy)) {
+                    if (skill.onAfterAttackProcessed(this, this.enemy, this._log)) {
                         performExtraAttack = true;
                     }
                 }
             });
 
             if (performExtraAttack) {
-                this._log(`${this.id} performs an extra attack from Double Chance!`);
                 this.performAttack();
             }
         }
@@ -95,26 +94,16 @@ export class Character {
     performAttack() {
         if (this.enemy && this.enemy.isAlive()) {
             let damage = this.totalDamage;
-            let isCrit = false;
 
             this.passiveSkills.forEach(skill => {
                 if (skill.onModifyOutgoingDamage) {
-                    const result = skill.onModifyOutgoingDamage(this, this.enemy, damage);
-                    if (typeof result === 'object' && result.hasOwnProperty('damage')) {
-                        damage = result.damage;
-                        if (result.isCrit) {
-                            isCrit = true;
-                        }
-                    } else {
-                        damage = result;
-                    }
+                    damage = skill.onModifyOutgoingDamage(this, this.enemy, damage, this._log);
                 }
             });
 
-            const critMessage = isCrit ? " (Critical Strike!)" : "";
             this.enemy.takeDamage(damage);
             this.totalDamageDealt += damage;
-            this._log(`${this.id} attacks ${this.enemy.id} for ${damage.toFixed(0)} damage${critMessage}. ${this.enemy.id}'s health is now ${this.enemy.health.toFixed(0)}.`);
+            this._log(`${this.id} attacks ${this.enemy.id} for ${damage.toFixed(0)} damage. ${this.enemy.id}'s health is now ${this.enemy.health.toFixed(0)}.`);
 
             // Trigger after-attack effects
             this.passiveSkills.forEach(skill => {

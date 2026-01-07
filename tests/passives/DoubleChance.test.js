@@ -1,21 +1,33 @@
 import { DoubleChance } from '../../src/domain/passives/DoubleChance.js';
 
 describe('DoubleChance', () => {
-    it('should return true when double chance counter is high enough', () => {
+    it('should return true and log when double chance counter is high enough', () => {
         const skill = new DoubleChance(100);
         const attacker = {
-            doubleChance: 1.0
+            id: 'Player',
+            basePassiveSkills: {
+                'double-chance': 100
+            }
         };
-        const result = skill.onAfterAttackProcessed(attacker, null);
+        const mockLog = jest.fn();
+        const result = skill.onAfterAttackProcessed(attacker, null, mockLog);
+
         expect(result).toBe(true);
+        expect(mockLog).toHaveBeenCalledWith('Player performs an extra attack from Double Chance!');
     });
 
-    it('should return false when double chance counter is too low', () => {
+    it('should return false and not log when double chance counter is too low', () => {
         const skill = new DoubleChance(0);
         const attacker = {
-            doubleChance: 0
+            id: 'Player',
+            basePassiveSkills: {
+                'double-chance': 0
+            }
         };
-        const result = skill.onAfterAttackProcessed(attacker, null);
+        const mockLog = jest.fn();
+        const result = skill.onAfterAttackProcessed(attacker, null, mockLog);
+
         expect(result).toBe(false);
+        expect(mockLog).not.toHaveBeenCalled();
     });
 });

@@ -12,10 +12,11 @@ export class DoubleChance extends PassiveSkill {
         this.doubleChanceCounter = 0;
     }
 
-    onAfterAttackProcessed(attacker, defender) {
-        this.doubleChanceCounter += attacker.doubleChance;
+    onAfterAttackProcessed(attacker, defender, log) {
+        this.doubleChanceCounter += (attacker.basePassiveSkills['double-chance'] || 0) / 100;
         if (this.doubleChanceCounter >= 1) {
             this.doubleChanceCounter--;
+            log(`${attacker.id} performs an extra attack from Double Chance!`);
             return true; // Signal to perform an extra attack
         }
         return false;
