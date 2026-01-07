@@ -86,24 +86,32 @@ export class DomAdapter {
         resultItem1.className = 'result-item';
         resultItem2.className = 'result-item';
 
-        // Corrected tie-breaker logic
-        if (resultNew.healthRemaining > 0 && resultOld.healthRemaining <= 0) {
+        // Tie-breaker logic:
+        // 1. Higher survival time wins.
+        // 2. If survival time is equal, higher max health wins.
+        // 3. If max health is also equal, higher total damage wins.
+        // 4. If all are equal, new equipment wins by default.
+        if (resultNew.survivalTime > resultOld.survivalTime) {
             resultItem1.classList.add('best-equipment');
-        } else if (resultOld.healthRemaining > 0 && resultNew.healthRemaining <= 0) {
-            resultItem2.classList.add('best-equipment');
-        } else if (resultNew.healthRemaining > resultOld.healthRemaining) {
-            resultItem1.classList.add('best-equipment');
-        } else if (resultOld.healthRemaining > resultNew.healthRemaining) {
+        } else if (resultOld.survivalTime > resultNew.survivalTime) {
             resultItem2.classList.add('best-equipment');
         } else {
-            // Health is equal, tie-break on damage
-            if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
+            // Survival times are equal, check max health
+            if (resultNew.maxHealth > resultOld.maxHealth) {
                 resultItem1.classList.add('best-equipment');
-            } else {
+            } else if (resultOld.maxHealth > resultNew.maxHealth) {
                 resultItem2.classList.add('best-equipment');
+            } else {
+                // Max health is equal, check total damage
+                if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
+                    resultItem1.classList.add('best-equipment');
+                } else {
+                    resultItem2.classList.add('best-equipment');
+                }
             }
         }
 
+        this.displayLogs('equipment', `--- Simulation with New Equip ---\n${resultNew.log.join('\n')}\n\n--- Simulation with Old Equip ---\n${resultOld.log.join('\n')}`);
         document.querySelector('[data-testid="equipment-log-controls"]').style.display = 'block';
     }
 

@@ -30,22 +30,24 @@ export class EquipmentComparisonService {
         const finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
 
         const characterForNewSim = new Character(finalStatsNew);
-        characterForNewSim.id = "Avec Nouvel Équipement";
+        characterForNewSim.id = "Player (New Equip)";
         const pvpResultNew = this.simulationService.simulatePvp(characterForNewSim, JSON.parse(JSON.stringify(dummyEnemy)));
         const resultNew = {
             survivalTime: pvpResultNew.time,
             totalDamageDealt: pvpResultNew.player1.totalDamageDealt,
             healthRemaining: pvpResultNew.player1.healthRemaining,
+            maxHealth: characterForNewSim.totalHealth,
             log: pvpResultNew.log
         };
 
         const characterForOldSim = new Character(initialCharacterState);
-        characterForOldSim.id = "Avec Équipement Actuel"; // Corrected typo
+        characterForOldSim.id = "Player (Old Equip)";
         const pvpResultOld = this.simulationService.simulatePvp(characterForOldSim, JSON.parse(JSON.stringify(dummyEnemy)));
         const resultOld = {
             survivalTime: pvpResultOld.time,
             totalDamageDealt: pvpResultOld.player1.totalDamageDealt,
             healthRemaining: pvpResultOld.player1.healthRemaining,
+            maxHealth: characterForOldSim.totalHealth,
             log: pvpResultOld.log
         };
 

@@ -35,11 +35,11 @@ def test_health_is_max_at_fight_start(page: Page):
     log_content = log_content_element.inner_text()
 
     # --- Verification for "New Equipment" simulation ---
-    new_equip_log_match = re.search(r"--- Simulation avec Nouvel Équipement ---\n([\s\S]*?)\n\n---", log_content)
+    new_equip_log_match = re.search(r"--- Simulation with New Equip ---\n([\s\S]*?)\n\n---", log_content)
     assert new_equip_log_match, "Could not find the log block for the new equipment simulation."
     new_equip_log = new_equip_log_match.group(1)
 
-    player_health_new_match = re.search(r"Avec Nouvel Équipement starts with (\d+) health", new_equip_log)
+    player_health_new_match = re.search(r"Player \(New Equip\) starts with (\d+) health", new_equip_log)
     assert player_health_new_match, "Could not find player's starting health for new equipment."
     player_health_new = int(player_health_new_match.group(1))
 
@@ -52,11 +52,11 @@ def test_health_is_max_at_fight_start(page: Page):
     assert enemy_health_new == int(initial_player_health)
 
     # --- Verification for "Old Equipment" simulation ---
-    old_equip_log_match = re.search(r"--- Simulation avec Équipement Actuel ---\n([\s\S]*)", log_content)
+    old_equip_log_match = re.search(r"--- Simulation with Old Equip ---\n([\s\S]*)", log_content)
     assert old_equip_log_match, "Could not find the log block for the old equipment simulation."
     old_equip_log = old_equip_log_match.group(1)
 
-    player_health_old_match = re.search(r"Avec Équipement Actuel starts with (\d+) health", old_equip_log)
+    player_health_old_match = re.search(r"Player \(Old Equip\) starts with (\d+) health", old_equip_log)
     assert player_health_old_match, "Could not find player's starting health for old equipment."
     player_health_old = int(player_health_old_match.group(1))
 
