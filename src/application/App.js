@@ -25,26 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for equipment comparison
     uiService.compareButton.addEventListener('click', () => {
-        loggerService.clear(); // Clear the main logger before starting the comparison process.
+        loggerService.clear();
 
         const characterSheetStats = domAdapter.getCharacterStats();
         const character = characterService.getCharacterBaseStats(characterSheetStats);
-        character.id = "Player"; // Assign a consistent ID for logging purposes
 
         const equipNew = domAdapter.getEquipment(1, character);
         const equipOld = domAdapter.getEquipment(2, character);
 
-        const { resultNew, resultOld } = equipmentComparisonService.compare(character, equipNew, equipOld);
+        const result = equipmentComparisonService.compare(character, equipNew, equipOld);
 
-        // Display results and combined log
-        domAdapter.displayComparisonResults(resultNew, resultOld);
-
-        // Combine the self-contained logs from each simulation for a complete report.
-        const combinedLog = `--- Simulation avec Nouvel Équipement ---\n${resultNew.log.join('\n')}\n\n--- Simulation avec Équipement Actuel ---\n${resultOld.log.join('\n')}`;
-        domAdapter.displayLogs('equipment', combinedLog);
-
-        // Also update the global logger so the "Export Log" button works correctly.
-        loggerService.setLogs(combinedLog.split('\n'));
+        domAdapter.displayComparisonResults(result);
+        loggerService.setLogs(result.log);
     });
 
     // Event listener for PvP simulation
