@@ -17,7 +17,7 @@ describe('EquipmentComparisonService', () => {
     let character;
     const mockPvpResult = {
         time: 50,
-        player1: { totalDamageDealt: 5000 },
+        player1: { totalDamageDealt: 5000, healthRemaining: 2500 },
         player2: { totalDamageDealt: 4000 }
     };
 
@@ -94,11 +94,13 @@ describe('EquipmentComparisonService', () => {
 
         expect(results.resultNew).toEqual({
             survivalTime: mockPvpResult.time,
-            totalDamageDealt: mockPvpResult.player1.totalDamageDealt
+            totalDamageDealt: mockPvpResult.player1.totalDamageDealt,
+            healthRemaining: mockPvpResult.player1.healthRemaining
         });
         expect(results.resultOld).toEqual({
             survivalTime: mockPvpResult.time,
-            totalDamageDealt: mockPvpResult.player1.totalDamageDealt
+            totalDamageDealt: mockPvpResult.player1.totalDamageDealt,
+            healthRemaining: mockPvpResult.player1.healthRemaining
         });
     });
 });

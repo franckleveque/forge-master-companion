@@ -25,7 +25,8 @@ export class EquipmentComparisonService {
         const pvpResultOld = this.simulationService.simulatePvp(character, dummyEnemy);
         const resultOld = {
             survivalTime: pvpResultOld.time,
-            totalDamageDealt: pvpResultOld.player1.totalDamageDealt
+            totalDamageDealt: pvpResultOld.player1.totalDamageDealt,
+            healthRemaining: pvpResultOld.player1.healthRemaining
         };
 
         // Run simulation for new equipment
@@ -36,7 +37,8 @@ export class EquipmentComparisonService {
         const pvpResultNew = this.simulationService.simulatePvp(finalStatsNew, dummyEnemy);
         const resultNew = {
             survivalTime: pvpResultNew.time,
-            totalDamageDealt: pvpResultNew.player1.totalDamageDealt
+            totalDamageDealt: pvpResultNew.player1.totalDamageDealt,
+            healthRemaining: pvpResultNew.player1.healthRemaining
         };
 
         return { resultNew, resultOld };
