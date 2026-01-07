@@ -348,7 +348,11 @@ export class DomAdapter {
 
     displayLogs(prefix, log) {
         const logContent = document.getElementById(`log-content-${prefix}`);
-        logContent.textContent = log.join('\n');
+        if (Array.isArray(log)) {
+            logContent.textContent = log.join('\n');
+        } else {
+            logContent.textContent = log;
+        }
     }
 
     toggleLogVisibility(prefix) {

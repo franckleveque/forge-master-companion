@@ -13,6 +13,10 @@ export class LoggerService {
         return this.logs;
     }
 
+    setLogs(logs) {
+        this.logs = logs;
+    }
+
     clear() {
         this.logs = [];
     }

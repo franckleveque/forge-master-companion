@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for equipment comparison
     uiService.compareButton.addEventListener('click', () => {
-        loggerService.clear();
         const character = domAdapter.getCharacterStats();
         const equipNew = domAdapter.getEquipment(1, character);
         const equipOld = domAdapter.getEquipment(2, character);
@@ -34,7 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Display results and combined log
         domAdapter.displayComparisonResults(resultNew, resultOld);
-        domAdapter.displayLogs('equipment', loggerService.getLogs());
+        const combinedLog = `--- Simulation avec Nouvel Équipement ---\n${resultNew.log.join('\n')}\n\n--- Simulation avec Équipement Actuel ---\n${resultOld.log.join('\n')}`;
+        domAdapter.displayLogs('equipment', combinedLog);
+        loggerService.setLogs([...resultNew.log, ...resultOld.log]);
     });
 
     // Event listener for PvP simulation

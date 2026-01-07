@@ -11,13 +11,13 @@ export class Character {
         basePassiveSkills,
         activeSkills
     }) {
-        this.name = name;
-        this.baseDamage = baseDamage;
-        this.baseHealth = baseHealth;
-        this.totalDamage = totalDamage;
-        this.totalHealth = totalHealth;
+        this.name = name || 'Character';
+        this.baseDamage = parseFloat(baseDamage) || 0;
+        this.baseHealth = parseFloat(baseHealth) || 0;
+        this.totalDamage = parseFloat(totalDamage) || 0;
+        this.totalHealth = parseFloat(totalHealth) || 0;
         this.weaponType = weaponType;
-        this.basePassiveSkills = basePassiveSkills;
-        this.activeSkills = activeSkills;
+        this.basePassiveSkills = basePassiveSkills || {};
+        this.activeSkills = activeSkills || [];
     }
 }

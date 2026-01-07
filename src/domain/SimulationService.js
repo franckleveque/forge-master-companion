@@ -96,6 +96,7 @@ export class SimulationService {
     }
 
     simulatePvp(player, opponent) {
+        this.logger.clear();
         const MAX_SIMULATION_TIME = 60;
         const dt = 0.01;
 

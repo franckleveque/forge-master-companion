@@ -8,8 +8,9 @@ export class EquipmentComparisonService {
         this.characterService = characterService;
     }
 
-    createDummyEnemy(character) {
+    createDummyEnemy(character, name) {
         return new Character({
+            name: name,
             totalDamage: character.totalDamage,
             totalHealth: character.totalHealth,
             weaponType: 'melee',
@@ -19,26 +20,31 @@ export class EquipmentComparisonService {
     }
 
     compare(character, equipNew, equipOld) {
-        const dummyEnemy = this.createDummyEnemy(character);
-
-        // Run simulation for old equipment (using the character stats as-is)
-        const pvpResultOld = this.simulationService.simulatePvp(character, dummyEnemy);
+        // Run simulation for old equipment
+        const characterOld = new Character({ ...character, name: 'Avec Équipement Actuel' });
+        const dummyEnemyOld = this.createDummyEnemy(characterOld, 'Ennemi (vs Équipement Actuel)');
+        const pvpResultOld = this.simulationService.simulatePvp(characterOld, dummyEnemyOld);
         const resultOld = {
             survivalTime: pvpResultOld.time,
             totalDamageDealt: pvpResultOld.player1.totalDamageDealt,
-            healthRemaining: pvpResultOld.player1.healthRemaining
+            healthRemaining: pvpResultOld.player1.healthRemaining,
+            log: pvpResultOld.log
         };
 
         // Run simulation for new equipment
         const baseStats = this.characterService.getCharacterBaseStats(character);
         const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld);
-        let statsWithNewEquip = this.characterService.applyEquipment(cleanBaseStats, equipNew);
-        let finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
-        const pvpResultNew = this.simulationService.simulatePvp(finalStatsNew, dummyEnemy);
+        const statsWithNewEquip = this.characterService.applyEquipment(cleanBaseStats, equipNew);
+        const finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
+
+        const characterNew = new Character({ ...finalStatsNew, name: 'Avec Nouvel Équipement' });
+        const dummyEnemyNew = this.createDummyEnemy(characterNew, 'Ennemi (vs Nouvel Équipement)');
+        const pvpResultNew = this.simulationService.simulatePvp(characterNew, dummyEnemyNew);
         const resultNew = {
             survivalTime: pvpResultNew.time,
             totalDamageDealt: pvpResultNew.player1.totalDamageDealt,
-            healthRemaining: pvpResultNew.player1.healthRemaining
+            healthRemaining: pvpResultNew.player1.healthRemaining,
+            log: pvpResultNew.log
         };
 
         return { resultNew, resultOld };
