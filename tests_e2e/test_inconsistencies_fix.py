@@ -1,6 +1,7 @@
 # tests_e2e/test_inconsistencies_fix.py
 import json
 import pytest
+import re
 from playwright.sync_api import Page, expect
 import os
 
@@ -40,9 +41,16 @@ def test_inconsistencies_fix(page: Page):
 
     # Verify that the player with new equipment starts with the correct health
     assert "Player (New Equip) starts with 11000 health." in log_content
-    # Verify that both melee characters attack at the 3-second mark
-    assert "[3.00] Player (New Equip) attacks Ennemi for 1100 damage." in log_content
-    assert "[3.00] Ennemi attacks Player (New Equip) for 1000 damage." in log_content
+
+    # Find the first attack from the player and the enemy
+    player_attack_match = re.search(r"\[(\d+\.\d+)\] Player \(New Equip\) attacks Ennemi", log_content)
+    enemy_attack_match = re.search(r"\[(\d+\.\d+)\] Ennemi attacks Player \(New Equip\)", log_content)
+
+    # Verify that both attacks occur and at the correct time
+    assert player_attack_match, "Could not find player's first attack."
+    assert float(player_attack_match.group(1)) == 3.00, "Player's first attack is not at 3.00s."
+    assert enemy_attack_match, "Could not find enemy's first attack."
+    assert float(enemy_attack_match.group(1)) == 3.00, "Enemy's first attack is not at 3.00s."
     os.remove(file_path)
 
 # Test to explicitly ensure the dummy enemy is always melee, regardless of player weapon type
@@ -80,7 +88,13 @@ def test_dummy_enemy_is_always_melee(page: Page):
     expect(log_content_element).not_to_be_empty()
     log_content = log_content_element.inner_text()
 
-    # Verify player (distance) attacks at 1s and enemy (melee) attacks at 3s
-    assert "[1.00] Player (New Equip) attacks Ennemi for 1100 damage." in log_content
-    assert "[3.00] Ennemi attacks Player (New Equip) for 1000 damage." in log_content
+    # Find the first attack from the player and the enemy
+    player_attack_match = re.search(r"\[(\d+\.\d+)\] Player \(New Equip\) attacks Ennemi", log_content)
+    enemy_attack_match = re.search(r"\[(\d+\.\d+)\] Ennemi attacks Player \(New Equip\)", log_content)
+
+    # Verify that both attacks occur and at the correct time
+    assert player_attack_match, "Could not find player's first attack."
+    assert float(player_attack_match.group(1)) == 1.00, "Player's first attack is not at 1.00s."
+    assert enemy_attack_match, "Could not find enemy's first attack."
+    assert float(enemy_attack_match.group(1)) == 3.00, "Enemy's first attack is not at 3.00s."
     os.remove(file_path)

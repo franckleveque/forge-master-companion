@@ -274,7 +274,7 @@ export class DomAdapter {
     importEquipmentComparisonData(data) {
         this.setElementValue('total-damage', data.character_stats.total_damage);
         this.setElementValue('total-health', data.character_stats.total_health);
-        this.setElementValue('weapon-type', data.character_stats.weapon_type);
+        this.setElementValue('weapon-type', data.character_stats.weaponType);
 
         this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
             this.setElementValue(skillId, data.passive_skills[skillId]);
@@ -313,7 +313,7 @@ export class DomAdapter {
         const playerData = data.player;
         this.setElementValue('total-damage', playerData.character_stats.total_damage);
         this.setElementValue('total-health', playerData.character_stats.total_health);
-        this.setElementValue('weapon-type', playerData.character_stats.weapon_type);
+        this.setElementValue('weapon-type', playerData.character_stats.weaponType);
         this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
             this.setElementValue(skillId, playerData.passive_skills[skillId]);
         });

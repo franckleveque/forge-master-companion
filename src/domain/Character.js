@@ -11,7 +11,6 @@ export class Character {
         totalHealth,
         maxHealth,
         weaponType,
-        weapon_type,
         basePassiveSkills,
         activeSkills,
         passiveSkills,
@@ -27,7 +26,7 @@ export class Character {
         this.totalHealth = parseFloat(totalHealth) || 0;
         this.maxHealth = parseFloat(maxHealth) || this.totalHealth;
 
-        this.weaponType = weaponType || weapon_type;
+        this.weaponType = weaponType;
         this.basePassiveSkills = basePassiveSkills || {};
         this.activeSkills = activeSkills || [];
 
