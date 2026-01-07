@@ -10,7 +10,7 @@ export class UiService {
 
         // Equipment comparison elements
         this.compareButton = document.getElementById('compare-button');
-        this.equip1PassiveSkill = document.getElementById('equip1-passive-skill');
+        this.simulateButton = document.getElementById('simulate-button');
         this.equip2PassiveSkill = document.getElementById('equip2-passive-skill');
         this.equipmentCategory = document.getElementById('equipment-category');
         this.equip1WeaponTypeContainer = document.getElementById('equip1-weapon-type-container');

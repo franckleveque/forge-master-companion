@@ -1,229 +1,98 @@
 // src/domain/SimulationService.js
 
-import { PassiveSkillFactory } from './passives/PassiveSkillFactory.js';
-import { DamageSkill, BuffSkill } from './Skills.js';
+import { Character } from "./Character.js";
+import { DamageSkill } from "./skills/DamageSkill.js";
+import { BuffSkill } from "./skills/BuffSkill.js";
 
 export class SimulationService {
-    constructor(loggerService) {
-        this.logger = loggerService;
+    constructor(logger) {
+        this.logger = logger; // Global logger for display in PvP mode
+        this.time = 0;
+        this.fighters = [];
+        this.simulationLog = []; // Local log for a single simulation run
     }
 
-    _calculateCharacterStats(character) {
-        const passiveSkills = Object.entries(character.basePassiveSkills)
-            .map(([id, value]) => PassiveSkillFactory.create(id, value))
-            .filter(Boolean);
+    _initializeFighters(player1, player2) {
+        // Deep copy fighters to avoid mutation issues during simulation
+        const p1 = new Character(JSON.parse(JSON.stringify(player1)));
+        const p2 = new Character(JSON.parse(JSON.stringify(player2)));
 
-        // The totalDamage and totalHealth are now pre-calculated by CharacterService.
-        // The simulation service will use them directly as the final base stats for combat.
-        const calculatedStats = {
-            ...character,
-            passiveSkills,
-            activeSkills: character.activeSkills.map(skill => {
-                if (skill.type === 'damage') {
-                    return new DamageSkill(skill);
-                } else if (skill.type === 'buff') {
-                    return new BuffSkill(skill);
-                }
-                return skill;
-            }),
-            finalHealth: character.totalHealth,
-            finalDamage: character.totalDamage,
-            timePerAttack: 1.0,
-            critChance: 0,
-            critDamage: 1.5,
-            blockChance: 0,
-            healthRegenPerSec: 0,
-            lifesteal: 0,
-            doubleChance: 0,
-            competenceDegatsMod: 1.0,
-            competenceCooldownMod: 1.0,
-            totalDamageDealt: 0,
-            activeBuffs: []
-        };
+        p1.enemy = p2;
+        p2.enemy = p1;
 
-        // onCalculateStats will now only handle secondary stats like crit, attack speed, etc.
-        passiveSkills.forEach(skill => skill.onCalculateStats(calculatedStats));
-        passiveSkills.forEach(skill => skill.onInitialize(calculatedStats));
+        // Instantiate active skills to ensure they have their methods
+        p1.activeSkills = p1.activeSkills.map(skillData => {
+            if (skillData.type === 'damage') return new DamageSkill(skillData);
+            if (skillData.type === 'buff') return new BuffSkill(skillData);
+            return null;
+        }).filter(Boolean);
 
-        calculatedStats.currentHealth = calculatedStats.finalHealth;
-        calculatedStats.attackTimer = character.weaponType === 'corp-a-corp' ? 2.0 : calculatedStats.timePerAttack;
+        p2.activeSkills = p2.activeSkills.map(skillData => {
+            if (skillData.type === 'damage') return new DamageSkill(skillData);
+            if (skillData.type === 'buff') return new BuffSkill(skillData);
+            return null;
+        }).filter(Boolean);
 
-        return calculatedStats;
+        p1.passiveSkills.forEach(skill => skill.onInitialize(p1));
+        p2.passiveSkills.forEach(skill => skill.onInitialize(p2));
+
+        p1.activeSkills.forEach(skill => skill.onInitialize(p1));
+        p2.activeSkills.forEach(skill => skill.onInitialize(p2));
+
+        return [p1, p2];
     }
 
-    simulate(stats) {
-        const MAX_SIMULATION_TIME = 60;
-        const dt = 0.01;
+    _log(message) {
+        const formattedMessage = `[${this.time.toFixed(2)}] ${message}`;
+        this.simulationLog.push(formattedMessage);
+        // We also log to the global logger for the main PvP mode's live log view
+        if (this.logger) {
+            this.logger.log(message, this.time);
+        }
+    }
 
-        const player = this._calculateCharacterStats(stats);
-        this.logger.log(`[0.00] Player starts with ${player.currentHealth.toFixed(0)} health.`);
+    simulatePvp(player1, player2) {
+        // Reset state for the new simulation run
+        this.simulationLog = [];
+        this.time = 0;
 
-        let time = 0;
-        let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
-        const timePerEnemyAttack = 1.0;
+        this.fighters = this._initializeFighters(player1, player2);
 
-        while (player.currentHealth > 0 && time < MAX_SIMULATION_TIME) {
-            time += dt;
-            player.passiveSkills.forEach(skill => skill.onTick(player, dt));
-            player.attackTimer -= dt;
-
-            while (player.attackTimer <= 0) {
-                let performExtraAttack = this._performAttack(player, null, player.finalDamage, time);
-                if (performExtraAttack) {
-                    this.logger.log(`[${time.toFixed(2)}] Player performs an extra attack.`);
-                    this._performAttack(player, null, player.finalDamage, time);
-                }
-                player.attackTimer += player.timePerAttack;
+        this.fighters.forEach(f => {
+            if (isNaN(f.health) || f.health <= 0) {
+                console.error(`ERROR: Fighter ${f.id} initialized with invalid health: ${f.health}.`);
+                f.health = 1; // Prevent simulation errors
             }
+            this._log(`${f.id} starts with ${f.health.toFixed(0)} health.`);
+        });
 
-            enemyAttackTimer -= dt;
-            while (enemyAttackTimer <= 0) {
-                let incomingDamage = stats.enemy.dps * timePerEnemyAttack;
-                player.passiveSkills.forEach(skill => {
-                    incomingDamage = skill.onModifyIncomingDamage(player, null, incomingDamage);
-                });
-                player.currentHealth -= incomingDamage;
-                this.logger.log(`[${time.toFixed(2)}] Enemy attacks for ${incomingDamage.toFixed(0)} damage. Player health is now ${player.currentHealth.toFixed(0)}.`);
-                enemyAttackTimer += timePerEnemyAttack;
-            }
-
-            if (player.currentHealth > player.finalHealth) player.currentHealth = player.finalHealth;
+        while (this.time < 60 && this.fighters.every(f => f.isAlive())) {
+            this.time += 0.01;
+            this.fighters.forEach(fighter => {
+                fighter.tick(0.01);
+            });
         }
 
-        const survivalTime = time >= MAX_SIMULATION_TIME ? Infinity : time;
-        this.logger.log(`[${time.toFixed(2)}] Simulation ended. Survival time: ${isFinite(survivalTime) ? survivalTime.toFixed(2) : 'Infinite'}.`);
-        return { survivalTime, totalDamageDealt: player.totalDamageDealt, log: this.logger.getLogs() };
-    }
+        const winner = this.fighters.find(f => f.isAlive()) || this.fighters.sort((a, b) => b.health - a.health)[0];
 
-    simulatePvp(player, opponent) {
-        this.logger.clear();
-        const MAX_SIMULATION_TIME = 60;
-        const dt = 0.01;
-
-        let p1 = this._calculateCharacterStats(player);
-        let p2 = this._calculateCharacterStats(opponent);
-        this.logger.log(`[0.00] ${p1.name} starts with ${p1.currentHealth.toFixed(0)} health.`);
-        this.logger.log(`[0.00] ${p2.name} starts with ${p2.currentHealth.toFixed(0)} health.`);
-
-        let time = 0;
-
-        while (p1.currentHealth > 0 && p2.currentHealth > 0 && time < MAX_SIMULATION_TIME) {
-            time += dt;
-
-            this._processTick(p1, p2, dt, time);
-            if (p2.currentHealth <= 0) break;
-            this._processTick(p2, p1, dt, time);
-        }
-
-        let winner = null;
-        if (p1.currentHealth <= 0 && p2.currentHealth > 0) winner = p2.name;
-        else if (p2.currentHealth <= 0 && p1.currentHealth > 0) winner = p1.name;
-        else winner = p1.currentHealth > p2.currentHealth ? p1.name : p2.name;
-
-        this.logger.log(`[${time.toFixed(2)}] Simulation ended. Winner: ${winner}.`);
+        this._log(`Simulation ended. Winner: ${winner ? winner.id : 'None'}.`);
 
         return {
-            winner, time,
-            player1: { name: p1.name, totalDamageDealt: p1.totalDamageDealt, healthRemaining: p1.currentHealth, maxHealth: p1.finalHealth },
-            player2: { name: p2.name, totalDamageDealt: p2.totalDamageDealt, healthRemaining: p2.currentHealth, maxHealth: p2.finalHealth },
-            log: this.logger.getLogs()
+            winner: winner ? winner.id : 'None',
+            time: this.time,
+            player1: {
+                name: this.fighters[0].name,
+                healthRemaining: this.fighters[0].health,
+                totalDamageDealt: this.fighters[0].totalDamageDealt,
+                maxHealth: this.fighters[0].maxHealth
+            },
+            player2: {
+                name: this.fighters[1].name,
+                healthRemaining: this.fighters[1].health,
+                totalDamageDealt: this.fighters[1].totalDamageDealt,
+                maxHealth: this.fighters[1].maxHealth
+            },
+            log: this.simulationLog // Return the self-contained log from this specific simulation
         };
-    }
-
-    _applyBuffs(character, buff) {
-        character.activeBuffs.push(buff);
-        character.finalDamage += buff.damageBuff;
-        character.finalHealth += buff.healthBuff;
-        character.currentHealth += buff.healthBuff;
-    }
-
-    _revertBuffs(character, buff) {
-        character.activeBuffs = character.activeBuffs.filter(b => b !== buff);
-        character.finalDamage -= buff.damageBuff;
-        character.finalHealth -= buff.healthBuff;
-        if (character.currentHealth > character.finalHealth) {
-            character.currentHealth = character.finalHealth;
-        }
-    }
-
-    _processActiveSkills(character, opponent, dt, time) {
-        character.activeSkills.forEach(skill => {
-            skill.tick(dt);
-
-            if (skill.isReady()) {
-                if (skill instanceof DamageSkill) {
-                    this.logger.log(`[${time.toFixed(2)}] ${character.name} uses a damage skill.`);
-                    for (let i = 0; i < skill.hits; i++) {
-                        let skillDamage = skill.value * character.competenceDegatsMod;
-                        if (opponent) {
-                            opponent.passiveSkills.forEach(s => {
-                                skillDamage = s.onModifyIncomingDamage(opponent, character, skillDamage);
-                            });
-                            opponent.currentHealth -= skillDamage;
-                            this.logger.log(`[${time.toFixed(2)}]   ... deals ${skillDamage.toFixed(0)} damage to ${opponent.name}. ${opponent.name}'s health is now ${opponent.currentHealth.toFixed(0)}.`);
-                        }
-                        character.totalDamageDealt += skillDamage;
-                    }
-                    skill.reset();
-                } else if (skill instanceof BuffSkill) {
-                    this._applyBuffs(character, skill);
-                    skill.trigger();
-                    this.logger.log(`[${time.toFixed(2)}] ${character.name} uses a buff skill. Damage: +${skill.damageBuff}, Health: +${skill.healthBuff}, Duration: ${skill.duration}s.`);
-                }
-            }
-
-            if (skill instanceof BuffSkill && skill.isActive() && skill.durationTimer <= 0) {
-                this._revertBuffs(character, skill);
-                this.logger.log(`[${time.toFixed(2)}] ${character.name}'s buff has expired.`);
-            }
-        });
-    }
-
-    _processTick(attacker, defender, dt, time) {
-        attacker.passiveSkills.forEach(skill => skill.onTick(attacker, dt));
-        this._processActiveSkills(attacker, defender, dt, time);
-
-        attacker.attackTimer -= dt;
-        while (attacker.attackTimer <= 0) {
-            if (this._performAttack(attacker, defender, attacker.finalDamage, time)) {
-                this.logger.log(`[${time.toFixed(2)}] ${attacker.name} performs an extra attack.`);
-                this._performAttack(attacker, defender, attacker.finalDamage, time);
-            }
-
-            attacker.attackTimer += attacker.timePerAttack;
-        }
-
-        if (attacker.currentHealth > attacker.finalHealth) attacker.currentHealth = attacker.finalHealth;
-    }
-
-    _performAttack(attacker, defender, baseDamage, time) {
-        let damage = baseDamage;
-
-        attacker.passiveSkills.forEach(s => {
-            damage = s.onModifyOutgoingDamage(attacker, defender, damage);
-        });
-
-        if (defender) {
-            defender.passiveSkills.forEach(s => {
-                damage = s.onModifyIncomingDamage(defender, attacker, damage);
-            });
-            defender.currentHealth -= damage;
-            this.logger.log(`[${time.toFixed(2)}] ${attacker.name} attacks ${defender.name} for ${damage.toFixed(0)} damage. ${defender.name}'s health is now ${defender.currentHealth.toFixed(0)}.`);
-        } else {
-            this.logger.log(`[${time.toFixed(2)}] Player attacks for ${damage.toFixed(0)} damage.`);
-        }
-
-
-        attacker.totalDamageDealt += damage;
-
-        attacker.passiveSkills.forEach(s => s.onAfterAttackDealt(attacker, defender, damage));
-
-        let performExtra = false;
-        attacker.passiveSkills.forEach(s => {
-            if (s.onAfterAttackProcessed(attacker, defender)) {
-                performExtra = true;
-            }
-        });
-        return performExtra;
     }
 }

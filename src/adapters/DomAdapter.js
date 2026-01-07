@@ -3,7 +3,8 @@
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 import { Character } from '../domain/Character.js';
 import { Equipment } from '../domain/Equipment.js';
-import { DamageSkill, BuffSkill } from '../domain/Skills.js';
+import { DamageSkill } from '../domain/skills/DamageSkill.js';
+import { BuffSkill } from '../domain/skills/BuffSkill.js';
 
 export class DomAdapter {
     constructor(characterService, passiveSkillService) {

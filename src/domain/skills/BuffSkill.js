@@ -1,0 +1,34 @@
+// src/domain/skills/BuffSkill.js
+import { ActiveSkill } from '../Skills.js';
+
+export class BuffSkill extends ActiveSkill {
+    constructor({ baseDamage = 0, baseHealth = 0, cooldown = 0, damageBuff = 0, healthBuff = 0, duration = 0 }) {
+        super({ baseDamage, baseHealth, cooldown });
+        this.type = 'buff';
+        this.damageBuff = damageBuff;
+        this.healthBuff = healthBuff;
+        this.duration = duration;
+        this.durationTimer = 0;
+    }
+
+    isActive() {
+        return this.durationTimer > 0;
+    }
+
+    tick(dt) {
+        super.tick(dt);
+        if (this.isActive()) {
+            this.durationTimer -= dt;
+            if (this.durationTimer <= 0) {
+                // Buff expired, now the cooldown can start
+                this.timer = this.cooldown;
+            }
+        }
+    }
+
+    trigger() {
+        this.durationTimer = this.duration;
+        // The cooldown will start after the duration ends
+        this.timer = this.cooldown + this.duration;
+    }
+}

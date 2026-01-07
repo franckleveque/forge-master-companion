@@ -25,7 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for equipment comparison
     uiService.compareButton.addEventListener('click', () => {
-        const character = domAdapter.getCharacterStats();
+        loggerService.clear(); // Clear the main logger before starting the comparison process.
+
+        const characterSheetStats = domAdapter.getCharacterStats();
+        const character = characterService.getCharacterBaseStats(characterSheetStats);
+        character.id = "Player"; // Assign a consistent ID for logging purposes
+
         const equipNew = domAdapter.getEquipment(1, character);
         const equipOld = domAdapter.getEquipment(2, character);
 
@@ -33,19 +38,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Display results and combined log
         domAdapter.displayComparisonResults(resultNew, resultOld);
+
+        // Combine the self-contained logs from each simulation for a complete report.
         const combinedLog = `--- Simulation avec Nouvel Équipement ---\n${resultNew.log.join('\n')}\n\n--- Simulation avec Équipement Actuel ---\n${resultOld.log.join('\n')}`;
         domAdapter.displayLogs('equipment', combinedLog);
-        loggerService.setLogs([...resultNew.log, ...resultOld.log]);
+
+        // Also update the global logger so the "Export Log" button works correctly.
+        loggerService.setLogs(combinedLog.split('\n'));
     });
 
     // Event listener for PvP simulation
     uiService.simulateButton.addEventListener('click', () => {
-        loggerService.clear();
+        loggerService.clear(); // Clear logger for a fresh PvP simulation.
         const playerSheetStats = domAdapter.getCharacterStatsPvp('player');
         const opponentSheetStats = domAdapter.getCharacterStatsPvp('opponent');
 
         const player = characterService.getCharacterBaseStats(playerSheetStats);
+        player.id = "Player"; // Assign ID for logs
         const opponent = characterService.getCharacterBaseStats(opponentSheetStats);
+        opponent.id = "Opponent"; // Assign ID for logs
 
         const result = simulationService.simulatePvp(player, opponent);
         domAdapter.displayPvpResults(result);
