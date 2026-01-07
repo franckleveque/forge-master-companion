@@ -72,11 +72,11 @@ export class DomAdapter {
     }
 
     displayComparisonResults(resultNew, resultOld) {
-        document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinity";
         document.getElementById('health-remaining-1').textContent = resultNew.healthRemaining.toLocaleString();
         document.getElementById('total-damage-1').textContent = resultNew.totalDamageDealt.toLocaleString();
 
-        document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinity";
         document.getElementById('health-remaining-2').textContent = resultOld.healthRemaining.toLocaleString();
         document.getElementById('total-damage-2').textContent = resultOld.totalDamageDealt.toLocaleString();
 
@@ -86,21 +86,21 @@ export class DomAdapter {
         resultItem1.className = 'result-item';
         resultItem2.className = 'result-item';
 
-        if (resultNew.survivalTime > resultOld.survivalTime) {
+        // Corrected tie-breaker logic
+        if (resultNew.healthRemaining > 0 && resultOld.healthRemaining <= 0) {
             resultItem1.classList.add('best-equipment');
-        } else if (resultOld.survivalTime > resultNew.survivalTime) {
+        } else if (resultOld.healthRemaining > 0 && resultNew.healthRemaining <= 0) {
             resultItem2.classList.add('best-equipment');
-        } else { // Equal survival time, check health
-            if (resultNew.healthRemaining > resultOld.healthRemaining) {
+        } else if (resultNew.healthRemaining > resultOld.healthRemaining) {
+            resultItem1.classList.add('best-equipment');
+        } else if (resultOld.healthRemaining > resultNew.healthRemaining) {
+            resultItem2.classList.add('best-equipment');
+        } else {
+            // Health is equal, tie-break on damage
+            if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
                 resultItem1.classList.add('best-equipment');
-            } else if (resultOld.healthRemaining > resultNew.healthRemaining) {
+            } else {
                 resultItem2.classList.add('best-equipment');
-            } else { // Equal health, check damage
-                if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
-                    resultItem1.classList.add('best-equipment');
-                } else {
-                    resultItem2.classList.add('best-equipment');
-                }
             }
         }
 

@@ -3,35 +3,42 @@
 import { Character } from "./Character.js";
 import { DamageSkill } from "./skills/DamageSkill.js";
 import { BuffSkill } from "./skills/BuffSkill.js";
+import { PassiveSkillFactory } from "./passives/PassiveSkillFactory.js";
 
 export class SimulationService {
     constructor(logger) {
-        this.logger = logger; // Global logger for display in PvP mode
+        this.logger = logger;
         this.time = 0;
         this.fighters = [];
-        this.simulationLog = []; // Local log for a single simulation run
+        this.simulationLog = [];
     }
 
     _initializeFighters(player1, player2) {
-        // Deep copy fighters to avoid mutation issues during simulation
-        const p1 = new Character(JSON.parse(JSON.stringify(player1)));
-        const p2 = new Character(JSON.parse(JSON.stringify(player2)));
+        const logFn = this._log.bind(this);
+
+        const p1Data = JSON.parse(JSON.stringify(player1));
+        const p2Data = JSON.parse(JSON.stringify(player2));
+
+        const p1 = new Character({ ...p1Data, logFunction: logFn });
+        const p2 = new Character({ ...p2Data, logFunction: logFn });
+
+        p1.activeSkills = player1.activeSkills.map(skillData => {
+            if (skillData.type === 'damage') return new DamageSkill(skillData);
+            if (skillData.type === 'buff') return new BuffSkill(skillData);
+            return null;
+        }).filter(Boolean);
+
+        p2.activeSkills = player2.activeSkills.map(skillData => {
+            if (skillData.type === 'damage') return new DamageSkill(skillData);
+            if (skillData.type === 'buff') return new BuffSkill(skillData);
+            return null;
+        }).filter(Boolean);
+
+        p1.passiveSkills = Object.entries(p1.basePassiveSkills).map(([id, value]) => PassiveSkillFactory.create(id, value)).filter(Boolean);
+        p2.passiveSkills = Object.entries(p2.basePassiveSkills).map(([id, value]) => PassiveSkillFactory.create(id, value)).filter(Boolean);
 
         p1.enemy = p2;
         p2.enemy = p1;
-
-        // Instantiate active skills to ensure they have their methods
-        p1.activeSkills = p1.activeSkills.map(skillData => {
-            if (skillData.type === 'damage') return new DamageSkill(skillData);
-            if (skillData.type === 'buff') return new BuffSkill(skillData);
-            return null;
-        }).filter(Boolean);
-
-        p2.activeSkills = p2.activeSkills.map(skillData => {
-            if (skillData.type === 'damage') return new DamageSkill(skillData);
-            if (skillData.type === 'buff') return new BuffSkill(skillData);
-            return null;
-        }).filter(Boolean);
 
         p1.passiveSkills.forEach(skill => skill.onInitialize(p1));
         p2.passiveSkills.forEach(skill => skill.onInitialize(p2));
@@ -45,14 +52,12 @@ export class SimulationService {
     _log(message) {
         const formattedMessage = `[${this.time.toFixed(2)}] ${message}`;
         this.simulationLog.push(formattedMessage);
-        // We also log to the global logger for the main PvP mode's live log view
         if (this.logger) {
-            this.logger.log(message, this.time);
+            this.logger.log(formattedMessage);
         }
     }
 
     simulatePvp(player1, player2) {
-        // Reset state for the new simulation run
         this.simulationLog = [];
         this.time = 0;
 
@@ -60,8 +65,7 @@ export class SimulationService {
 
         this.fighters.forEach(f => {
             if (isNaN(f.health) || f.health <= 0) {
-                console.error(`ERROR: Fighter ${f.id} initialized with invalid health: ${f.health}.`);
-                f.health = 1; // Prevent simulation errors
+                f.health = 1;
             }
             this._log(`${f.id} starts with ${f.health.toFixed(0)} health.`);
         });
@@ -70,6 +74,15 @@ export class SimulationService {
             this.time += 0.01;
             this.fighters.forEach(fighter => {
                 fighter.tick(0.01);
+                fighter.activeSkills.forEach(skill => {
+                    if (skill.isReady()) {
+                        this._log(`${fighter.id} uses a ${skill.type} skill.`);
+                        if (skill.type === 'buff') {
+                            skill.trigger(); // Trigger the buff
+                            fighter.applyBuff(skill);
+                        }
+                    }
+                });
             });
         }
 
@@ -92,7 +105,7 @@ export class SimulationService {
                 totalDamageDealt: this.fighters[1].totalDamageDealt,
                 maxHealth: this.fighters[1].maxHealth
             },
-            log: this.simulationLog // Return the self-contained log from this specific simulation
+            log: this.simulationLog
         };
     }
 }

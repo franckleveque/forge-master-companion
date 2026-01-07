@@ -8,6 +8,6 @@ export class Degats extends PassiveSkill {
     }
 
     onCalculateStats(character) {
-        character.finalDamage = character.baseDamage * (1 + this.value / 100);
+        // This skill modifies stats during the calculation phase, not during combat.
     }
 }
