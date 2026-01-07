@@ -93,10 +93,9 @@ This project uses Jest for unit/integration testing and Playwright for E2E testi
 2.  **Enter Character Stats:** Fill in your character's total damage, health, and weapon type.
 3.  **Enter Passive Skills:** Input your character's total passive skill percentages as they appear in-game (i.e., *with* your old equipment on).
 4.  **Configure Active Skills:** Set up your three active skills (type, base value, cooldown).
-5.  **Enter Enemy Stats:** Input the opponent's Damage Per Second (DPS) and their weapon type for the simulation.
-6.  **Enter Equipment to Compare:**
+5.  **Enter Equipment to Compare:**
     *   For the "Old Equipment" and "New Equipment", enter the main stat and any passive skill bonuses each item provides.
-7.  **Compare:** Click the "Compare Equipment" button. The tool will simulate combat with each item and declare the best one based on a combined score of survival time and total damage dealt.
+6.  **Compare:** Click the "Compare Equipment" button. The tool runs a PvP simulation pitting your character with the "Old Equipment" against an identical version of your character equipped with the "New Equipment". The winner is declared the "Best Equipment".
 
 **Important:** The tool automatically calculates your character's base stats. It assumes the stats you entered in steps 2 & 3 already include the bonuses from your "Old Equipment".
 
