@@ -30,7 +30,7 @@ export class EquipmentComparisonService {
         const finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
 
         const characterForNewSim = new Character(finalStatsNew);
-        characterForNewSim.name = "Player";
+        characterForNewSim.name = "Player (New Equip)";
         const pvpResultNew = this.simulationService.simulatePvp(characterForNewSim, JSON.parse(JSON.stringify(dummyEnemy)));
         const resultNew = {
             survivalTime: pvpResultNew.winner === characterForNewSim.name ? Infinity : pvpResultNew.time,
@@ -41,7 +41,7 @@ export class EquipmentComparisonService {
         };
 
         const characterForOldSim = new Character(initialCharacterState);
-        characterForOldSim.name = "Player";
+        characterForOldSim.name = "Player (Old Equip)";
         const pvpResultOld = this.simulationService.simulatePvp(characterForOldSim, JSON.parse(JSON.stringify(dummyEnemy)));
         const resultOld = {
             survivalTime: pvpResultOld.winner === characterForOldSim.name ? Infinity : pvpResultOld.time,
