@@ -4,6 +4,7 @@ import { Character } from '../src/domain/Character.js';
 import { CharacterService } from '../src/domain/CharacterService.js';
 import { SimulationService } from '../src/domain/SimulationService.js';
 import { DamageSkill, BuffSkill } from '../src/domain/Skills.js';
+import { LoggerService } from '../src/infrastructure/LoggerService.js';
 
 describe('Active Skills', () => {
     let characterService;
@@ -11,7 +12,7 @@ describe('Active Skills', () => {
 
     beforeEach(() => {
         characterService = new CharacterService();
-        simulationService = new SimulationService();
+        simulationService = new SimulationService(new LoggerService());
     });
 
     test('Skills should start in cooldown on initialization', () => {
@@ -58,7 +59,7 @@ describe('Active Skills', () => {
         const p2 = simulationService._calculateCharacterStats(defender);
 
         p1.activeSkills[0].timer = 0;
-        simulationService._processActiveSkills(p1, p2, 0.01);
+        simulationService._processActiveSkills(p1, p2, 0.01, 0);
 
         expect(p2.currentHealth).toBe(1000 - 50 * 3);
     });
@@ -77,7 +78,7 @@ describe('Active Skills', () => {
         p1.activeSkills[0].timer = 0;
 
         // Trigger the buff
-        simulationService._processActiveSkills(p1, null, 0.01);
+        simulationService._processActiveSkills(p1, null, 0.01, 0);
         expect(p1.finalDamage).toBe(150);
         expect(p1.finalHealth).toBe(1500);
         expect(p1.activeSkills[0].isActive()).toBe(true);

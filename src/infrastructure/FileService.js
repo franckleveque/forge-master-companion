@@ -38,4 +38,18 @@ export class FileService {
         };
         reader.readAsText(file);
     }
+
+    exportLog(prefix, log) {
+        const filename = `${prefix}_fight_log.txt`;
+        const logString = log.join('\n');
+        const blob = new Blob([logString], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 }

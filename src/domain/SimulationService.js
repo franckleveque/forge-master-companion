@@ -4,6 +4,10 @@ import { PassiveSkillFactory } from './passives/PassiveSkillFactory.js';
 import { DamageSkill, BuffSkill } from './Skills.js';
 
 export class SimulationService {
+    constructor(loggerService) {
+        this.logger = loggerService;
+    }
+
     _calculateCharacterStats(character) {
         const passiveSkills = Object.entries(character.basePassiveSkills)
             .map(([id, value]) => PassiveSkillFactory.create(id, value))
@@ -52,6 +56,7 @@ export class SimulationService {
         const dt = 0.01;
 
         const player = this._calculateCharacterStats(stats);
+        this.logger.log(`[0.00] Player starts with ${player.currentHealth.toFixed(0)} health.`);
 
         let time = 0;
         let enemyAttackTimer = stats.enemy.weaponType === 'corp-a-corp' ? 2.0 : 0.0;
@@ -63,31 +68,11 @@ export class SimulationService {
             player.attackTimer -= dt;
 
             while (player.attackTimer <= 0) {
-                function performAttack(baseDamage) {
-                    let damage = baseDamage;
-
-                    player.passiveSkills.forEach(skill => {
-                        damage = skill.onModifyOutgoingDamage(player, null, damage);
-                    });
-
-                    player.totalDamageDealt += damage;
-
-                    player.passiveSkills.forEach(skill => skill.onAfterAttackDealt(player, null, damage));
-
-                    let performExtraAttack = false;
-                    player.passiveSkills.forEach(skill => {
-                        if (skill.onAfterAttackProcessed(player, null)) {
-                            performExtraAttack = true;
-                        }
-                    });
-
-                    return performExtraAttack;
+                let performExtraAttack = this._performAttack(player, null, player.finalDamage, time);
+                if (performExtraAttack) {
+                    this.logger.log(`[${time.toFixed(2)}] Player performs an extra attack.`);
+                    this._performAttack(player, null, player.finalDamage, time);
                 }
-
-                if (performAttack(player.finalDamage)) {
-                    performAttack(player.finalDamage);
-                }
-
                 player.attackTimer += player.timePerAttack;
             }
 
@@ -98,6 +83,7 @@ export class SimulationService {
                     incomingDamage = skill.onModifyIncomingDamage(player, null, incomingDamage);
                 });
                 player.currentHealth -= incomingDamage;
+                this.logger.log(`[${time.toFixed(2)}] Enemy attacks for ${incomingDamage.toFixed(0)} damage. Player health is now ${player.currentHealth.toFixed(0)}.`);
                 enemyAttackTimer += timePerEnemyAttack;
             }
 
@@ -105,7 +91,8 @@ export class SimulationService {
         }
 
         const survivalTime = time >= MAX_SIMULATION_TIME ? Infinity : time;
-        return { survivalTime, totalDamageDealt: player.totalDamageDealt };
+        this.logger.log(`[${time.toFixed(2)}] Simulation ended. Survival time: ${isFinite(survivalTime) ? survivalTime.toFixed(2) : 'Infinite'}.`);
+        return { survivalTime, totalDamageDealt: player.totalDamageDealt, log: this.logger.getLogs() };
     }
 
     simulatePvp(player, opponent) {
@@ -114,14 +101,17 @@ export class SimulationService {
 
         let p1 = this._calculateCharacterStats(player);
         let p2 = this._calculateCharacterStats(opponent);
+        this.logger.log(`[0.00] ${p1.name} starts with ${p1.currentHealth.toFixed(0)} health.`);
+        this.logger.log(`[0.00] ${p2.name} starts with ${p2.currentHealth.toFixed(0)} health.`);
+
         let time = 0;
 
         while (p1.currentHealth > 0 && p2.currentHealth > 0 && time < MAX_SIMULATION_TIME) {
             time += dt;
 
-            this._processTick(p1, p2, dt);
+            this._processTick(p1, p2, dt, time);
             if (p2.currentHealth <= 0) break;
-            this._processTick(p2, p1, dt);
+            this._processTick(p2, p1, dt, time);
         }
 
         let winner = null;
@@ -129,10 +119,13 @@ export class SimulationService {
         else if (p2.currentHealth <= 0 && p1.currentHealth > 0) winner = p1.name;
         else winner = p1.currentHealth > p2.currentHealth ? p1.name : p2.name;
 
+        this.logger.log(`[${time.toFixed(2)}] Simulation ended. Winner: ${winner}.`);
+
         return {
             winner, time,
             player1: { name: p1.name, totalDamageDealt: p1.totalDamageDealt, healthRemaining: p1.currentHealth, maxHealth: p1.finalHealth },
-            player2: { name: p2.name, totalDamageDealt: p2.totalDamageDealt, healthRemaining: p2.currentHealth, maxHealth: p2.finalHealth }
+            player2: { name: p2.name, totalDamageDealt: p2.totalDamageDealt, healthRemaining: p2.currentHealth, maxHealth: p2.finalHealth },
+            log: this.logger.getLogs()
         };
     }
 
@@ -152,12 +145,13 @@ export class SimulationService {
         }
     }
 
-    _processActiveSkills(character, opponent, dt) {
+    _processActiveSkills(character, opponent, dt, time) {
         character.activeSkills.forEach(skill => {
             skill.tick(dt);
 
             if (skill.isReady()) {
                 if (skill instanceof DamageSkill) {
+                    this.logger.log(`[${time.toFixed(2)}] ${character.name} uses a damage skill.`);
                     for (let i = 0; i < skill.hits; i++) {
                         let skillDamage = skill.value * character.competenceDegatsMod;
                         if (opponent) {
@@ -165,6 +159,7 @@ export class SimulationService {
                                 skillDamage = s.onModifyIncomingDamage(opponent, character, skillDamage);
                             });
                             opponent.currentHealth -= skillDamage;
+                            this.logger.log(`[${time.toFixed(2)}]   ... deals ${skillDamage.toFixed(0)} damage to ${opponent.name}. ${opponent.name}'s health is now ${opponent.currentHealth.toFixed(0)}.`);
                         }
                         character.totalDamageDealt += skillDamage;
                     }
@@ -172,23 +167,26 @@ export class SimulationService {
                 } else if (skill instanceof BuffSkill) {
                     this._applyBuffs(character, skill);
                     skill.trigger();
+                    this.logger.log(`[${time.toFixed(2)}] ${character.name} uses a buff skill. Damage: +${skill.damageBuff}, Health: +${skill.healthBuff}, Duration: ${skill.duration}s.`);
                 }
             }
 
             if (skill instanceof BuffSkill && skill.isActive() && skill.durationTimer <= 0) {
                 this._revertBuffs(character, skill);
+                this.logger.log(`[${time.toFixed(2)}] ${character.name}'s buff has expired.`);
             }
         });
     }
 
-    _processTick(attacker, defender, dt) {
+    _processTick(attacker, defender, dt, time) {
         attacker.passiveSkills.forEach(skill => skill.onTick(attacker, dt));
-        this._processActiveSkills(attacker, defender, dt);
+        this._processActiveSkills(attacker, defender, dt, time);
 
         attacker.attackTimer -= dt;
         while (attacker.attackTimer <= 0) {
-            if (this._performAttack(attacker, defender, attacker.finalDamage)) {
-                this._performAttack(attacker, defender, attacker.finalDamage);
+            if (this._performAttack(attacker, defender, attacker.finalDamage, time)) {
+                this.logger.log(`[${time.toFixed(2)}] ${attacker.name} performs an extra attack.`);
+                this._performAttack(attacker, defender, attacker.finalDamage, time);
             }
 
             attacker.attackTimer += attacker.timePerAttack;
@@ -197,18 +195,24 @@ export class SimulationService {
         if (attacker.currentHealth > attacker.finalHealth) attacker.currentHealth = attacker.finalHealth;
     }
 
-    _performAttack(attacker, defender, baseDamage) {
+    _performAttack(attacker, defender, baseDamage, time) {
         let damage = baseDamage;
 
         attacker.passiveSkills.forEach(s => {
             damage = s.onModifyOutgoingDamage(attacker, defender, damage);
         });
 
-        defender.passiveSkills.forEach(s => {
-            damage = s.onModifyIncomingDamage(defender, attacker, damage);
-        });
+        if (defender) {
+            defender.passiveSkills.forEach(s => {
+                damage = s.onModifyIncomingDamage(defender, attacker, damage);
+            });
+            defender.currentHealth -= damage;
+            this.logger.log(`[${time.toFixed(2)}] ${attacker.name} attacks ${defender.name} for ${damage.toFixed(0)} damage. ${defender.name}'s health is now ${defender.currentHealth.toFixed(0)}.`);
+        } else {
+            this.logger.log(`[${time.toFixed(2)}] Player attacks for ${damage.toFixed(0)} damage.`);
+        }
 
-        defender.currentHealth -= damage;
+
         attacker.totalDamageDealt += damage;
 
         attacker.passiveSkills.forEach(s => s.onAfterAttackDealt(attacker, defender, damage));

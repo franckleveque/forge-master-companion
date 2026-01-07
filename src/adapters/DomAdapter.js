@@ -101,6 +101,8 @@ export class DomAdapter {
                 resultItem2.classList.add('best-equipment');
             }
         }
+
+        document.querySelector('[data-testid="equipment-log-controls"]').style.display = 'block';
     }
 
     getCharacterStatsPvp(prefix) {
@@ -122,6 +124,8 @@ export class DomAdapter {
     }
 
     displayPvpResults(result) {
+        this.displayLogs('pvp', result.log);
+
         const resultsOutput = document.getElementById('pvp-results-output');
         resultsOutput.innerHTML = `
             <h3>Simulation Result</h3>
@@ -138,6 +142,8 @@ export class DomAdapter {
                 <p>Total Damage Dealt: ${result.player2.totalDamageDealt.toLocaleString()}</p>
                 <p>Health Remaining: ${result.player2.healthRemaining.toLocaleString()} / ${result.player2.maxHealth.toLocaleString()}</p>
             </div>`;
+
+        document.querySelector('[data-testid="pvp-log-controls"]').style.display = 'block';
     }
 
     getElementValue(id) {
@@ -343,5 +349,16 @@ export class DomAdapter {
             this.setElementValue(`${skillId}-duration`, skillData.duration);
             toggleSkillParams(skillId);
         }
+    }
+
+    displayLogs(prefix, log) {
+        const logContent = document.getElementById(`log-content-${prefix}`);
+        logContent.textContent = log.join('\n');
+    }
+
+    toggleLogVisibility(prefix) {
+        const logContainer = document.getElementById(`log-container-${prefix}`);
+        const currentDisplay = logContainer.style.display;
+        logContainer.style.display = currentDisplay === 'none' ? 'block' : 'none';
     }
 }

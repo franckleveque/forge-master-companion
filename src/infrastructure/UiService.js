@@ -19,6 +19,12 @@ export class UiService {
         // PvP simulation elements
         this.simulateButton = document.getElementById('simulate-button');
 
+        // Log elements
+        this.viewLogEquipmentButton = document.getElementById('view-log-equipment');
+        this.exportLogEquipmentButton = document.getElementById('export-log-equipment');
+        this.viewLogPvpButton = document.getElementById('view-log-pvp');
+        this.exportLogPvpButton = document.getElementById('export-log-pvp');
+
         // Import/Export elements
         this.exportEquipmentButton = document.getElementById('export-equipment');
         this.importEquipmentButton = document.getElementById('import-equipment');

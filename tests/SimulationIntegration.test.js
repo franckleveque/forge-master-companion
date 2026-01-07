@@ -1,5 +1,6 @@
 import { SimulationService } from '../src/domain/SimulationService.js';
 import { Character } from '../src/domain/Character.js';
+import { LoggerService } from '../src/infrastructure/LoggerService.js';
 
 describe('SimulationService Integration Tests', () => {
   let simulationService;
@@ -7,19 +8,19 @@ describe('SimulationService Integration Tests', () => {
   let opponent;
 
   beforeEach(() => {
-    simulationService = new SimulationService();
+    simulationService = new SimulationService(new LoggerService());
     player = new Character({
       name: 'Player',
-      baseDamage: 100,
-      baseHealth: 1000,
+      totalDamage: 100,
+      totalHealth: 1000,
       weaponType: 'a-distance', // Use ranged to avoid 2s melee delay
       basePassiveSkills: {},
       activeSkills: []
     });
     opponent = new Character({
       name: 'Opponent',
-      baseDamage: 100,
-      baseHealth: 1000,
+      totalDamage: 100,
+      totalHealth: 1000,
       weaponType: 'corp-a-corp',
       basePassiveSkills: {},
       activeSkills: []
@@ -44,7 +45,7 @@ describe('SimulationService Integration Tests', () => {
       time += dt;
 
       const preAttackCount = attackSpy.mock.calls.length;
-      simulationService._processTick(p1, p2, dt);
+      simulationService._processTick(p1, p2, dt, time);
       const postAttackCount = attackSpy.mock.calls.length;
 
       if (postAttackCount > preAttackCount) {
