@@ -30,10 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const equipOld = domAdapter.getEquipment(2, baseStats);
         const cleanBaseStats = characterService.unequipEquipment(baseStats, equipOld);
 
+        // Create a dummy opponent using the character service
+        const opponent = characterService.createDummyOpponent(sheetStats);
+
         // Run simulation for new equipment
         let statsWithNewEquip = characterService.applyEquipment(cleanBaseStats, equipNew);
         let finalStatsNew = characterService.recalculateTotalStats(statsWithNewEquip);
-        finalStatsNew.enemy = sheetStats.enemy; // Make sure enemy stats are passed
+        finalStatsNew.enemy = opponent; // Make sure enemy stats are passed
         const resultNew = simulationService.simulate(finalStatsNew);
 
         loggerService.log('\n\n--- LOG FOR OLD EQUIPMENT ---\n');
@@ -46,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statsForOldScenario = characterService.applyEquipment(cleanBaseStats, equipOld);
         }
         let finalStatsOld = characterService.recalculateTotalStats(statsForOldScenario);
-        finalStatsOld.enemy = sheetStats.enemy; // Make sure enemy stats are passed
+        finalStatsOld.enemy = opponent; // Make sure enemy stats are passed
         const resultOld = simulationService.simulate(finalStatsOld);
 
         // Display results and combined log

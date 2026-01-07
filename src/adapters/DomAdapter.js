@@ -41,24 +41,6 @@ export class DomAdapter {
         return activeSkills;
     }
 
-    getCharacterStats() {
-        const basePassiveSkills = {};
-        this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
-            basePassiveSkills[skillId] = parseFloat(document.getElementById(skillId).value) || 0;
-        });
-
-        return new Character({
-            totalDamage: parseFloat(document.getElementById('total-damage').value) || 0,
-            totalHealth: parseFloat(document.getElementById('total-health').value) || 0,
-            weaponType: document.getElementById('weapon-type').value,
-            basePassiveSkills: basePassiveSkills,
-            activeSkills: this.getActiveSkills('player'),
-            enemy: {
-                dps: parseFloat(document.getElementById('enemy-dps').value) || 0,
-                weaponType: document.getElementById('enemy-weapon-type').value
-            }
-        });
-    }
 
     getEquipment(index, baseStats) {
         const category = document.getElementById('equipment-category').value;

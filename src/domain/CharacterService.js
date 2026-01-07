@@ -119,4 +119,15 @@ export class CharacterService {
 
         return stats;
     }
+
+    createDummyOpponent(playerStats) {
+        return {
+            name: 'Opponent',
+            totalDamage: playerStats.totalDamage,
+            totalHealth: playerStats.totalHealth,
+            weaponType: 'corp-a-corp',
+            basePassiveSkills: {},
+            activeSkills: []
+        };
+    }
 }
