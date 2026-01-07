@@ -19,20 +19,18 @@ export class EquipmentComparisonService {
     }
 
     compare(character, equipNew, equipOld) {
-        const baseStats = this.characterService.getCharacterBaseStats(character);
-        const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld);
         const dummyEnemy = this.createDummyEnemy(character);
 
-        // Run simulation for old equipment
-        let statsForOldScenario = this.characterService.applyEquipment(cleanBaseStats, equipOld);
-        let finalStatsOld = this.characterService.recalculateTotalStats(statsForOldScenario);
-        const pvpResultOld = this.simulationService.simulatePvp(finalStatsOld, dummyEnemy);
+        // Run simulation for old equipment (using the character stats as-is)
+        const pvpResultOld = this.simulationService.simulatePvp(character, dummyEnemy);
         const resultOld = {
             survivalTime: pvpResultOld.time,
             totalDamageDealt: pvpResultOld.player1.totalDamageDealt
         };
 
         // Run simulation for new equipment
+        const baseStats = this.characterService.getCharacterBaseStats(character);
+        const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld);
         let statsWithNewEquip = this.characterService.applyEquipment(cleanBaseStats, equipNew);
         let finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
         const pvpResultNew = this.simulationService.simulatePvp(finalStatsNew, dummyEnemy);

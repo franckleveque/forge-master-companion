@@ -59,15 +59,15 @@ describe('EquipmentComparisonService', () => {
         const callOrder = [];
 
         simulationService.simulatePvp.mockImplementation((player, enemy) => {
-            callOrder.push(player.equipment);
+            callOrder.push(player);
             return mockPvpResult;
         });
 
         service.compare(character, equipNew, equipOld);
 
         expect(simulationService.simulatePvp).toHaveBeenCalledTimes(2);
-        expect(callOrder[0]).toEqual(equipOld); // Old equipment first
-        expect(callOrder[1]).toEqual(equipNew); // New equipment second
+        expect(callOrder[0]).toBe(character); // Initial character for old equipment
+        expect(callOrder[1]).toEqual(expect.objectContaining({ equipment: equipNew })); // New character for new equipment
     });
 
     test('should correctly pass character and dummy enemy to pvp simulation', () => {
@@ -77,7 +77,7 @@ describe('EquipmentComparisonService', () => {
         service.compare(character, equipNew, equipOld);
 
         expect(simulationService.simulatePvp).toHaveBeenCalledWith(
-            expect.objectContaining({ equipment: equipOld }),
+            character,
             expect.any(Character)
         );
         expect(simulationService.simulatePvp).toHaveBeenCalledWith(
