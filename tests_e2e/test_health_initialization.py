@@ -35,7 +35,7 @@ def test_health_is_max_at_fight_start(page: Page):
     log_content = log_content_element.inner_text()
 
     # --- Verification for "New Equipment" simulation ---
-    new_equip_log_match = re.search(r"--- Simulation with New Equip ---\n([\s\S]*?)--- Simulation with Old Equip ---", log_content)
+    new_equip_log_match = re.search(r"--- Simulation avec Nouvel Équipement ---\n([\s\S]*?)--- Simulation avec Équipement Actuel ---", log_content)
     assert new_equip_log_match, "Could not find the log block for the new equipment simulation."
     new_equip_log = new_equip_log_match.group(1)
 
@@ -52,7 +52,7 @@ def test_health_is_max_at_fight_start(page: Page):
     assert enemy_health_new == int(initial_player_health)
 
     # --- Verification for "Old Equipment" simulation ---
-    old_equip_log_match = re.search(r"--- Simulation with Old Equip ---\n([\s\S]*)", log_content)
+    old_equip_log_match = re.search(r"--- Simulation avec Équipement Actuel ---\n([\s\S]*)", log_content)
     assert old_equip_log_match, "Could not find the log block for the old equipment simulation."
     old_equip_log = old_equip_log_match.group(1)
 

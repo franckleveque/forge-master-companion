@@ -89,6 +89,22 @@ document.addEventListener('DOMContentLoaded', () => {
     uiService.importPvpButton.addEventListener('click', () => uiService.importFile.click());
     uiService.importFile.addEventListener('change', (event) => {
         fileService.importData(event, (data) => {
+            // Normalize weapon_type to weaponType at the application boundary
+            if (data.character_stats && data.character_stats.weapon_type) {
+                data.character_stats.weaponType = data.character_stats.weapon_type;
+                delete data.character_stats.weapon_type;
+            }
+            if (data.equipment) {
+                if (data.equipment.equip1 && data.equipment.equip1.weapon_type) {
+                    data.equipment.equip1.weaponType = data.equipment.equip1.weapon_type;
+                    delete data.equipment.equip1.weapon_type;
+                }
+                if (data.equipment.equip2 && data.equipment.equip2.weapon_type) {
+                    data.equipment.equip2.weaponType = data.equipment.equip2.weapon_type;
+                    delete data.equipment.equip2.weapon_type;
+                }
+            }
+
             if (data.type === 'equipment_comparison' && uiService.isEquipmentMode()) {
                 domAdapter.importEquipmentComparisonData(data);
             } else if (data.type === 'pvp_simulation' && uiService.isPvpMode()) {
