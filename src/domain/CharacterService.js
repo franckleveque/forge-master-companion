@@ -59,15 +59,18 @@ export class CharacterService {
             ...stats,
             baseDamage: effectiveBaseDamage,
             baseHealth: effectiveBaseHealth,
+            basePassiveSkills: stats.basePassiveSkills, // Ensure passives are passed through
             name: stats.name || 'Player' // Ensure a name is set
         });
-        // Recalculate total health to set the correct maxHealth value
+
+        // Recalculate final stats based on the new base stats
         return this.recalculateTotalStats(character);
     }
 
     recalculateTotalStats(characterStats) {
-        const p = characterStats.basePassiveSkills;
+        // Use a deep copy to ensure the original object is NEVER mutated.
         const stats = JSON.parse(JSON.stringify(characterStats));
+        const p = stats.basePassiveSkills || {};
 
         let effectiveBaseDamage = stats.baseDamage;
         let effectiveBaseHealth = stats.baseHealth;
@@ -99,7 +102,11 @@ export class CharacterService {
         // Ensure maxHealth is also updated when totalHealth changes.
         stats.maxHealth = stats.totalHealth;
 
-        return new Character(stats);
+        // Pass the full stats object to the constructor.
+        // The ...stats spread includes the (potentially modified) basePassiveSkills.
+        return new Character({
+            ...stats
+        });
     }
 
     applyEquipment(characterStats, equipment) {

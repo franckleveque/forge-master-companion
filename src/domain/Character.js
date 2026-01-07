@@ -75,21 +75,53 @@ export class Character {
         if (this.attackTimer >= attackTime) {
             this.attackTimer -= attackTime;
             this.performAttack();
+
+            let performExtraAttack = false;
+            this.passiveSkills.forEach(skill => {
+                if (skill.onAfterAttackProcessed) {
+                    if (skill.onAfterAttackProcessed(this, this.enemy, this._log)) {
+                        performExtraAttack = true;
+                    }
+                }
+            });
+
+            if (performExtraAttack) {
+                this.performAttack();
+            }
         }
     }
 
     performAttack() {
         if (this.enemy && this.enemy.isAlive()) {
             let damage = this.totalDamage;
+
             this.passiveSkills.forEach(skill => {
                 if (skill.onModifyOutgoingDamage) {
-                    damage = skill.onModifyOutgoingDamage(this, this.enemy, damage);
+                    damage = skill.onModifyOutgoingDamage(this, this.enemy, damage, this._log);
                 }
             });
+
             this.enemy.takeDamage(damage);
             this.totalDamageDealt += damage;
             this._log(`${this.id} attacks ${this.enemy.id} for ${damage.toFixed(0)} damage. ${this.enemy.id}'s health is now ${this.enemy.health.toFixed(0)}.`);
+
+            // Trigger after-attack effects
+            this.passiveSkills.forEach(skill => {
+                if (skill.onAfterAttackDealt) {
+                    skill.onAfterAttackDealt(this, this.enemy, damage);
+                }
+            });
         }
+    }
+
+    heal(amount) {
+        if (!this.isAlive()) return 0;
+        const healthBefore = this.health;
+        this.health += amount;
+        if (this.health > this.maxHealth) {
+            this.health = this.maxHealth;
+        }
+        return this.health - healthBefore;
     }
 
     takeDamage(amount) {

@@ -1,46 +1,45 @@
 import { RegenerationSante } from '../../src/domain/passives/RegenerationSante.js';
 
 describe('RegenerationSante', () => {
-  it('should not have onCalculateStats logic', () => {
-    // This skill's value is used directly in onTick, not pre-calculated
-    const character = {};
-    const skill = new RegenerationSante(10);
-    // onCalculateStats should be empty or non-existent
-    if (skill.onCalculateStats) {
-      skill.onCalculateStats(character);
-    }
-    // No properties should be added to character
-    expect(character).toEqual({});
-  });
+    let character;
 
-  it('should regenerate health based on a percentage of finalHealth per second', () => {
-    const character = { currentHealth: 100, finalHealth: 1000 };
-    const skill = new RegenerationSante(10); // 10% of finalHealth per second
-    skill.onTick(character, 1.0); // Simulate 1 second
-    // 100 (current) + 1000 * (10 / 100) * 1.0 = 200
-    expect(character.currentHealth).toBe(200);
-  });
+    beforeEach(() => {
+        character = {
+            maxHealth: 1000,
+            health: 500,
+            heal: jest.fn(function(amount) {
+                const healedAmount = Math.min(this.maxHealth - this.health, amount);
+                this.health += healedAmount;
+                return healedAmount;
+            }),
+            _log: jest.fn(),
+            id: 'Player'
+        };
+    });
 
-  it('should handle different delta times correctly', () => {
-    const character = { currentHealth: 100, finalHealth: 1000 };
-    const skill = new RegenerationSante(10);
-    skill.onTick(character, 0.5); // Simulate half a second
-    // 100 + 1000 * 0.1 * 0.5 = 150
-    expect(character.currentHealth).toBe(150);
-  });
+    it('should call heal with the correct amount for 1 second', () => {
+        const skill = new RegenerationSante(10); // 10%
+        skill.onTick(character, 1.0);
+        expect(character.heal).toHaveBeenCalledWith(100); // 10% of 1000
+        expect(character._log).toHaveBeenCalledWith('Player regenerates 100 health from Regeneration. Now at 600 HP.');
+    });
 
-  test('handles zero health regeneration', () => {
-    const character = { currentHealth: 100, finalHealth: 1000 };
-    const skill = new RegenerationSante(0);
-    skill.onTick(character, 1.0);
-    expect(character.currentHealth).toBe(100);
-  });
+    it('should call heal with the correct amount for 0.5 seconds', () => {
+        const skill = new RegenerationSante(10); // 10%
+        skill.onTick(character, 0.5);
+        expect(character.heal).toHaveBeenCalledWith(50); // 10% of 1000 * 0.5
+        expect(character._log).toHaveBeenCalledWith('Player regenerates 50 health from Regeneration. Now at 550 HP.');
+    });
 
-  test('handles negative health regeneration', () => {
-    const character = { currentHealth: 100, finalHealth: 1000 };
-    const skill = new RegenerationSante(-10);
-    skill.onTick(character, 1.0);
-    // 100 + 1000 * (-0.1) * 1.0 = 0
-    expect(character.currentHealth).toBe(0);
-  });
+    it('should not call heal if regeneration value is zero', () => {
+        const skill = new RegenerationSante(0);
+        skill.onTick(character, 1.0);
+        expect(character.heal).not.toHaveBeenCalled();
+    });
+
+    it('should not call heal if regeneration value is negative', () => {
+        const skill = new RegenerationSante(-10);
+        skill.onTick(character, 1.0);
+        expect(character.heal).not.toHaveBeenCalled();
+    });
 });

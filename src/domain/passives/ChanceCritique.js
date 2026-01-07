@@ -12,15 +12,14 @@ export class ChanceCritique extends PassiveSkill {
         this.critCounter = 0;
     }
 
-    onCalculateStats(character) {
-        character.critChance += this.value / 100;
-    }
-
-    onModifyOutgoingDamage(attacker, defender, damage) {
-        this.critCounter += attacker.critChance;
+    onModifyOutgoingDamage(attacker, defender, damage, log) {
+        this.critCounter += (attacker.basePassiveSkills['chance-critique'] || 0) / 100;
         if (this.critCounter >= 1) {
             this.critCounter--;
-            return damage * attacker.critDamage;
+            const critDamageModifier = 1 + (attacker.basePassiveSkills['degats-critiques'] || 0) / 100;
+            const modifiedDamage = damage * critDamageModifier;
+            log(`${attacker.id} lands a Critical Strike!`);
+            return modifiedDamage;
         }
         return damage;
     }

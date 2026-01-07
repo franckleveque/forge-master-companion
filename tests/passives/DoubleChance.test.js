@@ -1,43 +1,33 @@
 import { DoubleChance } from '../../src/domain/passives/DoubleChance.js';
 
 describe('DoubleChance', () => {
-    beforeEach(() => {
-        DoubleChance.doubleCounter = 0;
+    it('should return true and log when double chance counter is high enough', () => {
+        const skill = new DoubleChance(100);
+        const attacker = {
+            id: 'Player',
+            basePassiveSkills: {
+                'double-chance': 100
+            }
+        };
+        const mockLog = jest.fn();
+        const result = skill.onAfterAttackProcessed(attacker, null, mockLog);
+
+        expect(result).toBe(true);
+        expect(mockLog).toHaveBeenCalledWith('Player performs an extra attack from Double Chance!');
     });
 
-  it('should increase doubleChance onCalculateStats', () => {
-    const character = { doubleChance: 0 };
-    const skill = new DoubleChance(50);
-    skill.onCalculateStats(character);
-    expect(character.doubleChance).toBe(0.5);
-  });
+    it('should return false and not log when double chance counter is too low', () => {
+        const skill = new DoubleChance(0);
+        const attacker = {
+            id: 'Player',
+            basePassiveSkills: {
+                'double-chance': 0
+            }
+        };
+        const mockLog = jest.fn();
+        const result = skill.onAfterAttackProcessed(attacker, null, mockLog);
 
-  it('should trigger extra attack when counter allows', () => {
-    const character = { doubleChance: 1.0 };
-    const skill = new DoubleChance(100);
-    const result = skill.onAfterAttackProcessed(character, null);
-    expect(result).toBe(true);
-  });
-
-  it('should not trigger extra attack when counter does not allow', () => {
-    const character = { doubleChance: 0.5 };
-    const skill = new DoubleChance(50);
-    DoubleChance.doubleCounter = 0.6;
-    const result = skill.onAfterAttackProcessed(character, null);
-    expect(result).toBe(false);
-  });
-
-  test('handles zero double chance', () => {
-    const character = { doubleChance: 0 };
-    const skill = new DoubleChance(0);
-    skill.onCalculateStats(character);
-    expect(character.doubleChance).toBe(0);
-  });
-
-  test('handles negative double chance', () => {
-    const character = { doubleChance: 0 };
-    const skill = new DoubleChance(-50);
-    skill.onCalculateStats(character);
-    expect(character.doubleChance).toBe(-0.5);
-  });
+        expect(result).toBe(false);
+        expect(mockLog).not.toHaveBeenCalled();
+    });
 });
