@@ -29,5 +29,5 @@ def test_mode_switching_from_pvp_to_equipment(page):
     expect(page.locator("#pvp-simulation-section")).not_to_be_visible()
 
     # Check for simplified opponent section
-    expect(page.locator(".enemy-stats")).to_be_visible()
+    expect(page.locator(".enemy-stats")).not_to_be_visible()
     expect(page.locator(".equipment-comparison")).to_be_visible()

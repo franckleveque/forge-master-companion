@@ -52,11 +52,7 @@ export class DomAdapter {
             totalHealth: parseFloat(document.getElementById('total-health').value) || 0,
             weaponType: document.getElementById('weapon-type').value,
             basePassiveSkills: basePassiveSkills,
-            activeSkills: this.getActiveSkills('player'),
-            enemy: {
-                dps: parseFloat(document.getElementById('enemy-dps').value) || 0,
-                weaponType: document.getElementById('enemy-weapon-type').value
-            }
+            activeSkills: this.getActiveSkills('player')
         });
     }
 
@@ -201,7 +197,6 @@ export class DomAdapter {
 
         data.enemy_stats.dps = this.getElementValue('enemy-dps');
         data.enemy_stats.weapon_type = this.getElementValue('enemy-weapon-type');
-
         data.equipment.category = this.getElementValue('equipment-category');
         data.equipment.equip1.weapon_type = this.getElementValue('equip1-weapon-type');
         data.equipment.equip1.damage = this.getElementValue('equip1-damage-value');
@@ -288,9 +283,10 @@ export class DomAdapter {
             toggleSkillParams(skillId);
         }
 
-        this.setElementValue('enemy-dps', data.enemy_stats.dps);
-        this.setElementValue('enemy-weapon-type', data.enemy_stats.weapon_type);
-
+        if (data.enemy_stats) {
+            this.setElementValue('enemy-dps', data.enemy_stats.dps);
+            this.setElementValue('enemy-weapon-type', data.enemy_stats.weapon_type);
+        }
         this.setElementValue('equipment-category', data.equipment.category);
         this.setElementValue('equip1-weapon-type', data.equipment.equip1.weapon_type);
         this.setElementValue('equip1-damage-value', data.equipment.equip1.damage);
