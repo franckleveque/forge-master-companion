@@ -9,7 +9,8 @@ export class Character {
         totalHealth,
         weaponType,
         basePassiveSkills,
-        activeSkills
+        activeSkills,
+        enemy
     }) {
         this.name = name;
         this.baseDamage = baseDamage;
@@ -19,5 +20,6 @@ export class Character {
         this.weaponType = weaponType;
         this.basePassiveSkills = basePassiveSkills;
         this.activeSkills = activeSkills;
+        this.enemy = enemy;
     }
 }
