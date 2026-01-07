@@ -20,10 +20,13 @@ export class EquipmentComparisonService {
     }
 
     compare(character, equipNew, equipOld) {
+        // Create a single, standardized dummy enemy based on the initial character stats.
+        const standardDummyEnemy = this.createDummyEnemy(character, 'Ennemi');
+
         // Run simulation for old equipment
         const characterOld = new Character({ ...character, name: 'Avec Équipement Actuel' });
-        const dummyEnemyOld = this.createDummyEnemy(characterOld, 'Ennemi (vs Équipement Actuel)');
-        const pvpResultOld = this.simulationService.simulatePvp(characterOld, dummyEnemyOld);
+        // Use a clone of the standard enemy for the simulation to prevent state mutation.
+        const pvpResultOld = this.simulationService.simulatePvp(characterOld, new Character(standardDummyEnemy));
         const resultOld = {
             survivalTime: pvpResultOld.time,
             totalDamageDealt: pvpResultOld.player1.totalDamageDealt,
@@ -38,8 +41,8 @@ export class EquipmentComparisonService {
         const finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
 
         const characterNew = new Character({ ...finalStatsNew, name: 'Avec Nouvel Équipement' });
-        const dummyEnemyNew = this.createDummyEnemy(characterNew, 'Ennemi (vs Nouvel Équipement)');
-        const pvpResultNew = this.simulationService.simulatePvp(characterNew, dummyEnemyNew);
+        // Use a fresh clone of the standard enemy for the second simulation.
+        const pvpResultNew = this.simulationService.simulatePvp(characterNew, new Character(standardDummyEnemy));
         const resultNew = {
             survivalTime: pvpResultNew.time,
             totalDamageDealt: pvpResultNew.player1.totalDamageDealt,
