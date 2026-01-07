@@ -91,12 +91,14 @@ This project uses Jest for unit/integration testing and Playwright for E2E testi
 
 1.  **Select the "Equipment Comparison" Tab.**
 2.  **Enter Character Stats:** Fill in your character's total damage, health, and weapon type.
-3.  **Enter Base Passive Skills:** Input your character's passive skill percentages *before* equipping either of the items you want to compare.
+3.  **Enter Passive Skills:** Input your character's total passive skill percentages as they appear in-game (i.e., *with* your old equipment on).
 4.  **Configure Active Skills:** Set up your three active skills (type, base value, cooldown).
-5.  **Enter Equipment to Compare:**
-    *   For each piece of equipment, enter its main stat and any passive skill bonuses it provides.
-    *   **Important:** If your in-game stats already include the old equipment, check the **"Stats are included..."** box. This correctly subtracts the old item's stats before running the comparison.
-6.  **Compare:** Click the "Compare Equipment" button. The tool will simulate combat with each item and declare the best one based on a combined score of survival time and total damage dealt.
+5.  **Enter Enemy Stats:** Input the opponent's Damage Per Second (DPS) and their weapon type for the simulation.
+6.  **Enter Equipment to Compare:**
+    *   For the "Old Equipment" and "New Equipment", enter the main stat and any passive skill bonuses each item provides.
+7.  **Compare:** Click the "Compare Equipment" button. The tool will simulate combat with each item and declare the best one based on a combined score of survival time and total damage dealt.
+
+**Important:** The tool automatically calculates your character's base stats. It assumes the stats you entered in steps 2 & 3 already include the bonuses from your "Old Equipment".
 
 ### PvP Simulation
 
@@ -115,7 +117,7 @@ You can save and load your configurations for either mode.
 
 *   **Simulation Model:** The simulation is **deterministic**, running on a high-precision time step (0.01s). It continues until a character's health reaches zero or a 60-second time limit is reached. This ensures consistent, reproducible results.
 *   **Player Attack Speed:** The "Vitesse d'attaque" passive reduces the time between attacks based on an exponential model. Every 100% bonus halves the time per attack.
-*   **Weapon Delay:** Melee weapons have a 2-second delay before their first attack.
+*   **Weapon Delay:** Melee weapons have a 2-second delay before their first attack to simulate the character walking to get into melee range.
 *   **Probabilities (Crit, Block, etc.):** All percentage-based chances are normalized for consistency. For example, a 10% chance to block will result in exactly 1 blocked attack for every 10 enemy hits.
 *   **Lifesteal:** Heals based on a percentage of auto-attack damage.
 *   **Health Regen:** Heals based on a percentage of maximum health per second.
