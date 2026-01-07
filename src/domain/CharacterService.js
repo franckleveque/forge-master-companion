@@ -55,13 +55,14 @@ export class CharacterService {
 
         // Ensure this service returns a full Character instance, not just a plain object.
         // This is critical for the simulation to have access to all class methods and properties.
-        return new Character({
+        const character = new Character({
             ...stats,
             baseDamage: effectiveBaseDamage,
             baseHealth: effectiveBaseHealth,
-            maxHealth: stats.totalHealth, // Set maxHealth from the sheet's total health
             name: stats.name || 'Player' // Ensure a name is set
         });
+        // Recalculate total health to set the correct maxHealth value
+        return this.recalculateTotalStats(character);
     }
 
     recalculateTotalStats(characterStats) {
@@ -95,6 +96,9 @@ export class CharacterService {
         stats.totalDamage = effectiveBaseDamage * totalDamageModifier;
         stats.totalHealth = effectiveBaseHealth * totalHealthModifier;
 
+        // Ensure maxHealth is also updated when totalHealth changes.
+        stats.maxHealth = stats.totalHealth;
+
         return new Character(stats);
     }
 
@@ -112,7 +116,7 @@ export class CharacterService {
             stats.weaponType = equipment.weaponType;
         }
 
-        return stats;
+        return new Character(stats);
     }
 
     unequipEquipment(characterStats, equipment) {
@@ -125,6 +129,6 @@ export class CharacterService {
             stats.basePassiveSkills[passive.id] = (stats.basePassiveSkills[passive.id] || 0) - equipment.passiveSkillValue;
         }
 
-        return stats;
+        return new Character(stats);
     }
 }

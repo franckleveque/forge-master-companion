@@ -14,7 +14,7 @@ export class EquipmentComparisonService {
             id: 'Ennemi',
             totalDamage: charCopy.totalDamage,
             totalHealth: charCopy.totalHealth,
-            weaponType: 'melee',
+            weaponType: 'corp-a-corp',
             activeSkills: [],
             basePassiveSkills: {}
         });
