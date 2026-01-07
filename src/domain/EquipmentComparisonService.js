@@ -9,9 +9,11 @@ export class EquipmentComparisonService {
     }
 
     createDummyEnemy(character) {
+        const charCopy = JSON.parse(JSON.stringify(character));
         return new Character({
-            totalDamage: character.totalDamage,
-            totalHealth: character.totalHealth,
+            id: 'Ennemi',
+            totalDamage: charCopy.totalDamage,
+            totalHealth: charCopy.totalHealth,
             weaponType: 'melee',
             activeSkills: [],
             basePassiveSkills: {}
@@ -19,26 +21,34 @@ export class EquipmentComparisonService {
     }
 
     compare(character, equipNew, equipOld) {
-        const dummyEnemy = this.createDummyEnemy(character);
+        const initialCharacterState = JSON.parse(JSON.stringify(character));
+        const dummyEnemy = this.createDummyEnemy(new Character(initialCharacterState));
 
-        // Run simulation for old equipment (using the character stats as-is)
-        const pvpResultOld = this.simulationService.simulatePvp(character, dummyEnemy);
-        const resultOld = {
-            survivalTime: pvpResultOld.time,
-            totalDamageDealt: pvpResultOld.player1.totalDamageDealt,
-            healthRemaining: pvpResultOld.player1.healthRemaining
-        };
-
-        // Run simulation for new equipment
-        const baseStats = this.characterService.getCharacterBaseStats(character);
+        const baseStats = this.characterService.getCharacterBaseStats(initialCharacterState);
         const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld);
-        let statsWithNewEquip = this.characterService.applyEquipment(cleanBaseStats, equipNew);
-        let finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
-        const pvpResultNew = this.simulationService.simulatePvp(finalStatsNew, dummyEnemy);
+        const statsWithNewEquip = this.characterService.applyEquipment(cleanBaseStats, equipNew);
+        const finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
+
+        const characterForNewSim = new Character(finalStatsNew);
+        characterForNewSim.id = "Player (New Equip)";
+        const pvpResultNew = this.simulationService.simulatePvp(characterForNewSim, JSON.parse(JSON.stringify(dummyEnemy)));
         const resultNew = {
             survivalTime: pvpResultNew.time,
             totalDamageDealt: pvpResultNew.player1.totalDamageDealt,
-            healthRemaining: pvpResultNew.player1.healthRemaining
+            healthRemaining: pvpResultNew.player1.healthRemaining,
+            maxHealth: characterForNewSim.totalHealth,
+            log: pvpResultNew.log
+        };
+
+        const characterForOldSim = new Character(initialCharacterState);
+        characterForOldSim.id = "Player (Old Equip)";
+        const pvpResultOld = this.simulationService.simulatePvp(characterForOldSim, JSON.parse(JSON.stringify(dummyEnemy)));
+        const resultOld = {
+            survivalTime: pvpResultOld.time,
+            totalDamageDealt: pvpResultOld.player1.totalDamageDealt,
+            healthRemaining: pvpResultOld.player1.healthRemaining,
+            maxHealth: characterForOldSim.totalHealth,
+            log: pvpResultOld.log
         };
 
         return { resultNew, resultOld };

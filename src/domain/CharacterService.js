@@ -1,4 +1,5 @@
 // src/domain/CharacterService.js
+import { Character } from "./Character.js";
 
 export class CharacterService {
     constructor() {
@@ -24,22 +25,25 @@ export class CharacterService {
     }
 
     getCharacterBaseStats(sheetStats) {
-        const p = sheetStats.basePassiveSkills;
+        // Use a deep copy to ensure the original object is NEVER mutated.
+        const stats = JSON.parse(JSON.stringify(sheetStats));
+        const p = stats.basePassiveSkills;
+
         let totalDamageModifier = 1 + (p['degats'] || 0) / 100;
-        if (sheetStats.weaponType === 'corp-a-corp') {
+        if (stats.weaponType === 'corp-a-corp') {
             totalDamageModifier += (p['degats-corps-a-corps'] || 0) / 100;
-        } else if (sheetStats.weaponType === 'a-distance') {
+        } else if (stats.weaponType === 'a-distance') {
             totalDamageModifier += (p['degats-a-distance'] || 0) / 100;
         }
 
         const totalHealthModifier = 1 + (p['sante'] || 0) / 100;
 
-        let effectiveBaseDamage = sheetStats.totalDamage / (totalDamageModifier || 1);
-        let effectiveBaseHealth = sheetStats.totalHealth / (totalHealthModifier || 1);
+        let effectiveBaseDamage = stats.totalDamage / (totalDamageModifier || 1);
+        let effectiveBaseHealth = stats.totalHealth / (totalHealthModifier || 1);
 
-        if (sheetStats.activeSkills && Array.isArray(sheetStats.activeSkills)) {
+        if (stats.activeSkills && Array.isArray(stats.activeSkills)) {
             const competenceDegatsMod = 1 + (p['competence-degats'] || 0) / 100;
-            sheetStats.activeSkills.forEach(skill => {
+            stats.activeSkills.forEach(skill => {
                 if (skill.baseDamage) {
                     effectiveBaseDamage -= skill.baseDamage * competenceDegatsMod;
                 }
@@ -49,11 +53,15 @@ export class CharacterService {
             });
         }
 
-        return {
-            ...sheetStats,
+        // Ensure this service returns a full Character instance, not just a plain object.
+        // This is critical for the simulation to have access to all class methods and properties.
+        return new Character({
+            ...stats,
             baseDamage: effectiveBaseDamage,
             baseHealth: effectiveBaseHealth,
-        };
+            maxHealth: stats.totalHealth, // Set maxHealth from the sheet's total health
+            name: stats.name || 'Player' // Ensure a name is set
+        });
     }
 
     recalculateTotalStats(characterStats) {
@@ -87,7 +95,7 @@ export class CharacterService {
         stats.totalDamage = effectiveBaseDamage * totalDamageModifier;
         stats.totalHealth = effectiveBaseHealth * totalHealthModifier;
 
-        return stats;
+        return new Character(stats);
     }
 
     applyEquipment(characterStats, equipment) {

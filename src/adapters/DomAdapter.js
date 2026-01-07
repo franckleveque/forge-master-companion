@@ -3,7 +3,8 @@
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 import { Character } from '../domain/Character.js';
 import { Equipment } from '../domain/Equipment.js';
-import { DamageSkill, BuffSkill } from '../domain/Skills.js';
+import { DamageSkill } from '../domain/skills/DamageSkill.js';
+import { BuffSkill } from '../domain/skills/BuffSkill.js';
 
 export class DomAdapter {
     constructor(characterService, passiveSkillService) {
@@ -71,11 +72,11 @@ export class DomAdapter {
     }
 
     displayComparisonResults(resultNew, resultOld) {
-        document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinity";
         document.getElementById('health-remaining-1').textContent = resultNew.healthRemaining.toLocaleString();
         document.getElementById('total-damage-1').textContent = resultNew.totalDamageDealt.toLocaleString();
 
-        document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinity";
         document.getElementById('health-remaining-2').textContent = resultOld.healthRemaining.toLocaleString();
         document.getElementById('total-damage-2').textContent = resultOld.totalDamageDealt.toLocaleString();
 
@@ -85,16 +86,23 @@ export class DomAdapter {
         resultItem1.className = 'result-item';
         resultItem2.className = 'result-item';
 
+        // Tie-breaker logic:
+        // 1. Higher survival time wins.
+        // 2. If survival time is equal, higher max health wins.
+        // 3. If max health is also equal, higher total damage wins.
+        // 4. If all are equal, new equipment wins by default.
         if (resultNew.survivalTime > resultOld.survivalTime) {
             resultItem1.classList.add('best-equipment');
         } else if (resultOld.survivalTime > resultNew.survivalTime) {
             resultItem2.classList.add('best-equipment');
-        } else { // Equal survival time, check health
-            if (resultNew.healthRemaining > resultOld.healthRemaining) {
+        } else {
+            // Survival times are equal, check max health
+            if (resultNew.maxHealth > resultOld.maxHealth) {
                 resultItem1.classList.add('best-equipment');
-            } else if (resultOld.healthRemaining > resultNew.healthRemaining) {
+            } else if (resultOld.maxHealth > resultNew.maxHealth) {
                 resultItem2.classList.add('best-equipment');
-            } else { // Equal health, check damage
+            } else {
+                // Max health is equal, check total damage
                 if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
                     resultItem1.classList.add('best-equipment');
                 } else {
@@ -103,6 +111,7 @@ export class DomAdapter {
             }
         }
 
+        this.displayLogs('equipment', `--- Simulation with New Equip ---\n${resultNew.log.join('\n')}\n\n--- Simulation with Old Equip ---\n${resultOld.log.join('\n')}`);
         document.querySelector('[data-testid="equipment-log-controls"]').style.display = 'block';
     }
 
@@ -348,7 +357,11 @@ export class DomAdapter {
 
     displayLogs(prefix, log) {
         const logContent = document.getElementById(`log-content-${prefix}`);
-        logContent.textContent = log.join('\n');
+        if (Array.isArray(log)) {
+            logContent.textContent = log.join('\n');
+        } else {
+            logContent.textContent = log;
+        }
     }
 
     toggleLogVisibility(prefix) {
