@@ -12,10 +12,6 @@ export class DoubleChance extends PassiveSkill {
         this.doubleChanceCounter = 0;
     }
 
-    onCalculateStats(character) {
-        character.doubleChance += this.value / 100;
-    }
-
     onAfterAttackProcessed(attacker, defender) {
         this.doubleChanceCounter += attacker.doubleChance;
         if (this.doubleChanceCounter >= 1) {

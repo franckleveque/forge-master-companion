@@ -228,46 +228,9 @@ export class DomAdapter {
     getPvpData() {
         const data = {
             type: 'pvp_simulation',
-            player: {
-                character_stats: {},
-                passive_skills: {},
-                active_skills: []
-            },
-            opponent: {
-                character_stats: {},
-                passive_skills: {},
-                active_skills: []
-            }
+            player: this.getCharacterStatsPvp('player'),
+            opponent: this.getCharacterStatsPvp('opponent')
         };
-
-        ['player', 'opponent'].forEach(prefix => {
-            const charData = data[prefix];
-            const id_prefix = prefix === 'player' ? '' : `${prefix}-`;
-
-            charData.character_stats.total_damage = this.getElementValue(`${id_prefix}total-damage`);
-            charData.character_stats.total_health = this.getElementValue(`${id_prefix}total-health`);
-            charData.character_stats.weapon_type = this.getElementValue(`${id_prefix}weapon-type`);
-
-            this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
-                charData.passive_skills[skillId] = this.getElementValue(`${id_prefix}${skillId}`);
-            });
-
-            for (let i = 1; i <= 3; i++) {
-                const skillId = `${id_prefix}active${i}`;
-                charData.active_skills.push({
-                    type: this.getElementValue(`${skillId}-type`),
-                    baseDamage: this.getElementValue(`${skillId}-baseDamage`),
-                    baseHealth: this.getElementValue(`${skillId}-baseHealth`),
-                    cooldown: this.getElementValue(`${skillId}-cooldown`),
-                    value: this.getElementValue(`${skillId}-value`),
-                    hits: this.getElementValue(`${skillId}-hits`),
-                    damageBuff: this.getElementValue(`${skillId}-damageBuff`),
-                    healthBuff: this.getElementValue(`${skillId}-healthBuff`),
-                    duration: this.getElementValue(`${skillId}-duration`)
-                });
-            }
-        });
-
         return data;
     }
 
@@ -310,47 +273,49 @@ export class DomAdapter {
     }
 
     importPvpData(data) {
+        // Player Data
         const playerData = data.player;
-        this.setElementValue('total-damage', playerData.character_stats.total_damage);
-        this.setElementValue('total-health', playerData.character_stats.total_health);
-        this.setElementValue('weapon-type', playerData.character_stats.weaponType);
+        this.setElementValue('total-damage', playerData.totalDamage);
+        this.setElementValue('total-health', playerData.totalHealth);
+        this.setElementValue('weapon-type', playerData.weaponType);
         this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
-            this.setElementValue(skillId, playerData.passive_skills[skillId]);
+            this.setElementValue(skillId, playerData.basePassiveSkills[skillId]);
         });
         for (let i = 1; i <= 3; i++) {
             const skillId = `player-active${i}`;
-            const skillData = playerData.active_skills[i - 1];
-            this.setElementValue(`${skillId}-type`, skillData.type);
-            this.setElementValue(`${skillId}-baseDamage`, skillData.baseDamage);
-            this.setElementValue(`${skillId}-baseHealth`, skillData.baseHealth);
-            this.setElementValue(`${skillId}-cooldown`, skillData.cooldown);
-            this.setElementValue(`${skillId}-value`, skillData.value);
-            this.setElementValue(`${skillId}-hits`, skillData.hits);
-            this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff);
-            this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff);
-            this.setElementValue(`${skillId}-duration`, skillData.duration);
+            const skillData = playerData.activeSkills[i - 1] || {};
+            this.setElementValue(`${skillId}-type`, skillData.type || '');
+            this.setElementValue(`${skillId}-baseDamage`, skillData.baseDamage || '');
+            this.setElementValue(`${skillId}-baseHealth`, skillData.baseHealth || '');
+            this.setElementValue(`${skillId}-cooldown`, skillData.cooldown || '');
+            this.setElementValue(`${skillId}-value`, skillData.value || '');
+            this.setElementValue(`${skillId}-hits`, skillData.hits || '');
+            this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff || '');
+            this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff || '');
+            this.setElementValue(`${skillId}-duration`, skillData.duration || '');
             toggleSkillParams(skillId);
         }
 
+        // Opponent Data
         const opponentData = data.opponent;
-        this.setElementValue('opponent-total-damage', opponentData.character_stats.total_damage);
-        this.setElementValue('opponent-total-health', opponentData.character_stats.total_health);
-        this.setElementValue('opponent-weapon-type', opponentData.character_stats.weapon_type);
-        this.characterService.getPassiveSkills().forEach(skill => {
-            this.setElementValue(`opponent-${skill.id}`, opponentData.passive_skills[skill.id]);
+        this.setElementValue('opponent-total-damage', opponentData.totalDamage);
+        this.setElementValue('opponent-total-health', opponentData.totalHealth);
+        this.setElementValue('opponent-weapon-type', opponentData.weaponType);
+        this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
+            this.setElementValue(`opponent-${skillId}`, opponentData.basePassiveSkills[skillId]);
         });
         for (let i = 1; i <= 3; i++) {
             const skillId = `opponent-active${i}`;
-            const skillData = opponentData.active_skills[i - 1];
-            this.setElementValue(`${skillId}-type`, skillData.type);
-            this.setElementValue(`${skillId}-baseDamage`, skillData.baseDamage);
-            this.setElementValue(`${skillId}-baseHealth`, skillData.baseHealth);
-            this.setElementValue(`${skillId}-cooldown`, skillData.cooldown);
-            this.setElementValue(`${skillId}-value`, skillData.value);
-            this.setElementValue(`${skillId}-hits`, skillData.hits);
-            this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff);
-            this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff);
-            this.setElementValue(`${skillId}-duration`, skillData.duration);
+            const skillData = opponentData.activeSkills[i - 1] || {};
+            this.setElementValue(`${skillId}-type`, skillData.type || '');
+            this.setElementValue(`${skillId}-baseDamage`, skillData.baseDamage || '');
+            this.setElementValue(`${skillId}-baseHealth`, skillData.baseHealth || '');
+            this.setElementValue(`${skillId}-cooldown`, skillData.cooldown || '');
+            this.setElementValue(`${skillId}-value`, skillData.value || '');
+            this.setElementValue(`${skillId}-hits`, skillData.hits || '');
+            this.setElementValue(`${skillId}-damageBuff`, skillData.damageBuff || '');
+            this.setElementValue(`${skillId}-healthBuff`, skillData.healthBuff || '');
+            this.setElementValue(`${skillId}-duration`, skillData.duration || '');
             toggleSkillParams(skillId);
         }
     }

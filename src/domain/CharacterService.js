@@ -59,9 +59,11 @@ export class CharacterService {
             ...stats,
             baseDamage: effectiveBaseDamage,
             baseHealth: effectiveBaseHealth,
+            basePassiveSkills: stats.basePassiveSkills, // Ensure passives are passed through
             name: stats.name || 'Player' // Ensure a name is set
         });
-        // Recalculate total health to set the correct maxHealth value
+
+        // Recalculate final stats based on the new base stats
         return this.recalculateTotalStats(character);
     }
 
@@ -99,7 +101,11 @@ export class CharacterService {
         // Ensure maxHealth is also updated when totalHealth changes.
         stats.maxHealth = stats.totalHealth;
 
-        return new Character(stats);
+        // Pass the full stats object, including basePassiveSkills, to the constructor
+        return new Character({
+            ...stats,
+            basePassiveSkills: p
+        });
     }
 
     applyEquipment(characterStats, equipment) {
