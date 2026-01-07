@@ -96,9 +96,13 @@ button:hover {
 }
 
 .active-skills {
+    margin-bottom: 20px;
+}
+
+#player-active-skills-container,
+#opponent-active-skills-container {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
     gap: 10px;
 }
 
