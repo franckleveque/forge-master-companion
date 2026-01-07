@@ -70,10 +70,6 @@ export class DomAdapter {
         });
     }
 
-    isUnequipChecked() {
-        return document.getElementById('equip2-unequip').checked;
-    }
-
     displayComparisonResults(resultNew, resultOld) {
         document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinite";
         document.getElementById('total-damage-1').textContent = resultNew.totalDamageDealt.toLocaleString();
@@ -195,8 +191,6 @@ export class DomAdapter {
             });
         }
 
-        data.enemy_stats.dps = this.getElementValue('enemy-dps');
-        data.enemy_stats.weapon_type = this.getElementValue('enemy-weapon-type');
         data.equipment.category = this.getElementValue('equipment-category');
         data.equipment.equip1.weapon_type = this.getElementValue('equip1-weapon-type');
         data.equipment.equip1.damage = this.getElementValue('equip1-damage-value');
@@ -283,10 +277,6 @@ export class DomAdapter {
             toggleSkillParams(skillId);
         }
 
-        if (data.enemy_stats) {
-            this.setElementValue('enemy-dps', data.enemy_stats.dps);
-            this.setElementValue('enemy-weapon-type', data.enemy_stats.weapon_type);
-        }
         this.setElementValue('equipment-category', data.equipment.category);
         this.setElementValue('equip1-weapon-type', data.equipment.equip1.weapon_type);
         this.setElementValue('equip1-damage-value', data.equipment.equip1.damage);

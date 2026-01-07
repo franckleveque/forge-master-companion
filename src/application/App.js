@@ -1,7 +1,5 @@
 // src/application/App.js
 
-// src/application/App.js
-
 import { CharacterService } from '../domain/CharacterService.js';
 import { UiService } from '../infrastructure/UiService.js';
 import { DomAdapter } from '../adapters/DomAdapter.js';
@@ -9,7 +7,7 @@ import { SimulationService } from '../domain/SimulationService.js';
 import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 import { LoggerService } from '../infrastructure/LoggerService.js';
-import { EquipmentComparisonEngine } from '../domain/EquipmentComparisonEngine.js';
+import { EquipmentComparisonService } from '../domain/EquipmentComparisonService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const characterService = new CharacterService();
@@ -19,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loggerService = new LoggerService();
     const simulationService = new SimulationService(loggerService);
     const fileService = new FileService();
-    const equipmentComparisonEngine = new EquipmentComparisonEngine(simulationService, characterService);
+    const equipmentComparisonService = new EquipmentComparisonService(simulationService, characterService);
 
     // Event listeners for mode switching
     uiService.modeEquipmentButton.addEventListener('click', () => uiService.switchToEquipmentMode());
@@ -31,9 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const character = domAdapter.getCharacterStats();
         const equipNew = domAdapter.getEquipment(1, character);
         const equipOld = domAdapter.getEquipment(2, character);
-        const isUnequip = domAdapter.isUnequipChecked();
 
-        const { resultNew, resultOld } = equipmentComparisonEngine.compare(character, equipNew, equipOld, isUnequip);
+        const { resultNew, resultOld } = equipmentComparisonService.compare(character, equipNew, equipOld);
 
         // Display results and combined log
         domAdapter.displayComparisonResults(resultNew, resultOld);

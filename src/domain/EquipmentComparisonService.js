@@ -1,8 +1,8 @@
-// src/domain/EquipmentComparisonEngine.js
+// src/domain/EquipmentComparisonService.js
 
 import { Character } from "./Character.js";
 
-export class EquipmentComparisonEngine {
+export class EquipmentComparisonService {
     constructor(simulationService, characterService) {
         this.simulationService = simulationService;
         this.characterService = characterService;
@@ -18,18 +18,13 @@ export class EquipmentComparisonEngine {
         });
     }
 
-    compare(character, equipNew, equipOld, isUnequip) {
+    compare(character, equipNew, equipOld) {
         const baseStats = this.characterService.getCharacterBaseStats(character);
         const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld);
         const dummyEnemy = this.createDummyEnemy(character);
 
         // Run simulation for old equipment
-        let statsForOldScenario;
-        if (isUnequip) {
-            statsForOldScenario = cleanBaseStats;
-        } else {
-            statsForOldScenario = this.characterService.applyEquipment(cleanBaseStats, equipOld);
-        }
+        let statsForOldScenario = this.characterService.applyEquipment(cleanBaseStats, equipOld);
         let finalStatsOld = this.characterService.recalculateTotalStats(statsForOldScenario);
         const pvpResultOld = this.simulationService.simulatePvp(finalStatsOld, dummyEnemy);
         const resultOld = {

@@ -7,7 +7,6 @@ export class UiService {
         this.modePvpButton = document.getElementById('mode-pvp');
         this.equipmentSection = document.getElementById('equipment-comparison-section');
         this.pvpSection = document.getElementById('pvp-simulation-section');
-        this.enemyStatsContainer = document.getElementById('enemy-stats-container');
 
         // Equipment comparison elements
         this.compareButton = document.getElementById('compare-button');
@@ -91,7 +90,6 @@ export class UiService {
         this.modePvpButton.classList.remove('active');
         this.equipmentSection.style.display = 'block';
         this.pvpSection.style.display = 'none';
-        this.enemyStatsContainer.style.display = 'none';
     }
 
     switchToPvpMode() {

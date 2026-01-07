@@ -1,6 +1,6 @@
-// tests/domain/EquipmentComparisonEngine.test.js
+// tests/domain/EquipmentComparisonService.test.js
 
-import { EquipmentComparisonEngine } from '../../src/domain/EquipmentComparisonEngine.js';
+import { EquipmentComparisonService } from '../../src/domain/EquipmentComparisonService.js';
 import { Character } from '../../src/domain/Character.js';
 import { Equipment } from '../../src/domain/Equipment.js';
 import { SimulationService } from '../../src/domain/SimulationService.js';
@@ -10,10 +10,10 @@ import { CharacterService } from '../../src/domain/CharacterService.js';
 jest.mock('../../src/domain/SimulationService.js');
 jest.mock('../../src/domain/CharacterService.js');
 
-describe('EquipmentComparisonEngine', () => {
+describe('EquipmentComparisonService', () => {
     let simulationService;
     let characterService;
-    let engine;
+    let service;
     let character;
     const mockPvpResult = {
         time: 50,
@@ -24,7 +24,7 @@ describe('EquipmentComparisonEngine', () => {
     beforeEach(() => {
         simulationService = new SimulationService();
         characterService = new CharacterService();
-        engine = new EquipmentComparisonEngine(simulationService, characterService);
+        service = new EquipmentComparisonService(simulationService, characterService);
         character = new Character({
             totalDamage: 1000,
             totalHealth: 10000,
@@ -44,7 +44,7 @@ describe('EquipmentComparisonEngine', () => {
     });
 
     test('should create a dummy enemy as a Character object with correct stats', () => {
-        const dummy = engine.createDummyEnemy(character);
+        const dummy = service.createDummyEnemy(character);
         expect(dummy).toBeInstanceOf(Character);
         expect(dummy.totalDamage).toBe(character.totalDamage);
         expect(dummy.totalHealth).toBe(character.totalHealth);
@@ -63,7 +63,7 @@ describe('EquipmentComparisonEngine', () => {
             return mockPvpResult;
         });
 
-        engine.compare(character, equipNew, equipOld, false);
+        service.compare(character, equipNew, equipOld);
 
         expect(simulationService.simulatePvp).toHaveBeenCalledTimes(2);
         expect(callOrder[0]).toEqual(equipOld); // Old equipment first
@@ -74,7 +74,7 @@ describe('EquipmentComparisonEngine', () => {
         const equipNew = new Equipment({ damage: 100 });
         const equipOld = new Equipment({ damage: 50 });
 
-        engine.compare(character, equipNew, equipOld, false);
+        service.compare(character, equipNew, equipOld);
 
         expect(simulationService.simulatePvp).toHaveBeenCalledWith(
             expect.objectContaining({ equipment: equipOld }),
@@ -90,7 +90,7 @@ describe('EquipmentComparisonEngine', () => {
         const equipNew = new Equipment({ damage: 100 });
         const equipOld = new Equipment({ damage: 50 });
 
-        const results = engine.compare(character, equipNew, equipOld, false);
+        const results = service.compare(character, equipNew, equipOld);
 
         expect(results.resultNew).toEqual({
             survivalTime: mockPvpResult.time,
