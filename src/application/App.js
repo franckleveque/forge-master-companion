@@ -7,6 +7,7 @@ import { SimulationService } from '../domain/SimulationService.js';
 import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 import { LoggerService } from '../infrastructure/LoggerService.js';
+import { EquipmentComparisonService } from '../domain/EquipmentComparisonService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const characterService = new CharacterService();
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loggerService = new LoggerService();
     const simulationService = new SimulationService(loggerService);
     const fileService = new FileService();
+    const equipmentComparisonService = new EquipmentComparisonService(simulationService, characterService);
 
     // Event listeners for mode switching
     uiService.modeEquipmentButton.addEventListener('click', () => uiService.switchToEquipmentMode());
@@ -24,30 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for equipment comparison
     uiService.compareButton.addEventListener('click', () => {
         loggerService.clear();
-        const sheetStats = domAdapter.getCharacterStats();
-        const baseStats = characterService.getCharacterBaseStats(sheetStats);
-        const equipNew = domAdapter.getEquipment(1, baseStats);
-        const equipOld = domAdapter.getEquipment(2, baseStats);
-        const cleanBaseStats = characterService.unequipEquipment(baseStats, equipOld);
+        const character = domAdapter.getCharacterStats();
+        const equipNew = domAdapter.getEquipment(1, character);
+        const equipOld = domAdapter.getEquipment(2, character);
 
-        // Run simulation for new equipment
-        let statsWithNewEquip = characterService.applyEquipment(cleanBaseStats, equipNew);
-        let finalStatsNew = characterService.recalculateTotalStats(statsWithNewEquip);
-        finalStatsNew.enemy = sheetStats.enemy; // Make sure enemy stats are passed
-        const resultNew = simulationService.simulate(finalStatsNew);
-
-        loggerService.log('\n\n--- LOG FOR OLD EQUIPMENT ---\n');
-
-        // Run simulation for old equipment
-        let statsForOldScenario;
-        if (domAdapter.isUnequipChecked()) {
-            statsForOldScenario = cleanBaseStats;
-        } else {
-            statsForOldScenario = characterService.applyEquipment(cleanBaseStats, equipOld);
-        }
-        let finalStatsOld = characterService.recalculateTotalStats(statsForOldScenario);
-        finalStatsOld.enemy = sheetStats.enemy; // Make sure enemy stats are passed
-        const resultOld = simulationService.simulate(finalStatsOld);
+        const { resultNew, resultOld } = equipmentComparisonService.compare(character, equipNew, equipOld);
 
         // Display results and combined log
         domAdapter.displayComparisonResults(resultNew, resultOld);

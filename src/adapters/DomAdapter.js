@@ -52,11 +52,7 @@ export class DomAdapter {
             totalHealth: parseFloat(document.getElementById('total-health').value) || 0,
             weaponType: document.getElementById('weapon-type').value,
             basePassiveSkills: basePassiveSkills,
-            activeSkills: this.getActiveSkills('player'),
-            enemy: {
-                dps: parseFloat(document.getElementById('enemy-dps').value) || 0,
-                weaponType: document.getElementById('enemy-weapon-type').value
-            }
+            activeSkills: this.getActiveSkills('player')
         });
     }
 
@@ -74,14 +70,13 @@ export class DomAdapter {
         });
     }
 
-    isUnequipChecked() {
-        return document.getElementById('equip2-unequip').checked;
-    }
-
     displayComparisonResults(resultNew, resultOld) {
         document.getElementById('survival-time-1').textContent = isFinite(resultNew.survivalTime) ? resultNew.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('health-remaining-1').textContent = resultNew.healthRemaining.toLocaleString();
         document.getElementById('total-damage-1').textContent = resultNew.totalDamageDealt.toLocaleString();
+
         document.getElementById('survival-time-2').textContent = isFinite(resultOld.survivalTime) ? resultOld.survivalTime.toFixed(2) : "Infinite";
+        document.getElementById('health-remaining-2').textContent = resultOld.healthRemaining.toLocaleString();
         document.getElementById('total-damage-2').textContent = resultOld.totalDamageDealt.toLocaleString();
 
         const resultItem1 = document.getElementById('result-item-1');
@@ -94,11 +89,17 @@ export class DomAdapter {
             resultItem1.classList.add('best-equipment');
         } else if (resultOld.survivalTime > resultNew.survivalTime) {
             resultItem2.classList.add('best-equipment');
-        } else {
-            if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
+        } else { // Equal survival time, check health
+            if (resultNew.healthRemaining > resultOld.healthRemaining) {
                 resultItem1.classList.add('best-equipment');
-            } else {
+            } else if (resultOld.healthRemaining > resultNew.healthRemaining) {
                 resultItem2.classList.add('best-equipment');
+            } else { // Equal health, check damage
+                if (resultNew.totalDamageDealt >= resultOld.totalDamageDealt) {
+                    resultItem1.classList.add('best-equipment');
+                } else {
+                    resultItem2.classList.add('best-equipment');
+                }
             }
         }
 
@@ -199,9 +200,6 @@ export class DomAdapter {
             });
         }
 
-        data.enemy_stats.dps = this.getElementValue('enemy-dps');
-        data.enemy_stats.weapon_type = this.getElementValue('enemy-weapon-type');
-
         data.equipment.category = this.getElementValue('equipment-category');
         data.equipment.equip1.weapon_type = this.getElementValue('equip1-weapon-type');
         data.equipment.equip1.damage = this.getElementValue('equip1-damage-value');
@@ -287,9 +285,6 @@ export class DomAdapter {
             this.setElementValue(`${skillId}-duration`, skillData.duration);
             toggleSkillParams(skillId);
         }
-
-        this.setElementValue('enemy-dps', data.enemy_stats.dps);
-        this.setElementValue('enemy-weapon-type', data.enemy_stats.weapon_type);
 
         this.setElementValue('equipment-category', data.equipment.category);
         this.setElementValue('equip1-weapon-type', data.equipment.equip1.weapon_type);

@@ -39,6 +39,8 @@ export class UiService {
 
         this.createActiveSkillUI('player-active-skills-container', 'player');
         this.createActiveSkillUI('opponent-active-skills-container', 'opponent');
+
+        this.switchToEquipmentMode();
     }
 
     createActiveSkillUI(containerId, prefix) {

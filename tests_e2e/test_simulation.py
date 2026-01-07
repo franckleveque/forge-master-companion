@@ -6,10 +6,6 @@ def test_equipment_comparison_simulation(page):
     page.fill("#total-health", "10000")
     page.select_option("#weapon-type", "corp-a-corp")
 
-    # Fill in enemy stats
-    page.fill("#enemy-dps", "500")
-    page.select_option("#enemy-weapon-type", "corp-a-corp")
-
     # Fill in equipment stats
     page.fill("#equip1-damage-value", "100")
     page.fill("#equip2-damage-value", "120")
