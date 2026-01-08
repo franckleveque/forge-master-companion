@@ -1,9 +1,8 @@
 // src/domain/SimulationService.js
 
 import { Character } from "./Character.js";
-import { DamageSkill } from "./skills/DamageSkill.js";
-import { BuffSkill } from "./skills/BuffSkill.js";
 import { PassiveSkillFactory } from "./passives/PassiveSkillFactory.js";
+import { ActiveSkillFactory } from "./skills/ActiveSkillFactory.js";
 
 export class SimulationService {
     constructor(logger) {
@@ -22,17 +21,8 @@ export class SimulationService {
         const p1 = new Character({ ...p1Data, logFunction: logFn });
         const p2 = new Character({ ...p2Data, logFunction: logFn });
 
-        p1.activeSkills = player1.activeSkills.map(skillData => {
-            if (skillData.type === 'damage') return new DamageSkill(skillData);
-            if (skillData.type === 'buff') return new BuffSkill(skillData);
-            return null;
-        }).filter(Boolean);
-
-        p2.activeSkills = player2.activeSkills.map(skillData => {
-            if (skillData.type === 'damage') return new DamageSkill(skillData);
-            if (skillData.type === 'buff') return new BuffSkill(skillData);
-            return null;
-        }).filter(Boolean);
+        p1.activeSkills = player1.activeSkills.map(ActiveSkillFactory.create).filter(Boolean);
+        p2.activeSkills = player2.activeSkills.map(ActiveSkillFactory.create).filter(Boolean);
 
         p1.passiveSkills = Object.entries(p1.basePassiveSkills).map(([id, value]) => PassiveSkillFactory.create(id, value)).filter(Boolean);
         p2.passiveSkills = Object.entries(p2.basePassiveSkills).map(([id, value]) => PassiveSkillFactory.create(id, value)).filter(Boolean);
