@@ -2,26 +2,8 @@
 import { Character } from "./Character.js";
 
 export class CharacterService {
-    constructor() {
-        this.passiveSkills = [
-            { id: 'sante', name: "Santé" },
-            { id: 'degats', name: "Dégâts" },
-            { id: 'degats-corps-a-corps', name: "Dégâts corps à corps" },
-            { id: 'degats-a-distance', name: "Dégâts à distance" },
-            { id: 'vitesse-attaque', name: "Vitesse d'attaque" },
-            { id: 'chance-critique', name: "Chance critique" },
-            { id: 'degats-critiques', name: "Dégâts critiques" },
-            { id: 'chance-blocage', name: "Chance de blocage" },
-            { id: 'regeneration-sante', name: "Régénération santé" },
-            { id: 'vol-de-vie', name: "Vol de vie" },
-            { id: 'double-chance', name: "Double chance" },
-            { id: 'competence-degats', name: "Compétence dégâts" },
-            { id: 'competences-temps-recharge', name: "Compétences temps de recharge" },
-        ];
-    }
-
-    getPassiveSkills() {
-        return this.passiveSkills;
+    constructor(passiveSkillService) {
+        this.passiveSkillService = passiveSkillService;
     }
 
     getCharacterBaseStats(sheetStats) {
@@ -114,7 +96,7 @@ export class CharacterService {
         stats.baseDamage += equipment.damage;
         stats.baseHealth += equipment.health;
 
-        const passive = this.passiveSkills.find(p => p.name === equipment.passiveSkill);
+        const passive = this.passiveSkillService.findSkillByName(equipment.passiveSkill);
         if (passive) {
             stats.basePassiveSkills[passive.id] = (stats.basePassiveSkills[passive.id] || 0) + equipment.passiveSkillValue;
         }
@@ -131,7 +113,7 @@ export class CharacterService {
         stats.baseDamage -= equipment.damage;
         stats.baseHealth -= equipment.health;
 
-        const passive = this.passiveSkills.find(p => p.name === equipment.passiveSkill);
+        const passive = this.passiveSkillService.findSkillByName(equipment.passiveSkill);
         if (passive) {
             stats.basePassiveSkills[passive.id] = (stats.basePassiveSkills[passive.id] || 0) - equipment.passiveSkillValue;
         }

@@ -10,9 +10,9 @@ import { LoggerService } from '../infrastructure/LoggerService.js';
 import { EquipmentComparisonService } from '../domain/EquipmentComparisonService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const characterService = new CharacterService();
-    const uiService = new UiService();
     const passiveSkillService = new PassiveSkillService();
+    const characterService = new CharacterService(passiveSkillService);
+    const uiService = new UiService();
     const domAdapter = new DomAdapter(characterService, passiveSkillService, uiService);
     const loggerService = new LoggerService();
     const simulationService = new SimulationService(loggerService);
@@ -108,6 +108,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial population of passive skills
-    const passiveSkillsForUi = characterService.getPassiveSkills();
-    uiService.populatePassiveSkills(passiveSkillsForUi);
+    domAdapter.populatePassiveSkills();
 });

@@ -13,6 +13,11 @@ export class DomAdapter {
         this.uiService = uiService;
     }
 
+    populatePassiveSkills() {
+        const passiveSkills = this.passiveSkillService.passiveSkills;
+        this.uiService.populatePassiveSkills(passiveSkills);
+    }
+
     getActiveSkills(prefix) {
         const activeSkills = [];
         for (let i = 1; i <= 3; i++) {
