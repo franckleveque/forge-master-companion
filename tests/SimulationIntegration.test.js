@@ -3,6 +3,8 @@
 import { SimulationService } from '../src/domain/SimulationService.js';
 import { Character } from '../src/domain/Character.js';
 import { LoggerService } from '../src/infrastructure/LoggerService.js';
+import { PassiveSkillFactory } from '../src/domain/passives/PassiveSkillFactory.js';
+import { ActiveSkillFactory } from '../src/domain/skills/ActiveSkillFactory.js';
 
 describe('SimulationService Integration Tests', () => {
     let simulationService;
@@ -10,18 +12,20 @@ describe('SimulationService Integration Tests', () => {
 
     beforeEach(() => {
         logger = new LoggerService();
-        simulationService = new SimulationService(logger);
+        simulationService = new SimulationService(logger, new PassiveSkillFactory(), new ActiveSkillFactory());
     });
 
     // Test for attack speed
     test("Vitesse d'attaque should result in correct attack timings", () => {
+        const passiveSkillFactory = new PassiveSkillFactory();
         const player = new Character({
             id: 'Player',
             totalDamage: 100,
             totalHealth: 1000,
-            basePassiveSkills: { 'vitesse-attaque': 100 }
+            basePassiveSkills: { 'vitesse-attaque': 100 },
+            passiveSkillFactory
         });
-        const opponent = new Character({ id: 'Opponent', totalHealth: 10000 });
+        const opponent = new Character({ id: 'Opponent', totalHealth: 10000, passiveSkillFactory });
 
         simulationService.simulatePvp(player, opponent);
         const logs = simulationService.simulationLog;
@@ -32,6 +36,7 @@ describe('SimulationService Integration Tests', () => {
 
     // Test for damage stacking
     test('should stack global and melee damage passives correctly', () => {
+        const passiveSkillFactory = new PassiveSkillFactory();
         const player = new Character({
             id: 'Player',
             baseDamage: 1000,
@@ -40,9 +45,10 @@ describe('SimulationService Integration Tests', () => {
             basePassiveSkills: {
                 'degats': 50,
                 'degats-corps-a-corps': 25
-            }
+            },
+            passiveSkillFactory
         });
-        const opponent = new Character({ id: 'Opponent', totalHealth: 100000 });
+        const opponent = new Character({ id: 'Opponent', totalHealth: 100000, passiveSkillFactory });
 
         simulationService.simulatePvp(player, opponent);
         const firstAttackLog = simulationService.simulationLog.find(l => l.includes('Player attacks'));
@@ -52,13 +58,15 @@ describe('SimulationService Integration Tests', () => {
 
     // Test for multi-hit skills
     test('Multi-hit skills should apply all hits', () => {
+        const passiveSkillFactory = new PassiveSkillFactory();
         const player = new Character({
             id: 'Player',
             activeSkills: [
                 { type: 'damage', value: 50, hits: 3, cooldown: 0.1 }
-            ]
+            ],
+            passiveSkillFactory
         });
-        const opponent = new Character({ id: 'Opponent', totalHealth: 1000 });
+        const opponent = new Character({ id: 'Opponent', totalHealth: 1000, passiveSkillFactory });
 
         simulationService.simulatePvp(player, opponent);
         const skillLogs = simulationService.simulationLog.filter(l => l.includes('uses a damage skill'));
@@ -67,15 +75,17 @@ describe('SimulationService Integration Tests', () => {
 
     // Test for buffs
     test('Buffs should apply and expire correctly', () => {
+        const passiveSkillFactory = new PassiveSkillFactory();
         const player = new Character({
             id: 'Player',
             totalDamage: 100,
             totalHealth: 1000,
             activeSkills: [
                 { type: 'buff', damageBuff: 50, duration: 0.1, cooldown: 0.2 }
-            ]
+            ],
+            passiveSkillFactory
         });
-        const opponent = new Character({ id: 'Opponent', totalHealth: 10000 });
+        const opponent = new Character({ id: 'Opponent', totalHealth: 10000, passiveSkillFactory });
 
         simulationService.simulatePvp(player, opponent);
         const logs = simulationService.simulationLog;

@@ -3,9 +3,10 @@
 import { Character } from "./Character.js";
 
 export class EquipmentComparisonService {
-    constructor(simulationService, characterService) {
+    constructor(simulationService, characterService, passiveSkillFactory) {
         this.simulationService = simulationService;
         this.characterService = characterService;
+        this.passiveSkillFactory = passiveSkillFactory;
     }
 
     compare(character, equipNew, equipOld) {
@@ -14,7 +15,8 @@ export class EquipmentComparisonService {
         const characterWithOldEquip = new Character({
             ...characterStateWithOldEquip,
             name: "Old Equip",
-            id: "Old Equip"
+            id: "Old Equip",
+            passiveSkillFactory: this.passiveSkillFactory
         });
 
         // Calculate stats for character with new equipment
@@ -25,7 +27,8 @@ export class EquipmentComparisonService {
         const characterWithNewEquip = new Character({
             ...finalStatsNew,
             name: "New Equip",
-id: "New Equip"
+            id: "New Equip",
+            passiveSkillFactory: this.passiveSkillFactory
         });
 
         // Run a single simulation between the two character versions

@@ -9,7 +9,7 @@ const skillMap = {
 };
 
 export class ActiveSkillFactory {
-    static create(skillData) {
+    create(skillData) {
         const SkillClass = skillMap[skillData.type];
         if (SkillClass) {
             return new SkillClass(skillData);
