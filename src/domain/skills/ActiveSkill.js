@@ -1,11 +1,4 @@
-// src/domain/Skills.js
-
-export class PassiveSkill {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
-    }
-}
+// src/domain/skills/ActiveSkill.js
 
 export class ActiveSkill {
     constructor({ baseDamage = 0, baseHealth = 0, cooldown = 0 }) {
