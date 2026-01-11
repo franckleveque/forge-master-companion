@@ -2,7 +2,7 @@
 
 import { Character } from "./Character.js";
 import { PassiveSkillFactory } from "./passives/PassiveSkillFactory.js";
-import { ActiveSkillFactory } from "./skills/ActiveSkillFactory.js";
+import { ActiveSkillFactory } from "./active_skills/ActiveSkillFactory.js";
 
 export class SimulationService {
     constructor(logger) {

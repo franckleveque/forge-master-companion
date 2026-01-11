@@ -3,8 +3,8 @@
 import { Character } from '../src/domain/Character.js';
 import { CharacterService } from '../src/domain/CharacterService.js';
 import { SimulationService } from '../src/domain/SimulationService.js';
-import { DamageSkill } from '../src/domain/skills/DamageSkill.js';
-import { BuffSkill } from '../src/domain/skills/BuffSkill.js';
+import { DamageSkill } from '../src/domain/active_skills/DamageSkill.js';
+import { BuffSkill } from '../src/domain/active_skills/BuffSkill.js';
 import { LoggerService } from '../src/infrastructure/LoggerService.js';
 
 describe('Active Skills', () => {

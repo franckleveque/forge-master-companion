@@ -1,5 +1,5 @@
 // src/domain/skills/BuffSkill.js
-import { ActiveSkill } from '../Skills.js';
+import { ActiveSkill } from './ActiveSkill.js';
 
 export class BuffSkill extends ActiveSkill {
     constructor({ baseDamage = 0, baseHealth = 0, cooldown = 0, damageBuff = 0, healthBuff = 0, duration = 0 }) {

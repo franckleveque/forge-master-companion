@@ -1,5 +1,5 @@
 // src/domain/skills/DamageSkill.js
-import { ActiveSkill } from '../Skills.js';
+import { ActiveSkill } from './ActiveSkill.js';
 
 export class DamageSkill extends ActiveSkill {
     constructor({ baseDamage = 0, baseHealth = 0, cooldown = 0, value = 0, hits = 1 }) {
