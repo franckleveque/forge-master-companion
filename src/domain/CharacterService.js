@@ -2,8 +2,9 @@
 import { Character } from "./Character.js";
 
 export class CharacterService {
-    constructor(passiveSkillService) {
+    constructor(passiveSkillService, passiveSkillFactory) {
         this.passiveSkillService = passiveSkillService;
+        this.passiveSkillFactory = passiveSkillFactory;
     }
 
     getCharacterBaseStats(sheetStats) {
@@ -42,7 +43,8 @@ export class CharacterService {
             baseDamage: effectiveBaseDamage,
             baseHealth: effectiveBaseHealth,
             basePassiveSkills: stats.basePassiveSkills, // Ensure passives are passed through
-            name: stats.name || 'Player' // Ensure a name is set
+            name: stats.name || 'Player', // Ensure a name is set
+            passiveSkillFactory: this.passiveSkillFactory
         });
 
         // Recalculate final stats based on the new base stats
@@ -87,7 +89,8 @@ export class CharacterService {
         // Pass the full stats object to the constructor.
         // The ...stats spread includes the (potentially modified) basePassiveSkills.
         return new Character({
-            ...stats
+            ...stats,
+            passiveSkillFactory: this.passiveSkillFactory
         });
     }
 
@@ -105,7 +108,7 @@ export class CharacterService {
             stats.weaponType = equipment.weaponType;
         }
 
-        return new Character(stats);
+        return new Character({...stats, passiveSkillFactory: this.passiveSkillFactory});
     }
 
     unequipEquipment(characterStats, equipment) {
@@ -118,6 +121,6 @@ export class CharacterService {
             stats.basePassiveSkills[passive.id] = (stats.basePassiveSkills[passive.id] || 0) - equipment.passiveSkillValue;
         }
 
-        return new Character(stats);
+        return new Character({...stats, passiveSkillFactory: this.passiveSkillFactory});
     }
 }

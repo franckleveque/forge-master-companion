@@ -1,12 +1,12 @@
 // src/domain/SimulationService.js
 
 import { Character } from "./Character.js";
-import { PassiveSkillFactory } from "./passives/PassiveSkillFactory.js";
-import { ActiveSkillFactory } from "./skills/ActiveSkillFactory.js";
 
 export class SimulationService {
-    constructor(logger) {
+    constructor(logger, passiveSkillFactory, activeSkillFactory) {
         this.logger = logger;
+        this.passiveSkillFactory = passiveSkillFactory;
+        this.activeSkillFactory = activeSkillFactory;
         this.time = 0;
         this.fighters = [];
         this.simulationLog = [];
@@ -18,14 +18,14 @@ export class SimulationService {
         const p1Data = JSON.parse(JSON.stringify(player1));
         const p2Data = JSON.parse(JSON.stringify(player2));
 
-        const p1 = new Character({ ...p1Data, logFunction: logFn });
-        const p2 = new Character({ ...p2Data, logFunction: logFn });
+        const p1 = new Character({ ...p1Data, logFunction: logFn, passiveSkillFactory: this.passiveSkillFactory });
+        const p2 = new Character({ ...p2Data, logFunction: logFn, passiveSkillFactory: this.passiveSkillFactory });
 
-        p1.activeSkills = player1.activeSkills.map(ActiveSkillFactory.create).filter(Boolean);
-        p2.activeSkills = player2.activeSkills.map(ActiveSkillFactory.create).filter(Boolean);
+        p1.activeSkills = player1.activeSkills.map(skillData => this.activeSkillFactory.create(skillData)).filter(Boolean);
+        p2.activeSkills = player2.activeSkills.map(skillData => this.activeSkillFactory.create(skillData)).filter(Boolean);
 
-        p1.passiveSkills = Object.entries(p1.basePassiveSkills).map(([id, value]) => PassiveSkillFactory.create(id, value)).filter(Boolean);
-        p2.passiveSkills = Object.entries(p2.basePassiveSkills).map(([id, value]) => PassiveSkillFactory.create(id, value)).filter(Boolean);
+        p1.passiveSkills = Object.entries(p1.basePassiveSkills).map(([id, value]) => this.passiveSkillFactory.create(id, value)).filter(Boolean);
+        p2.passiveSkills = Object.entries(p2.basePassiveSkills).map(([id, value]) => this.passiveSkillFactory.create(id, value)).filter(Boolean);
 
         p1.enemy = p2;
         p2.enemy = p1;

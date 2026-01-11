@@ -1,10 +1,14 @@
 import { CharacterService } from '../src/domain/CharacterService.js';
+import { PassiveSkillFactory } from '../src/domain/passives/PassiveSkillFactory.js';
+import { PassiveSkillService } from '../src/domain/PassiveSkillService.js';
 
 describe('CharacterService', () => {
   let characterService;
 
   beforeEach(() => {
-    characterService = new CharacterService();
+    const passiveSkillService = new PassiveSkillService();
+    const passiveSkillFactory = new PassiveSkillFactory();
+    characterService = new CharacterService(passiveSkillService, passiveSkillFactory);
   });
 
   describe('getCharacterBaseStats', () => {

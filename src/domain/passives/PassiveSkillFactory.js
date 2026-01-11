@@ -31,7 +31,7 @@ const skillMap = {
 };
 
 export class PassiveSkillFactory {
-    static create(id, value) {
+    create(id, value) {
         const SkillClass = skillMap[id];
         if (SkillClass) {
             return new SkillClass(value);

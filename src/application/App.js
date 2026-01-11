@@ -8,16 +8,20 @@ import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 import { LoggerService } from '../infrastructure/LoggerService.js';
 import { EquipmentComparisonService } from '../domain/EquipmentComparisonService.js';
+import { PassiveSkillFactory } from '../domain/passives/PassiveSkillFactory.js';
+import { ActiveSkillFactory } from '../domain/skills/ActiveSkillFactory.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const passiveSkillService = new PassiveSkillService();
-    const characterService = new CharacterService(passiveSkillService);
+    const passiveSkillFactory = new PassiveSkillFactory();
+    const characterService = new CharacterService(passiveSkillService, passiveSkillFactory);
     const uiService = new UiService();
     const domAdapter = new DomAdapter(characterService, passiveSkillService, uiService);
     const loggerService = new LoggerService();
-    const simulationService = new SimulationService(loggerService);
+    const activeSkillFactory = new ActiveSkillFactory();
+    const simulationService = new SimulationService(loggerService, passiveSkillFactory, activeSkillFactory);
     const fileService = new FileService();
-    const equipmentComparisonService = new EquipmentComparisonService(simulationService, characterService);
+    const equipmentComparisonService = new EquipmentComparisonService(simulationService, characterService, passiveSkillFactory);
 
     // Event listeners for mode switching
     uiService.modeEquipmentButton.addEventListener('click', () => uiService.switchToEquipmentMode());

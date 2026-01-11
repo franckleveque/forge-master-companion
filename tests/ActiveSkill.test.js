@@ -7,11 +7,16 @@ import { DamageSkill } from '../src/domain/skills/DamageSkill.js';
 import { BuffSkill } from '../src/domain/skills/BuffSkill.js';
 import { LoggerService } from '../src/infrastructure/LoggerService.js';
 
+import { PassiveSkillFactory } from '../src/domain/passives/PassiveSkillFactory.js';
+import { PassiveSkillService } from '../src/domain/PassiveSkillService.js';
+
 describe('Active Skills', () => {
     let characterService;
+    let passiveSkillFactory;
 
     beforeEach(() => {
-        characterService = new CharacterService();
+        passiveSkillFactory = new PassiveSkillFactory();
+        characterService = new CharacterService(new PassiveSkillService(), passiveSkillFactory);
     });
 
     test('Skills should start in cooldown on initialization', () => {
@@ -30,7 +35,7 @@ describe('Active Skills', () => {
                 { type: 'damage', baseDamage: 10, baseHealth: 100 }
             ]
         };
-        const character = new Character(characterData);
+        const character = new Character({...characterData, passiveSkillFactory});
         const stats = characterService.recalculateTotalStats(character);
         const expectedDamage = (100 + 10 * 1.5) * 1.2;
         expect(stats.totalDamage).toBe(expectedDamage);

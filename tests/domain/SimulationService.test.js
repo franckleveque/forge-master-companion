@@ -4,6 +4,8 @@ import { SimulationService } from '../../src/domain/SimulationService.js';
 import { LoggerService } from '../../src/infrastructure/LoggerService.js';
 import { Character } from '../../src/domain/Character.js';
 import { DamageSkill } from '../../src/domain/skills/DamageSkill.js';
+import { PassiveSkillFactory } from '../../src/domain/passives/PassiveSkillFactory.js';
+import { ActiveSkillFactory } from '../../src/domain/skills/ActiveSkillFactory.js';
 
 describe('SimulationService', () => {
     let logger;
@@ -11,7 +13,7 @@ describe('SimulationService', () => {
 
     beforeEach(() => {
         logger = new LoggerService();
-        simulationService = new SimulationService(logger);
+        simulationService = new SimulationService(logger, new PassiveSkillFactory(), new ActiveSkillFactory());
     });
 
     // Test case 1: Basic PvP simulation logging
