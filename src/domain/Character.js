@@ -1,5 +1,4 @@
 // src/domain/Character.js
-import { PassiveSkillFactory } from "./passives/PassiveSkillFactory.js";
 
 export class Character {
     constructor({
@@ -29,14 +28,7 @@ export class Character {
         this.weaponType = weaponType;
         this.basePassiveSkills = basePassiveSkills || {};
         this.activeSkills = activeSkills || [];
-
-        if (passiveSkills) {
-            this.passiveSkills = passiveSkills;
-        } else {
-            this.passiveSkills = Object.keys(this.basePassiveSkills).map(skillId => {
-                return PassiveSkillFactory.create(skillId, this.basePassiveSkills[skillId]);
-            }).filter(Boolean);
-        }
+        this.passiveSkills = passiveSkills || [];
 
         this.enemy = enemy;
         this._log = logFunction || (() => {});
