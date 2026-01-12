@@ -2,8 +2,7 @@
 
 import { Character } from '../domain/Character.js';
 import { Equipment } from '../domain/Equipment.js';
-import { DamageSkill } from '../domain/skills/DamageSkill.js';
-import { BuffSkill } from '../domain/skills/BuffSkill.js';
+import { ActiveSkillFactory } from '../domain/skills/ActiveSkillFactory.js';
 import { PassiveSkillFactory } from '../domain/passives/PassiveSkillFactory.js';
 
 export class CharacterFactory {
@@ -30,15 +29,7 @@ export class CharacterFactory {
     }
 
     createActiveSkillsFromData(skillsData) {
-        return skillsData.map(skillData => {
-            if (skillData.type === 'damage') {
-                return new DamageSkill(skillData);
-            }
-            if (skillData.type === 'buff') {
-                return new BuffSkill(skillData);
-            }
-            return null;
-        }).filter(Boolean);
+        return skillsData.map(skillData => ActiveSkillFactory.create(skillData)).filter(Boolean);
     }
 
     createPassiveSkillsFromData(basePassiveSkills) {
