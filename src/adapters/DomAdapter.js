@@ -1,5 +1,9 @@
 // src/adapters/DomAdapter.js
 
+import { CharacterData } from '../domain/ports/CharacterData.js';
+import { EquipmentData } from '../domain/ports/EquipmentData.js';
+import { ActiveSkillData } from '../domain/ports/ActiveSkillData.js';
+
 export class DomAdapter {
     constructor(characterService, passiveSkillService, uiService) {
         this.characterService = characterService;
@@ -35,7 +39,7 @@ export class DomAdapter {
                 skillData.healthBuff = parseFloat(this.getElementValue(`${skillId}-healthBuff`)) || 0;
                 skillData.duration = parseFloat(this.getElementValue(`${skillId}-duration`)) || 0;
             }
-            activeSkillsData.push(skillData);
+            activeSkillsData.push(new ActiveSkillData(skillData));
         }
         return activeSkillsData;
     }
@@ -46,24 +50,24 @@ export class DomAdapter {
             basePassiveSkills[skillId] = parseFloat(document.getElementById(skillId).value) || 0;
         });
 
-        return {
+        return new CharacterData({
             totalDamage: parseFloat(document.getElementById('total-damage').value) || 0,
             totalHealth: parseFloat(document.getElementById('total-health').value) || 0,
             weaponType: document.getElementById('weapon-type').value,
             basePassiveSkills: basePassiveSkills,
             activeSkills: this.getActiveSkills('player')
-        };
+        });
     }
 
     getEquipment(index) {
-        return {
+        return new EquipmentData({
             category: document.getElementById('equipment-category').value,
             weaponType: document.getElementById(`equip${index}-weapon-type`).value,
             damage: parseFloat(document.getElementById(`equip${index}-damage-value`).value) || 0,
             health: parseFloat(document.getElementById(`equip${index}-health-value`).value) || 0,
             passiveSkill: document.getElementById(`equip${index}-passive-skill`).value,
             passiveSkillValue: parseFloat(document.getElementById(`equip${index}-passive-skill-value`).value) || 0
-        };
+        });
     }
 
     displayComparisonResults(result) {
@@ -97,14 +101,14 @@ export class DomAdapter {
             basePassiveSkills[skillId] = parseFloat(document.getElementById(`${id_prefix}${skillId}`).value) || 0;
         });
 
-        return {
+        return new CharacterData({
             name: prefix.charAt(0).toUpperCase() + prefix.slice(1),
             totalDamage: parseFloat(document.getElementById(`${id_prefix}total-damage`).value) || 0,
             totalHealth: parseFloat(document.getElementById(`${id_prefix}total-health`).value) || 0,
             weaponType: document.getElementById(`${id_prefix}weapon-type`).value,
             basePassiveSkills: basePassiveSkills,
             activeSkills: this.getActiveSkills(prefix)
-        };
+        });
     }
 
     displayPvpResults(result) {

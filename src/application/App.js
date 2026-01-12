@@ -30,14 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loggerService.clear();
 
         const characterData = domAdapter.getCharacterStats();
-        const characterSheet = characterFactory.createCharacterFromSheet(characterData);
+        const characterSheet = characterFactory.createCharacterFromData(characterData);
         const character = characterService.getCharacterBaseStats(characterSheet);
 
         const equipNewData = domAdapter.getEquipment(1);
         const equipOldData = domAdapter.getEquipment(2);
 
-        const equipNew = characterFactory.createEquipment(equipNewData, character);
-        const equipOld = characterFactory.createEquipment(equipOldData, character);
+        const equipNew = characterFactory.createEquipmentFromData(equipNewData, character);
+        const equipOld = characterFactory.createEquipmentFromData(equipOldData, character);
 
         const result = equipmentComparisonService.compare(character, equipNew, equipOld);
 
@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerData = domAdapter.getCharacterStatsPvp('player');
         const opponentData = domAdapter.getCharacterStatsPvp('opponent');
 
-        const playerSheet = characterFactory.createCharacterFromSheet(playerData);
-        const opponentSheet = characterFactory.createCharacterFromSheet(opponentData);
+        const playerSheet = characterFactory.createCharacterFromData(playerData);
+        const opponentSheet = characterFactory.createCharacterFromData(opponentData);
 
         const player = characterService.getCharacterBaseStats(playerSheet);
         player.id = "Player"; // Assign ID for logs
