@@ -1,10 +1,8 @@
 // src/adapters/DomAdapter.js
 
-import { PassiveSkillService } from '../domain/PassiveSkillService.js';
-import { Character } from '../domain/Character.js';
-import { Equipment } from '../domain/Equipment.js';
-import { DamageSkill } from '../domain/skills/DamageSkill.js';
-import { BuffSkill } from '../domain/skills/BuffSkill.js';
+import { CharacterData } from '../domain/ports/CharacterData.js';
+import { EquipmentData } from '../domain/ports/EquipmentData.js';
+import { ActiveSkillData } from '../domain/ports/ActiveSkillData.js';
 
 export class DomAdapter {
     constructor(characterService, passiveSkillService, uiService) {
@@ -19,33 +17,31 @@ export class DomAdapter {
     }
 
     getActiveSkills(prefix) {
-        const activeSkills = [];
+        const activeSkillsData = [];
         for (let i = 1; i <= 3; i++) {
             const id_prefix = prefix ? `${prefix}-` : '';
             const skillId = `${id_prefix}active${i}`;
             const type = this.getElementValue(`${skillId}-type`);
             if (!type) continue;
 
-            const baseDamage = parseFloat(this.getElementValue(`${skillId}-baseDamage`)) || 0;
-            const baseHealth = parseFloat(this.getElementValue(`${skillId}-baseHealth`)) || 0;
-            const cooldown = parseFloat(this.getElementValue(`${skillId}-cooldown`)) || 0;
+            const skillData = {
+                type: type,
+                baseDamage: parseFloat(this.getElementValue(`${skillId}-baseDamage`)) || 0,
+                baseHealth: parseFloat(this.getElementValue(`${skillId}-baseHealth`)) || 0,
+                cooldown: parseFloat(this.getElementValue(`${skillId}-cooldown`)) || 0,
+            };
 
             if (type === 'damage') {
-                const value = parseFloat(this.getElementValue(`${skillId}-value`)) || 0;
-                const hits = parseFloat(this.getElementValue(`${skillId}-hits`)) || 1;
-                if (value && cooldown) {
-                    activeSkills.push(new DamageSkill({ baseDamage, baseHealth, cooldown, value, hits }));
-                }
+                skillData.value = parseFloat(this.getElementValue(`${skillId}-value`)) || 0;
+                skillData.hits = parseFloat(this.getElementValue(`${skillId}-hits`)) || 1;
             } else if (type === 'buff') {
-                const damageBuff = parseFloat(this.getElementValue(`${skillId}-damageBuff`)) || 0;
-                const healthBuff = parseFloat(this.getElementValue(`${skillId}-healthBuff`)) || 0;
-                const duration = parseFloat(this.getElementValue(`${skillId}-duration`)) || 0;
-                if (duration && cooldown) {
-                    activeSkills.push(new BuffSkill({ baseDamage, baseHealth, cooldown, damageBuff, healthBuff, duration }));
-                }
+                skillData.damageBuff = parseFloat(this.getElementValue(`${skillId}-damageBuff`)) || 0;
+                skillData.healthBuff = parseFloat(this.getElementValue(`${skillId}-healthBuff`)) || 0;
+                skillData.duration = parseFloat(this.getElementValue(`${skillId}-duration`)) || 0;
             }
+            activeSkillsData.push(new ActiveSkillData(skillData));
         }
-        return activeSkills;
+        return activeSkillsData;
     }
 
     getCharacterStats() {
@@ -54,7 +50,7 @@ export class DomAdapter {
             basePassiveSkills[skillId] = parseFloat(document.getElementById(skillId).value) || 0;
         });
 
-        return new Character({
+        return new CharacterData({
             totalDamage: parseFloat(document.getElementById('total-damage').value) || 0,
             totalHealth: parseFloat(document.getElementById('total-health').value) || 0,
             weaponType: document.getElementById('weapon-type').value,
@@ -63,13 +59,10 @@ export class DomAdapter {
         });
     }
 
-    getEquipment(index, baseStats) {
-        const category = document.getElementById('equipment-category').value;
-        const weaponType = category === 'weapon' ? document.getElementById(`equip${index}-weapon-type`).value : baseStats.weaponType;
-
-        return new Equipment({
-            category: category,
-            weaponType: weaponType,
+    getEquipment(index) {
+        return new EquipmentData({
+            category: document.getElementById('equipment-category').value,
+            weaponType: document.getElementById(`equip${index}-weapon-type`).value,
             damage: parseFloat(document.getElementById(`equip${index}-damage-value`).value) || 0,
             health: parseFloat(document.getElementById(`equip${index}-health-value`).value) || 0,
             passiveSkill: document.getElementById(`equip${index}-passive-skill`).value,
@@ -108,7 +101,7 @@ export class DomAdapter {
             basePassiveSkills[skillId] = parseFloat(document.getElementById(`${id_prefix}${skillId}`).value) || 0;
         });
 
-        return new Character({
+        return new CharacterData({
             name: prefix.charAt(0).toUpperCase() + prefix.slice(1),
             totalDamage: parseFloat(document.getElementById(`${id_prefix}total-damage`).value) || 0,
             totalHealth: parseFloat(document.getElementById(`${id_prefix}total-health`).value) || 0,

@@ -8,6 +8,7 @@ import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 import { LoggerService } from '../infrastructure/LoggerService.js';
 import { EquipmentComparisonService } from '../domain/EquipmentComparisonService.js';
+import { CharacterFactory } from './CharacterFactory.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const passiveSkillService = new PassiveSkillService();
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const simulationService = new SimulationService(loggerService);
     const fileService = new FileService();
     const equipmentComparisonService = new EquipmentComparisonService(simulationService, characterService);
+    const characterFactory = new CharacterFactory();
 
     // Event listeners for mode switching
     uiService.modeEquipmentButton.addEventListener('click', () => uiService.switchToEquipmentMode());
@@ -27,11 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
     uiService.compareButton.addEventListener('click', () => {
         loggerService.clear();
 
-        const characterSheetStats = domAdapter.getCharacterStats();
-        const character = characterService.getCharacterBaseStats(characterSheetStats);
+        const characterData = domAdapter.getCharacterStats();
+        const characterSheet = characterFactory.createCharacterFromData(characterData);
+        const character = characterService.getCharacterBaseStats(characterSheet);
 
-        const equipNew = domAdapter.getEquipment(1, character);
-        const equipOld = domAdapter.getEquipment(2, character);
+        const equipNewData = domAdapter.getEquipment(1);
+        const equipOldData = domAdapter.getEquipment(2);
+
+        const equipNew = characterFactory.createEquipmentFromData(equipNewData, character);
+        const equipOld = characterFactory.createEquipmentFromData(equipOldData, character);
 
         const result = equipmentComparisonService.compare(character, equipNew, equipOld);
 
@@ -42,12 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listener for PvP simulation
     uiService.simulateButton.addEventListener('click', () => {
         loggerService.clear(); // Clear logger for a fresh PvP simulation.
-        const playerSheetStats = domAdapter.getCharacterStatsPvp('player');
-        const opponentSheetStats = domAdapter.getCharacterStatsPvp('opponent');
+        const playerData = domAdapter.getCharacterStatsPvp('player');
+        const opponentData = domAdapter.getCharacterStatsPvp('opponent');
 
-        const player = characterService.getCharacterBaseStats(playerSheetStats);
+        const playerSheet = characterFactory.createCharacterFromData(playerData);
+        const opponentSheet = characterFactory.createCharacterFromData(opponentData);
+
+        const player = characterService.getCharacterBaseStats(playerSheet);
         player.id = "Player"; // Assign ID for logs
-        const opponent = characterService.getCharacterBaseStats(opponentSheetStats);
+        const opponent = characterService.getCharacterBaseStats(opponentSheet);
         opponent.id = "Opponent"; // Assign ID for logs
 
         const result = simulationService.simulatePvp(player, opponent);

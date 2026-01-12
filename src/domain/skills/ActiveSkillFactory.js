@@ -3,16 +3,17 @@
 import { DamageSkill } from './DamageSkill.js';
 import { BuffSkill } from './BuffSkill.js';
 
-const skillMap = {
-    'damage': DamageSkill,
-    'buff': BuffSkill,
-};
-
 export class ActiveSkillFactory {
+    /**
+     * @param {ActiveSkillData} skillData
+     * @returns {DamageSkill | BuffSkill | null}
+     */
     static create(skillData) {
-        const SkillClass = skillMap[skillData.type];
-        if (SkillClass) {
-            return new SkillClass(skillData);
+        if (skillData.type === 'damage') {
+            return new DamageSkill(skillData);
+        }
+        if (skillData.type === 'buff') {
+            return new BuffSkill(skillData);
         }
         return null;
     }
