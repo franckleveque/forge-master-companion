@@ -29,7 +29,7 @@ export class BuffSkill extends ActiveSkill {
     trigger(caster) {
         this.durationTimer = this.duration;
         caster.applyBuff(this);
-        caster._log(`${caster.id} uses a buff skill. Their stats are increased for ${this.duration} seconds.`);
+        caster._log(`${caster.id} uses a buff skill. Damage is now ${caster.totalDamage}, Health is now ${caster.health.toFixed(0)}/${caster.maxHealth.toFixed(0)}.`);
         // The cooldown will start after the duration ends
         this.timer = this.cooldown + this.duration;
     }
