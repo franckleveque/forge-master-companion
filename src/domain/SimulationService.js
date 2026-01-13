@@ -66,11 +66,7 @@ export class SimulationService {
                 fighter.tick(0.01);
                 fighter.activeSkills.forEach(skill => {
                     if (skill.isReady()) {
-                        this._log(`${fighter.id} uses a ${skill.type} skill.`);
-                        if (skill.type === 'buff') {
-                            skill.trigger(); // Trigger the buff
-                            fighter.applyBuff(skill);
-                        }
+                        skill.trigger(fighter);
                     }
                 });
             });

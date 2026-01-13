@@ -8,4 +8,13 @@ export class DamageSkill extends ActiveSkill {
         this.value = value;
         this.hits = hits;
     }
+
+    trigger(caster) {
+        if (caster.enemy && caster.enemy.isAlive()) {
+            const damage = this.value * this.hits;
+            caster.enemy.takeDamage(damage);
+            caster._log(`${caster.id} uses a ${this.type} skill for ${damage} damage. ${caster.enemy.id}'s health is now ${caster.enemy.health}.`);
+            this.reset();
+        }
+    }
 }

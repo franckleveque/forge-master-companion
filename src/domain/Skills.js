@@ -33,4 +33,9 @@ export class ActiveSkill {
     reset() {
         this.timer = this.cooldown;
     }
+
+    trigger(caster) {
+        // Base implementation does nothing, but can be overridden.
+        this.reset();
+    }
 }
