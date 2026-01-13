@@ -15,8 +15,10 @@ export class SimulationService {
     _initializeFighters(player1, player2) {
         const logFn = this._log.bind(this);
 
-        const p1Data = JSON.parse(JSON.stringify(player1));
-        const p2Data = JSON.parse(JSON.stringify(player2));
+        // Create a deep copy of the characters to avoid modifying the originals.
+        // The 'enemy' property is temporarily removed to prevent circular reference errors.
+        const p1Data = JSON.parse(JSON.stringify({ ...player1, enemy: null }));
+        const p2Data = JSON.parse(JSON.stringify({ ...player2, enemy: null }));
 
         const p1 = new Character({ ...p1Data, logFunction: logFn });
         const p2 = new Character({ ...p2Data, logFunction: logFn });

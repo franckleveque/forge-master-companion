@@ -1,46 +1,54 @@
 // tests/domain/skills/DamageSkill.test.js
-import { DamageSkill } from '../../../src/domain/skills/DamageSkill.js';
+
+import { SimulationService } from '../../../src/domain/SimulationService.js';
 import { Character } from '../../../src/domain/Character.js';
+import { LoggerService } from '../../../src/infrastructure/LoggerService.js';
 
-describe('DamageSkill', () => {
-    test('should log the correct damage and remaining health', () => {
-        const logFunction = jest.fn();
-        const attacker = new Character({
-            id: 'Attacker',
-            totalDamage: 100,
-            logFunction: logFunction,
-        });
-        const target = new Character({
-            id: 'Target',
-            totalHealth: 200,
-        });
-        attacker.enemy = target;
+describe('DamageSkill Integration Test', () => {
+    let simulationService;
+    let logger;
 
-        const skill = new DamageSkill({ value: 50, hits: 1 });
-        skill.trigger(attacker);
-
-        expect(logFunction).toHaveBeenCalledWith("Attacker uses a damage skill for 50 damage. Target's health is now 150.");
-        expect(target.health).toBe(150);
+    beforeEach(() => {
+        logger = new LoggerService();
+        simulationService = new SimulationService(logger);
     });
 
-    test('should log the correct damage and remaining health with decimals', () => {
-        const logFunction = jest.fn();
-        const attacker = new Character({
-            id: 'Attacker',
-            totalDamage: 100,
-            logFunction: logFunction,
+    test('Multi-hit damage skill should deal damage sequentially across different timestamps', () => {
+        const player = new Character({
+            id: 'Player',
+            name: 'Player',
+            totalHealth: 1000,
+            activeSkills: [
+                { type: 'damage', value: 10, hits: 3, cooldown: 0.1 }
+            ]
         });
-        const target = new Character({
-            id: 'Target',
-            totalHealth: 200.5,
+
+        const opponent = new Character({
+            id: 'Opponent',
+            name: 'Opponent',
+            totalHealth: 1000
         });
-        target.health = 200.5;
-        attacker.enemy = target;
 
-        const skill = new DamageSkill({ value: 50, hits: 1 });
-        skill.trigger(attacker);
+        // Initialize skills to set initial cooldowns and states
+        const [p1, p2] = simulationService._initializeFighters(player, opponent);
+        p1.activeSkills.forEach(s => s.tick(s.cooldown)); // Make skill ready at time 0
 
-        expect(logFunction).toHaveBeenCalledWith("Attacker uses a damage skill for 50 damage. Target's health is now 151.");
-        expect(target.health).toBe(150.5);
+        const { log } = simulationService.simulatePvp(p1, p2);
+
+        const skillLogs = log.filter(l => l.includes('Player uses a damage skill for 10 damage'));
+
+        // Check that all 3 hits were logged
+        expect(skillLogs).toHaveLength(3);
+
+        // Check that each hit has a unique timestamp
+        const timestamps = skillLogs.map(l => l.match(/\[(\d+\.\d+)\]/)[1]);
+        const uniqueTimestamps = [...new Set(timestamps)];
+
+        expect(uniqueTimestamps).toHaveLength(3);
+
+        // Check that the timestamps are sequential
+        expect(parseFloat(uniqueTimestamps[0])).toBeCloseTo(0.01);
+        expect(parseFloat(uniqueTimestamps[1])).toBeCloseTo(0.02);
+        expect(parseFloat(uniqueTimestamps[2])).toBeCloseTo(0.03);
     });
 });
