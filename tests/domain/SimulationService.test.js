@@ -64,4 +64,36 @@ describe('SimulationService', () => {
         // For now, we'll just ensure the simulation runs. A more specific assertion can be added later.
         expect(logs.length).toBeGreaterThan(0);
     });
+
+    test('simulation should stop at exactly 60.00s', () => {
+        const player = new Character({
+            id: 'Player',
+            totalDamage: 100,
+            totalHealth: 1000000,
+        });
+        const opponent = new Character({
+            id: 'Opponent',
+            totalDamage: 100,
+            totalHealth: 1000000
+        });
+
+        const result = simulationService.simulatePvp(player, opponent);
+        expect(result.time).toBe(60.00);
+    });
+
+    test('winner should be the one with more health at 60.00s', () => {
+        const player = new Character({
+            id: 'Player',
+            totalDamage: 100,
+            totalHealth: 1000000,
+        });
+        const opponent = new Character({
+            id: 'Opponent',
+            totalDamage: 110,
+            totalHealth: 1000000
+        });
+
+        const result = simulationService.simulatePvp(player, opponent);
+        expect(result.winner).toBe('Opponent');
+    });
 });
