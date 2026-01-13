@@ -52,13 +52,17 @@ export class Character {
         this.passiveSkills.forEach(skill => skill.onTick(this, dt));
         this.activeSkills.forEach(skill => skill.tick(dt));
 
-        // This is the critical fix: check for and remove expired buffs.
-        this.activeBuffs.forEach(buff => {
+        const expiredBuffs = this.activeBuffs.filter(buff => {
             buff.tick(dt);
-            if (!buff.isActive()) {
-                this.removeBuff(buff);
-            }
+            return !buff.isActive();
         });
+
+        if (expiredBuffs.length > 0) {
+            expiredBuffs.forEach(buff => {
+                this.removeBuff(buff);
+                buff.onExpire(this);
+            });
+        }
 
         this.attackTimer += dt;
         const attackSpeedBonus = this.basePassiveSkills['vitesse-attaque'] || 0;
@@ -125,11 +129,42 @@ export class Character {
 
     applyBuff(buff) {
         this.activeBuffs.push(buff);
-        this._log(`${this.id} gains a buff.`);
+        this._recalculateStats();
     }
 
     removeBuff(buff) {
         this.activeBuffs = this.activeBuffs.filter(b => b !== buff);
-        this._log(`${this.id} buff expired.`);
+        this._recalculateStats();
+    }
+
+    _recalculateStats() {
+        const maxHealthBefore = this.maxHealth;
+
+        let totalDamage = this.baseDamage;
+        let maxHealth = this.baseHealth;
+
+        this.passiveSkills.forEach(skill => {
+            if (skill.onCalculateStats) {
+                const result = skill.onCalculateStats(this, { totalDamage, maxHealth });
+                totalDamage = result.totalDamage;
+                maxHealth = result.maxHealth;
+            }
+        });
+
+        this.activeBuffs.forEach(buff => {
+            totalDamage += buff.damageBuff || 0;
+            maxHealth += buff.healthBuff || 0;
+        });
+
+        this.totalDamage = totalDamage;
+        this.maxHealth = maxHealth;
+
+        if (this.maxHealth > maxHealthBefore) {
+            this.health += this.maxHealth - maxHealthBefore;
+        }
+
+        if (this.health > this.maxHealth) {
+            this.health = this.maxHealth;
+        }
     }
 }

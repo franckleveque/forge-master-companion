@@ -69,7 +69,9 @@ describe('SimulationService Integration Tests', () => {
     test('Buffs should apply and expire correctly', () => {
         const player = new Character({
             id: 'Player',
+            baseDamage: 100,
             totalDamage: 100,
+            baseHealth: 1000,
             totalHealth: 1000,
             activeSkills: [
                 { type: 'buff', damageBuff: 50, duration: 0.1, cooldown: 0.2 }
@@ -80,7 +82,7 @@ describe('SimulationService Integration Tests', () => {
         simulationService.simulatePvp(player, opponent);
         const logs = simulationService.simulationLog;
 
-        const buffAppliedLog = logs.find(l => l.includes('gains a buff'));
+        const buffAppliedLog = logs.find(l => l.includes('uses a buff skill. Damage is now 150'));
         const buffExpiredLog = logs.find(l => l.includes('buff expired'));
 
         expect(buffAppliedLog).toBeDefined();
