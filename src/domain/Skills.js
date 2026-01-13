@@ -38,4 +38,8 @@ export class ActiveSkill {
         // Base implementation does nothing, but can be overridden.
         this.reset();
     }
+
+    onExpire(caster) {
+        // Base implementation does nothing. Can be overridden by skills with duration.
+    }
 }

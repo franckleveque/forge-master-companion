@@ -58,7 +58,10 @@ export class Character {
         });
 
         if (expiredBuffs.length > 0) {
-            expiredBuffs.forEach(buff => this.removeBuff(buff));
+            expiredBuffs.forEach(buff => {
+                this.removeBuff(buff);
+                buff.onExpire(this);
+            });
         }
 
         this.attackTimer += dt;
@@ -132,7 +135,6 @@ export class Character {
     removeBuff(buff) {
         this.activeBuffs = this.activeBuffs.filter(b => b !== buff);
         this._recalculateStats();
-        this._log(`${this.id}'s buff expired. Damage is now ${this.totalDamage}, Health is now ${this.health.toFixed(0)}/${this.maxHealth.toFixed(0)}.`);
     }
 
     _recalculateStats() {
