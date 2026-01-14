@@ -39,7 +39,7 @@ describe('DamageSkill', () => {
         const time2 = parseFloat(skillLogs[1][0].match(/\[(\d+\.\d+)\]/)[1]);
         const time3 = parseFloat(skillLogs[2][0].match(/\[(\d+\.\d+)\]/)[1]);
 
-        expect(time1).toBe(1.01);
+        expect(time1).toBe(1.00);
         expect(time2).toBeCloseTo(time1 + 0.01);
         expect(time3).toBeCloseTo(time2 + 0.01);
     });

@@ -18,7 +18,7 @@ export class BuffSkill extends ActiveSkill {
     tick(dt) {
         super.tick(dt);
         if (this.isActive()) {
-            this.durationTimer -= dt;
+            this.durationTimer = parseFloat((this.durationTimer - dt).toFixed(2));
             if (this.durationTimer <= 0) {
                 // Buff expired, now the cooldown can start
                 this.timer = this.cooldown;

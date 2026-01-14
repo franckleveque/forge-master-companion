@@ -19,17 +19,17 @@ export class DamageSkill extends ActiveSkill {
     }
 
     trigger(caster) {
-        if (this.hits > 1) {
-            this.isExecuting = true;
-            this.remainingHits = this.hits;
-            this.hitTimer = 0;
-            this.reset(); // Reset cooldown as soon as the skill is triggered
-        } else {
-            if (caster.enemy && caster.enemy.isAlive()) {
-                caster.enemy.takeDamage(this.value);
-                caster._log(`${caster.id} uses a ${this.type} skill for ${this.value} damage. ${caster.enemy.id}'s health is now ${caster.enemy.health.toFixed(0)}.`);
+        this.reset(); // Reset cooldown immediately.
+
+        if (caster.enemy && caster.enemy.isAlive()) {
+            caster.enemy.takeDamage(this.value);
+            caster._log(`${caster.id} uses a ${this.type} skill for ${this.value} damage. ${caster.enemy.id}'s health is now ${caster.enemy.health.toFixed(0)}.`);
+
+            if (this.hits > 1) {
+                this.isExecuting = true;
+                this.remainingHits = this.hits - 1; // One hit was already dealt.
+                this.hitTimer = this.hitDelay;
             }
-            this.reset();
         }
     }
 

@@ -26,7 +26,7 @@ export class ActiveSkill {
 
     tick(dt) {
         if (this.timer > 0) {
-            this.timer -= dt;
+            this.timer = parseFloat((this.timer - dt).toFixed(2));
         }
     }
 

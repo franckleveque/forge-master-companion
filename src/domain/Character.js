@@ -1,4 +1,5 @@
 // src/domain/Character.js
+import { BuffSkill } from './skills/BuffSkill.js';
 
 export class Character {
     constructor({
@@ -50,9 +51,13 @@ export class Character {
         if (!this.isAlive()) return;
 
         this.passiveSkills.forEach(skill => skill.onTick(this, dt));
+        this.activeSkills.forEach(skill => skill.tick(dt, this));
 
         const expiredBuffs = this.activeBuffs.filter(buff => {
-            buff.tick(dt);
+            // BuffSkills are already ticked in the activeSkills loop
+            if (!(buff instanceof BuffSkill)) {
+                buff.tick(dt);
+            }
             return !buff.isActive();
         });
 
