@@ -39,7 +39,6 @@ export class Character {
         this.critChanceCounter = 0;
         this.blockChanceCounter = 0;
         this.doubleChanceCounter = 0;
-        this.activeBuffs = [];
     }
 
     isAlive() {
@@ -51,17 +50,25 @@ export class Character {
 
         this.passiveSkills.forEach(skill => skill.onTick(this, dt));
 
-        // Unified ticking for all components to prevent double-ticking
-        const tickableComponents = new Set([...this.activeSkills, ...this.activeBuffs]);
-        tickableComponents.forEach(component => component.tick(dt, this));
+        const expiredSkills = [];
+        this.activeSkills.forEach(skill => {
+            const wasActive = skill.isActive ? skill.isActive() : false;
 
-        const expiredBuffs = this.activeBuffs.filter(buff => !buff.isActive());
+            skill.tick(dt, this);
 
-        if (expiredBuffs.length > 0) {
-            expiredBuffs.forEach(buff => {
-                this.removeBuff(buff);
-                buff.onExpire(this);
-            });
+            if (skill.isReady()) {
+                skill.trigger(this);
+            }
+
+            const isNowActive = skill.isActive ? skill.isActive() : false;
+            if (wasActive && !isNowActive) {
+                expiredSkills.push(skill);
+            }
+        });
+
+        if (expiredSkills.length > 0) {
+            this._recalculateStats();
+            expiredSkills.forEach(skill => skill.onExpire(this));
         }
 
         this.attackTimer += dt;
@@ -127,16 +134,6 @@ export class Character {
         }
     }
 
-    applyBuff(buff) {
-        this.activeBuffs.push(buff);
-        this._recalculateStats();
-    }
-
-    removeBuff(buff) {
-        this.activeBuffs = this.activeBuffs.filter(b => b !== buff);
-        this._recalculateStats();
-    }
-
     _recalculateStats() {
         const maxHealthBefore = this.maxHealth;
 
@@ -151,9 +148,10 @@ export class Character {
             }
         });
 
-        this.activeBuffs.forEach(buff => {
-            totalDamage += buff.damageBuff || 0;
-            maxHealth += buff.healthBuff || 0;
+        this.activeSkills.forEach(skill => {
+            const modifiers = skill.getStatModifiers();
+            totalDamage += modifiers.damage;
+            maxHealth += modifiers.health;
         });
 
         this.totalDamage = totalDamage;

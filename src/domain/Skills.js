@@ -42,4 +42,8 @@ export class ActiveSkill {
     onExpire(caster) {
         // Base implementation does nothing. Can be overridden by skills with duration.
     }
+
+    getStatModifiers() {
+        return { damage: 0, health: 0 };
+    }
 }
