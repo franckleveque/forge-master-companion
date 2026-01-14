@@ -50,15 +50,12 @@ export class Character {
         if (!this.isAlive()) return;
 
         this.passiveSkills.forEach(skill => skill.onTick(this, dt));
-        this.activeSkills.forEach(skill => skill.tick(dt, this));
 
-        const expiredBuffs = this.activeBuffs.filter(buff => {
-            // Active skills that are also buffs are already ticked in the activeSkills loop.
-            if (!this.activeSkills.includes(buff)) {
-                buff.tick(dt);
-            }
-            return !buff.isActive();
-        });
+        // Unified ticking for all components to prevent double-ticking
+        const tickableComponents = new Set([...this.activeSkills, ...this.activeBuffs]);
+        tickableComponents.forEach(component => component.tick(dt, this));
+
+        const expiredBuffs = this.activeBuffs.filter(buff => !buff.isActive());
 
         if (expiredBuffs.length > 0) {
             expiredBuffs.forEach(buff => {
