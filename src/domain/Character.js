@@ -50,7 +50,6 @@ export class Character {
         if (!this.isAlive()) return;
 
         this.passiveSkills.forEach(skill => skill.onTick(this, dt));
-        this.activeSkills.forEach(skill => skill.tick(dt));
 
         const expiredBuffs = this.activeBuffs.filter(buff => {
             buff.tick(dt);

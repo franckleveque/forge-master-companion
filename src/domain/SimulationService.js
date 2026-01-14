@@ -68,6 +68,7 @@ export class SimulationService {
                     if (skill.isReady()) {
                         skill.trigger(fighter);
                     }
+                    skill.tick(0.01, fighter);
                 });
             });
         }
