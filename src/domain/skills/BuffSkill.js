@@ -37,4 +37,11 @@ export class BuffSkill extends ActiveSkill {
     onExpire(caster) {
         caster._log(`${caster.id}'s buff expired. Damage is now ${caster.totalDamage}, Health is now ${caster.health.toFixed(0)}/${caster.maxHealth.toFixed(0)}.`);
     }
+
+    getStatModifiers() {
+        if (this.isActive()) {
+            return { damage: this.damageBuff, health: this.healthBuff };
+        }
+        return { damage: 0, health: 0 };
+    }
 }
