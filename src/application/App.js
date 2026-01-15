@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const characterData = domAdapter.getCharacterStats();
         const characterSheet = characterFactory.createCharacterFromData(characterData);
-        const character = characterService.getCharacterBaseStats(characterSheet);
+        const character = characterFactory.create(characterSheet);
 
         const equipNewData = domAdapter.getEquipment(1);
         const equipOldData = domAdapter.getEquipment(2);
@@ -54,9 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerSheet = characterFactory.createCharacterFromData(playerData);
         const opponentSheet = characterFactory.createCharacterFromData(opponentData);
 
-        const player = characterService.getCharacterBaseStats(playerSheet);
+        const player = characterFactory.create(playerSheet);
         player.id = "Player"; // Assign ID for logs
-        const opponent = characterService.getCharacterBaseStats(opponentSheet);
+        const opponent = characterFactory.create(opponentSheet);
         opponent.id = "Opponent"; // Assign ID for logs
 
         const result = simulationService.simulatePvp(player, opponent);

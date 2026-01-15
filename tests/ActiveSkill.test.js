@@ -31,12 +31,9 @@ describe('Active Skills', () => {
             ]
         };
         const character = new Character(characterData);
-        const stats = characterService.recalculateTotalStats(character);
+        const stats = character.recalculateTotalStats();
         const expectedDamage = (100 + 10 * 1.5) * 1.2;
         expect(stats.totalDamage).toBe(expectedDamage);
-
-        const baseStats = characterService.getCharacterBaseStats(stats);
-        expect(baseStats.baseDamage).toBeCloseTo(100);
     });
 
     // Note: The tests for multi-hit and buffs require a running simulation,

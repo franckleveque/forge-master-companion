@@ -6,6 +6,45 @@ import { ActiveSkillFactory } from '../domain/skills/ActiveSkillFactory.js';
 import { PassiveSkillFactory } from '../domain/passives/PassiveSkillFactory.js';
 
 export class CharacterFactory {
+    create(sheetStats) {
+        const stats = JSON.parse(JSON.stringify(sheetStats));
+        const p = stats.basePassiveSkills;
+
+        let totalDamageModifier = 1 + (p['degats'] || 0) / 100;
+        if (stats.weaponType === 'corp-a-corp') {
+            totalDamageModifier += (p['degats-corps-a-corps'] || 0) / 100;
+        } else if (stats.weaponType === 'a-distance') {
+            totalDamageModifier += (p['degats-a-distance'] || 0) / 100;
+        }
+
+        const totalHealthModifier = 1 + (p['sante'] || 0) / 100;
+
+        let effectiveBaseDamage = stats.totalDamage / (totalDamageModifier || 1);
+        let effectiveBaseHealth = stats.totalHealth / (totalHealthModifier || 1);
+
+        if (stats.activeSkills && Array.isArray(stats.activeSkills)) {
+            const competenceDegatsMod = 1 + (p['competence-degats'] || 0) / 100;
+            stats.activeSkills.forEach(skill => {
+                if (skill.baseDamage) {
+                    effectiveBaseDamage -= skill.baseDamage * competenceDegatsMod;
+                }
+                if (skill.baseHealth) {
+                    effectiveBaseHealth -= skill.baseHealth * competenceDegatsMod;
+                }
+            });
+        }
+
+        const character = new Character({
+            ...stats,
+            baseDamage: effectiveBaseDamage,
+            baseHealth: effectiveBaseHealth,
+            basePassiveSkills: stats.basePassiveSkills,
+            name: stats.name || 'Player'
+        });
+
+        return character.recalculateTotalStats();
+    }
+
     createCharacterFromData(characterData) {
         const activeSkills = this.createActiveSkillsFromData(characterData.activeSkills);
         const passiveSkills = this.createPassiveSkillsFromData(characterData.basePassiveSkills);

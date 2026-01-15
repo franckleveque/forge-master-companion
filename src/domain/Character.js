@@ -167,4 +167,37 @@ export class Character {
             this.health = this.maxHealth;
         }
     }
+
+    recalculateTotalStats() {
+        const p = this.basePassiveSkills || {};
+        let effectiveBaseDamage = this.baseDamage;
+        let effectiveBaseHealth = this.baseHealth;
+
+        if (this.activeSkills && Array.isArray(this.activeSkills)) {
+            const competenceDegatsMod = 1 + (p['competence-degats'] || 0) / 100;
+            this.activeSkills.forEach(skill => {
+                if (skill.baseDamage) {
+                    effectiveBaseDamage += skill.baseDamage * competenceDegatsMod;
+                }
+                if (skill.baseHealth) {
+                    effectiveBaseHealth += skill.baseHealth * competenceDegatsMod;
+                }
+            });
+        }
+
+        let totalDamageModifier = 1 + (p['degats'] || 0) / 100;
+        if (this.weaponType === 'corp-a-corp') {
+            totalDamageModifier += (p['degats-corps-a-corps'] || 0) / 100;
+        } else if (this.weaponType === 'a-distance') {
+            totalDamageModifier += (p['degats-a-distance'] || 0) / 100;
+        }
+
+        const totalHealthModifier = 1 + (p['sante'] || 0) / 100;
+
+        this.totalDamage = effectiveBaseDamage * totalDamageModifier;
+        this.totalHealth = effectiveBaseHealth * totalHealthModifier;
+        this.maxHealth = this.totalHealth;
+
+        return this;
+    }
 }
