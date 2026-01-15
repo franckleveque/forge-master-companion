@@ -62,14 +62,7 @@ export class SimulationService {
 
         while (this.time < 60 && this.fighters.every(f => f.isAlive())) {
             this.time = parseFloat((this.time + 0.01).toFixed(2));
-            this.fighters.forEach(fighter => {
-                fighter.tick(0.01);
-                fighter.activeSkills.forEach(skill => {
-                    if (skill.isReady()) {
-                        skill.trigger(fighter);
-                    }
-                });
-            });
+            this.fighters.forEach(fighter => fighter.tick(0.01));
         }
 
         const winner = [...this.fighters].sort((a, b) => b.health - a.health)[0];
