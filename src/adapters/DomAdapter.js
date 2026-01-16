@@ -166,7 +166,7 @@ export class DomAdapter {
 
         data.character_stats.total_damage = this.getElementValue('total-damage');
         data.character_stats.total_health = this.getElementValue('total-health');
-        data.character_stats.weapon_type = this.getElementValue('weapon-type');
+        data.character_stats.weaponType = this.getElementValue('weapon-type');
 
         this.passiveSkillService.getPassiveSkillIds().forEach(skillId => {
             data.passive_skills[skillId] = this.getElementValue(skillId);
@@ -188,13 +188,13 @@ export class DomAdapter {
         }
 
         data.equipment.category = this.getElementValue('equipment-category');
-        data.equipment.equip1.weapon_type = this.getElementValue('equip1-weapon-type');
+        data.equipment.equip1.weaponType = this.getElementValue('equip1-weapon-type');
         data.equipment.equip1.damage = this.getElementValue('equip1-damage-value');
         data.equipment.equip1.health = this.getElementValue('equip1-health-value');
         data.equipment.equip1.passive_skill = this.getElementValue('equip1-passive-skill');
         data.equipment.equip1.passive_skill_value = this.getElementValue('equip1-passive-skill-value');
         data.equipment.equip2.unequip = this.getElementValue('equip2-unequip');
-        data.equipment.equip2.weapon_type = this.getElementValue('equip2-weapon-type');
+        data.equipment.equip2.weaponType = this.getElementValue('equip2-weapon-type');
         data.equipment.equip2.damage = this.getElementValue('equip2-damage-value');
         data.equipment.equip2.health = this.getElementValue('equip2-health-value');
         data.equipment.equip2.passive_skill = this.getElementValue('equip2-passive-skill');
@@ -237,13 +237,13 @@ export class DomAdapter {
         }
 
         this.setElementValue('equipment-category', data.equipment.category);
-        this.setElementValue('equip1-weapon-type', data.equipment.equip1.weapon_type);
+        this.setElementValue('equip1-weapon-type', data.equipment.equip1.weaponType);
         this.setElementValue('equip1-damage-value', data.equipment.equip1.damage);
         this.setElementValue('equip1-health-value', data.equipment.equip1.health);
         this.setElementValue('equip1-passive-skill', data.equipment.equip1.passive_skill);
         this.setElementValue('equip1-passive-skill-value', data.equipment.equip1.passive_skill_value);
         this.setElementValue('equip2-unequip', data.equipment.equip2.unequip);
-        this.setElementValue('equip2-weapon-type', data.equipment.equip2.weapon_type);
+        this.setElementValue('equip2-weapon-type', data.equipment.equip2.weaponType);
         this.setElementValue('equip2-damage-value', data.equipment.equip2.damage);
         this.setElementValue('equip2-health-value', data.equipment.equip2.health);
         this.setElementValue('equip2-passive-skill', data.equipment.equip2.passive_skill);
