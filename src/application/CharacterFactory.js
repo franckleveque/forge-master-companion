@@ -10,10 +10,13 @@ export class CharacterFactory {
         const activeSkills = this.createActiveSkillsFromData(characterData.activeSkills);
         const passiveSkills = this.createPassiveSkillsFromData(characterData.basePassiveSkills);
 
+        // Normalize weapon_type to weaponType at the factory boundary
+        const weaponType = characterData.weaponType || characterData.weapon_type;
+
         return new Character({
             totalDamage: characterData.totalDamage,
             totalHealth: characterData.totalHealth,
-            weaponType: characterData.weaponType,
+            weaponType: weaponType,
             basePassiveSkills: characterData.basePassiveSkills,
             activeSkills: activeSkills,
             passiveSkills: passiveSkills,
@@ -22,9 +25,12 @@ export class CharacterFactory {
     }
 
     createEquipmentFromData(equipmentData, baseStats) {
+        // Normalize weapon_type to weaponType at the factory boundary
+        const weaponType = equipmentData.weaponType || equipmentData.weapon_type;
+
         return new Equipment({
             ...equipmentData,
-            weaponType: equipmentData.category === 'weapon' ? equipmentData.weaponType : baseStats.weaponType,
+            weaponType: equipmentData.category === 'weapon' ? weaponType : baseStats.weaponType,
         });
     }
 
