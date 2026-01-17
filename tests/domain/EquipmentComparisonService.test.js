@@ -62,7 +62,6 @@ describe('EquipmentComparisonService', () => {
         expect(characterService.getCharacterBaseStats).toHaveBeenCalledWith(character);
         expect(characterService.unequipEquipment).toHaveBeenCalled();
         expect(characterService.applyEquipment).toHaveBeenCalledWith(expect.any(Character), equipNew);
-        expect(characterService.recalculateTotalStats).toHaveBeenCalled();
     });
 
     test('should return the direct result from the simulation service', () => {

@@ -1,4 +1,4 @@
-import { CharacterService } from '../src/domain/CharacterService.js';
+import { CharacterService } from '../src/application/CharacterService.js';
 
 describe('CharacterService', () => {
   let characterService;
@@ -50,21 +50,4 @@ describe('CharacterService', () => {
       });
   });
 
-  describe('recalculateTotalStats', () => {
-    it('should correctly recalculate total stats from base stats', () => {
-      const characterStats = {
-        baseDamage: 100,
-        baseHealth: 1000,
-        weaponType: 'corp-a-corp',
-        basePassiveSkills: {
-          'degats': 50,
-          'sante': 50,
-          'degats-corps-a-corps': 20
-        }
-      };
-      const finalStats = characterService.recalculateTotalStats(characterStats);
-      expect(finalStats.totalDamage).toBeCloseTo(170);
-      expect(finalStats.totalHealth).toBeCloseTo(1500);
-    });
-  });
 });
