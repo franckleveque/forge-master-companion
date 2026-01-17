@@ -1,6 +1,6 @@
 // src/application/App.js
 
-import { CharacterService } from '../domain/CharacterService.js';
+import { CharacterService } from './CharacterService.js';
 import { UiService } from '../infrastructure/UiService.js';
 import { DomAdapter } from '../adapters/DomAdapter.js';
 import { SimulationService } from '../domain/SimulationService.js';

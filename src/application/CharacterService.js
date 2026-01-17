@@ -1,5 +1,5 @@
-// src/domain/CharacterService.js
-import { Character } from "./Character.js";
+// src/application/CharacterService.js
+import { Character } from "../domain/Character.js";
 
 export class CharacterService {
     constructor(passiveSkillService) {
@@ -35,8 +35,8 @@ export class CharacterService {
             });
         }
 
-        // Ensure this service returns a full Character instance, not just a plain object.
-        // This is critical for the simulation to have access to all class methods and properties.
+        // The Character constructor now automatically recalculates total stats.
+        // This service is only responsible for determining the base stats from UI inputs.
         const character = new Character({
             ...stats,
             baseDamage: effectiveBaseDamage,
@@ -44,51 +44,7 @@ export class CharacterService {
             basePassiveSkills: stats.basePassiveSkills, // Ensure passives are passed through
             name: stats.name || 'Player' // Ensure a name is set
         });
-
-        // Recalculate final stats based on the new base stats
-        return this.recalculateTotalStats(character);
-    }
-
-    recalculateTotalStats(characterStats) {
-        // Use a deep copy to ensure the original object is NEVER mutated.
-        const stats = JSON.parse(JSON.stringify(characterStats));
-        const p = stats.basePassiveSkills || {};
-
-        let effectiveBaseDamage = stats.baseDamage;
-        let effectiveBaseHealth = stats.baseHealth;
-
-        if (stats.activeSkills && Array.isArray(stats.activeSkills)) {
-            const competenceDegatsMod = 1 + (p['competence-degats'] || 0) / 100;
-            stats.activeSkills.forEach(skill => {
-                if (skill.baseDamage) {
-                    effectiveBaseDamage += skill.baseDamage * competenceDegatsMod;
-                }
-                if (skill.baseHealth) {
-                    effectiveBaseHealth += skill.baseHealth * competenceDegatsMod;
-                }
-            });
-        }
-
-        let totalDamageModifier = 1 + (p['degats'] || 0) / 100;
-        if (stats.weaponType === 'corp-a-corp') {
-            totalDamageModifier += (p['degats-corps-a-corps'] || 0) / 100;
-        } else if (stats.weaponType === 'a-distance') {
-            totalDamageModifier += (p['degats-a-distance'] || 0) / 100;
-        }
-
-        const totalHealthModifier = 1 + (p['sante'] || 0) / 100;
-
-        stats.totalDamage = effectiveBaseDamage * totalDamageModifier;
-        stats.totalHealth = effectiveBaseHealth * totalHealthModifier;
-
-        // Ensure maxHealth is also updated when totalHealth changes.
-        stats.maxHealth = stats.totalHealth;
-
-        // Pass the full stats object to the constructor.
-        // The ...stats spread includes the (potentially modified) basePassiveSkills.
-        return new Character({
-            ...stats
-        });
+        return character.recalculateStats();
     }
 
     applyEquipment(characterStats, equipment) {

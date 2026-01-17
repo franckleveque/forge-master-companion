@@ -19,13 +19,12 @@ export class EquipmentComparisonService {
 
         // Calculate stats for character with new equipment
         const baseStats = this.characterService.getCharacterBaseStats(character);
-        const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld);
-        const statsWithNewEquip = this.characterService.applyEquipment(cleanBaseStats, equipNew);
-        const finalStatsNew = this.characterService.recalculateTotalStats(statsWithNewEquip);
+        const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld).recalculateStats();
+        const finalStatsNew = this.characterService.applyEquipment(cleanBaseStats, equipNew).recalculateStats();
         const characterWithNewEquip = new Character({
             ...finalStatsNew,
             name: "New Equip",
-id: "New Equip"
+            id: "New Equip"
         });
 
         // Run a single simulation between the two character versions
