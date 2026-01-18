@@ -7,7 +7,7 @@ import { SimulationService } from '../domain/SimulationService.js';
 import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from '../domain/PassiveSkillService.js';
 import { LoggerService } from '../infrastructure/LoggerService.js';
-import { EquipmentComparisonService } from '../domain/EquipmentComparisonService.js';
+import { EquipmentComparisonService } from './EquipmentComparisonService.js';
 import { CharacterFactory } from './CharacterFactory.js';
 
 document.addEventListener('DOMContentLoaded', () => {
