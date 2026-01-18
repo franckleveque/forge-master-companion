@@ -1,6 +1,6 @@
 // tests/domain/EquipmentComparisonService.test.js
 
-import { EquipmentComparisonService } from '../../src/domain/EquipmentComparisonService.js';
+import { EquipmentComparisonService } from '../../src/application/EquipmentComparisonService.js';
 import { Character } from '../../src/domain/Character.js';
 import { Equipment } from '../../src/domain/Equipment.js';
 

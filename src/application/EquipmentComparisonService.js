@@ -1,6 +1,6 @@
 // src/domain/EquipmentComparisonService.js
 
-import { Character } from "./Character.js";
+import { Character } from "../domain/Character.js";
 
 export class EquipmentComparisonService {
     constructor(simulationService, characterService) {
