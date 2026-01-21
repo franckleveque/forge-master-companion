@@ -2,7 +2,7 @@
 
 import { DamageSkill } from '../../src/domain/skills/DamageSkill.js';
 import { Character } from '../../src/domain/Character.js';
-import { SimulationService } from '../../src/domain/SimulationService.js';
+import { SimulationService } from '../../src/application/SimulationService.js';
 
 describe('DamageSkill', () => {
     it('should deliver multi-hit attacks over consecutive ticks', () => {

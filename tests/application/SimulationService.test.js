@@ -1,6 +1,6 @@
 // tests/domain/SimulationService.test.js
 
-import { SimulationService } from '../../src/domain/SimulationService.js';
+import { SimulationService } from '../../src/application/SimulationService.js';
 import { LoggerService } from '../../src/infrastructure/LoggerService.js';
 import { Character } from '../../src/domain/Character.js';
 import { DamageSkill } from '../../src/domain/skills/DamageSkill.js';

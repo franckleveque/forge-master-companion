@@ -2,7 +2,7 @@
 
 import { Character } from '../src/domain/Character.js';
 import { CharacterService } from '../src/application/CharacterService.js';
-import { SimulationService } from '../src/domain/SimulationService.js';
+import { SimulationService } from '../src/application/SimulationService.js';
 import { DamageSkill } from '../src/domain/skills/DamageSkill.js';
 import { BuffSkill } from '../src/domain/skills/BuffSkill.js';
 import { LoggerService } from '../src/infrastructure/LoggerService.js';
