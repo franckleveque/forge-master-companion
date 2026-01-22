@@ -1,6 +1,6 @@
-// src/domain/PassiveSkillService.js
+// src/application/PassiveSkillService.js
 
-import { PassiveSkillFactory } from './passives/PassiveSkillFactory.js';
+import { PassiveSkillFactory } from '../domain/passives/PassiveSkillFactory.js';
 
 export class PassiveSkillService {
     constructor() {

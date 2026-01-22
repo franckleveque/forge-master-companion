@@ -1,8 +1,8 @@
 // src/domain/SimulationService.js
 
-import { Character } from "./Character.js";
-import { PassiveSkillFactory } from "./passives/PassiveSkillFactory.js";
-import { ActiveSkillFactory } from "./skills/ActiveSkillFactory.js";
+import { Character } from "../domain/Character.js";
+import { PassiveSkillFactory } from "../domain/passives/PassiveSkillFactory.js";
+import { ActiveSkillFactory } from "../domain/skills/ActiveSkillFactory.js";
 
 export class SimulationService {
     constructor(logger) {

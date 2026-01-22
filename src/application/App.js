@@ -3,9 +3,9 @@
 import { CharacterService } from './CharacterService.js';
 import { UiService } from '../infrastructure/UiService.js';
 import { DomAdapter } from '../adapters/DomAdapter.js';
-import { SimulationService } from '../domain/SimulationService.js';
+import { SimulationService } from './SimulationService.js';
 import { FileService } from '../infrastructure/FileService.js';
-import { PassiveSkillService } from '../domain/PassiveSkillService.js';
+import { PassiveSkillService } from './PassiveSkillService.js';
 import { LoggerService } from '../infrastructure/LoggerService.js';
 import { EquipmentComparisonService } from './EquipmentComparisonService.js';
 import { CharacterFactory } from './CharacterFactory.js';
