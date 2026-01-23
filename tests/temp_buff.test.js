@@ -1,7 +1,7 @@
 // tests/temp_buff.test.js
 import { Character } from '../src/domain/Character.js';
 import { BuffSkill } from '../src/domain/skills/BuffSkill.js';
-import { SimulationService } from '../src/domain/SimulationService.js';
+import { SimulationService } from '../src/application/SimulationService.js';
 
 describe('Refactored BuffSkill Integration Test', () => {
     it('should apply and expire buffs correctly using the unified activeSkills list', () => {
