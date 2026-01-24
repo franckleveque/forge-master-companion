@@ -1,53 +1,43 @@
 import { CharacterService } from '../src/application/CharacterService.js';
+import { Character } from '../src/domain/Character.js';
+
+// Mock the Character class and its static method
+jest.mock('../src/domain/Character.js');
 
 describe('CharacterService', () => {
   let characterService;
 
   beforeEach(() => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
     characterService = new CharacterService();
   });
 
   describe('getCharacterBaseStats', () => {
-    it('should correctly calculate base stats from total stats with global modifiers', () => {
+    it('should orchestrate character creation by calling Character.fromTotalStats', () => {
       const sheetStats = {
         totalDamage: 150,
         totalHealth: 2000,
-        weaponType: 'a-distance',
-        basePassiveSkills: {
-          'degats': 50,
-          'sante': 100
-        }
+        basePassiveSkills: {}
       };
-      const baseStats = characterService.getCharacterBaseStats(sheetStats);
-      expect(baseStats.baseDamage).toBeCloseTo(100);
-      expect(baseStats.baseHealth).toBeCloseTo(1000);
-    });
 
-    it('should correctly calculate base stats with weapon-specific modifiers', () => {
-      const sheetStats = {
-        totalDamage: 170,
-        totalHealth: 1000,
-        weaponType: 'corp-a-corp',
-        basePassiveSkills: {
-          'degats': 50,
-          'degats-corps-a-corps': 20
-        }
+      // Create a mock instance with a spy on recalculateStats
+      const mockCharacterInstance = {
+        recalculateStats: jest.fn().mockReturnThis(),
       };
-      const baseStats = characterService.getCharacterBaseStats(sheetStats);
-      expect(baseStats.baseDamage).toBeCloseTo(100);
-    });
 
-    it('should handle zero modifiers correctly', () => {
-        const sheetStats = {
-          totalDamage: 100,
-          totalHealth: 1000,
-          weaponType: 'corp-a-corp',
-          basePassiveSkills: {}
-        };
-        const baseStats = characterService.getCharacterBaseStats(sheetStats);
-        expect(baseStats.baseDamage).toBeCloseTo(100);
-        expect(baseStats.baseHealth).toBeCloseTo(1000);
-      });
+      // Configure the static mock to return our mock instance
+      Character.fromTotalStats.mockReturnValue(mockCharacterInstance);
+
+      // Call the service method
+      characterService.getCharacterBaseStats(sheetStats);
+
+      // Assert that the static factory method was called correctly
+      expect(Character.fromTotalStats).toHaveBeenCalledWith(sheetStats);
+      expect(Character.fromTotalStats).toHaveBeenCalledTimes(1);
+
+      // Assert that the final stat recalculation was triggered
+      expect(mockCharacterInstance.recalculateStats).toHaveBeenCalledTimes(1);
+    });
   });
-
 });

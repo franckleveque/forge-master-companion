@@ -35,4 +35,45 @@ describe('Character', () => {
             expect(finalStats.totalDamage).toBe(expectedDamage);
         });
     });
+
+    describe('fromTotalStats', () => {
+        it('should correctly calculate base stats from total stats and passives', () => {
+            const sheetStats = {
+                totalDamage: 170,
+                totalHealth: 1500,
+                weaponType: 'corp-a-corp',
+                basePassiveSkills: {
+                    'degats': 50,
+                    'sante': 50,
+                    'degats-corps-a-corps': 20
+                },
+                activeSkills: []
+            };
+
+            const character = Character.fromTotalStats(sheetStats);
+
+            expect(character.baseDamage).toBeCloseTo(100);
+            expect(character.baseHealth).toBeCloseTo(1000);
+        });
+
+        it('should correctly factor in active skills when calculating base stats', () => {
+            const sheetStats = {
+                totalDamage: 138, // (100 base + 10 skill * 1.5 comp) * 1.2 degats = 138
+                totalHealth: 1650, // (1000 base + 100 skill) * 1.5 sante = 1650
+                basePassiveSkills: {
+                    'degats': 20,
+                    'sante': 50,
+                    'competence-degats': 50
+                },
+                activeSkills: [
+                    { baseDamage: 10, baseHealth: 100 }
+                ]
+            };
+
+            const character = Character.fromTotalStats(sheetStats);
+
+            expect(character.baseDamage).toBeCloseTo(100);
+            expect(character.baseHealth).toBeCloseTo(1000);
+        });
+    });
 });
