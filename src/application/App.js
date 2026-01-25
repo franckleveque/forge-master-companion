@@ -3,6 +3,7 @@
 import { CharacterService } from './CharacterService.js';
 import { UiService } from '../infrastructure/UiService.js';
 import { DomAdapter } from '../adapters/DomAdapter.js';
+import { FileAdapter } from '../adapters/FileAdapter.js';
 import { SimulationService } from './SimulationService.js';
 import { FileService } from '../infrastructure/FileService.js';
 import { PassiveSkillService } from './PassiveSkillService.js';
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const characterService = new CharacterService(passiveSkillService);
     const uiService = new UiService();
     const domAdapter = new DomAdapter(characterService, passiveSkillService, uiService);
+    const fileAdapter = new FileAdapter(domAdapter, passiveSkillService, uiService);
     const loggerService = new LoggerService();
     const simulationService = new SimulationService(loggerService);
     const fileService = new FileService();
@@ -79,11 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listeners for import/export
     uiService.exportEquipmentButton.addEventListener('click', () => {
-        const data = domAdapter.getEquipmentComparisonData();
+        const data = fileAdapter.getEquipmentComparisonData();
         fileService.exportData('equipment', data);
     });
     uiService.exportPvpButton.addEventListener('click', () => {
-        const data = domAdapter.getPvpData();
+        const data = fileAdapter.getPvpData();
         fileService.exportData('pvp', data);
     });
     uiService.importEquipmentButton.addEventListener('click', () => uiService.importFile.click());
@@ -91,9 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
     uiService.importFile.addEventListener('change', (event) => {
         fileService.importData(event, (data) => {
             if (data.type === 'equipment_comparison' && uiService.isEquipmentMode()) {
-                domAdapter.importEquipmentComparisonData(data);
+                fileAdapter.importEquipmentComparisonData(data);
             } else if (data.type === 'pvp_simulation' && uiService.isPvpMode()) {
-                domAdapter.importPvpData(data);
+                fileAdapter.importPvpData(data);
             } else {
                 alert('The selected file does not match the active tab or is invalid.');
             }
