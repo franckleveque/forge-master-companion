@@ -44,7 +44,7 @@ export class CharacterService {
             basePassiveSkills: stats.basePassiveSkills, // Ensure passives are passed through
             name: stats.name || 'Player' // Ensure a name is set
         });
-        return character.recalculateStats();
+        return character.recalculateTotalStats();
     }
 
     applyEquipment(characterStats, equipment) {

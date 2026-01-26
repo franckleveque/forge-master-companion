@@ -19,8 +19,8 @@ export class EquipmentComparisonService {
 
         // Calculate stats for character with new equipment
         const baseStats = this.characterService.getCharacterBaseStats(character);
-        const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld).recalculateStats();
-        const finalStatsNew = this.characterService.applyEquipment(cleanBaseStats, equipNew).recalculateStats();
+        const cleanBaseStats = this.characterService.unequipEquipment(baseStats, equipOld).recalculateTotalStats();
+        const finalStatsNew = this.characterService.applyEquipment(cleanBaseStats, equipNew).recalculateTotalStats();
         const characterWithNewEquip = new Character({
             ...finalStatsNew,
             name: "New Equip",

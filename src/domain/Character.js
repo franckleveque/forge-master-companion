@@ -41,37 +41,69 @@ export class Character {
         this.doubleChanceCounter = 0;
     }
 
-    recalculateStats() {
-        const p = this.basePassiveSkills || {};
-
+    recalculateTotalStats() {
+        // Start with base stats from character sheet
         let effectiveBaseDamage = this.baseDamage;
         let effectiveBaseHealth = this.baseHealth;
 
+        const p = this.basePassiveSkills || {};
+        const competenceDegatsMod = 1 + (p['competence-degats'] || 0) / 100;
+
+        // 1. Add permanent stat bonuses from active skills
         if (this.activeSkills && Array.isArray(this.activeSkills)) {
-            const competenceDegatsMod = 1 + (p['competence-degats'] || 0) / 100;
             this.activeSkills.forEach(skill => {
-                if (skill.baseDamage) {
-                    effectiveBaseDamage += skill.baseDamage * competenceDegatsMod;
-                }
-                if (skill.baseHealth) {
-                    effectiveBaseHealth += skill.baseHealth * competenceDegatsMod;
-                }
+                const skillBaseDamage = skill.baseDamage || 0;
+                const skillBaseHealth = skill.baseHealth || 0;
+                effectiveBaseDamage += skillBaseDamage * competenceDegatsMod;
+                effectiveBaseHealth += skillBaseHealth * competenceDegatsMod;
             });
         }
 
+        let totalDamage = effectiveBaseDamage;
+        let maxHealth = effectiveBaseHealth;
+
+        // 2. Apply percentage-based passive modifiers
         let totalDamageModifier = 1 + (p['degats'] || 0) / 100;
         if (this.weaponType === 'corp-a-corp') {
             totalDamageModifier += (p['degats-corps-a-corps'] || 0) / 100;
         } else if (this.weaponType === 'a-distance') {
             totalDamageModifier += (p['degats-a-distance'] || 0) / 100;
         }
-
         const totalHealthModifier = 1 + (p['sante'] || 0) / 100;
 
-        this.totalDamage = effectiveBaseDamage * totalDamageModifier;
-        this.totalHealth = effectiveBaseHealth * totalHealthModifier;
-        this.maxHealth = this.totalHealth;
-        this.health = this.maxHealth;
+        totalDamage *= totalDamageModifier;
+        maxHealth *= totalHealthModifier;
+
+        // (This part is for simulation only, where passiveSkills are class instances)
+        this.passiveSkills.forEach(skill => {
+            if (skill.onCalculateStats) {
+                const result = skill.onCalculateStats(this, { totalDamage, maxHealth });
+                totalDamage = result.totalDamage;
+                maxHealth = result.maxHealth;
+            }
+        });
+
+        // 3. Apply temporary flat buffs from active skills (simulation only)
+        this.activeSkills.forEach(skill => {
+            if (typeof skill.getStatModifiers === 'function') {
+                const modifiers = skill.getStatModifiers();
+                totalDamage += modifiers.damage;
+                maxHealth += modifiers.health;
+            }
+        });
+
+        const maxHealthBefore = this.maxHealth;
+        this.totalDamage = totalDamage;
+        this.totalHealth = maxHealth;
+        this.maxHealth = maxHealth;
+
+        // Adjust current health if max health changes
+        if (this.maxHealth > maxHealthBefore) {
+            this.health += this.maxHealth - maxHealthBefore;
+        }
+        if (this.health > this.maxHealth) {
+            this.health = this.maxHealth;
+        }
 
         return this;
     }
@@ -102,7 +134,7 @@ export class Character {
         });
 
         if (expiredSkills.length > 0) {
-            this._recalculateStats();
+            this.recalculateTotalStats();
             expiredSkills.forEach(skill => skill.onExpire(this));
         }
 
@@ -169,35 +201,4 @@ export class Character {
         }
     }
 
-    _recalculateStats() {
-        const maxHealthBefore = this.maxHealth;
-
-        let totalDamage = this.baseDamage;
-        let maxHealth = this.baseHealth;
-
-        this.passiveSkills.forEach(skill => {
-            if (skill.onCalculateStats) {
-                const result = skill.onCalculateStats(this, { totalDamage, maxHealth });
-                totalDamage = result.totalDamage;
-                maxHealth = result.maxHealth;
-            }
-        });
-
-        this.activeSkills.forEach(skill => {
-            const modifiers = skill.getStatModifiers();
-            totalDamage += modifiers.damage;
-            maxHealth += modifiers.health;
-        });
-
-        this.totalDamage = totalDamage;
-        this.maxHealth = maxHealth;
-
-        if (this.maxHealth > maxHealthBefore) {
-            this.health += this.maxHealth - maxHealthBefore;
-        }
-
-        if (this.health > this.maxHealth) {
-            this.health = this.maxHealth;
-        }
-    }
 }
