@@ -41,7 +41,7 @@ export class Character {
         this.doubleChanceCounter = 0;
     }
 
-    recalculateStats() {
+    calculateSheetStats() {
         const p = this.basePassiveSkills || {};
 
         let effectiveBaseDamage = this.baseDamage;
@@ -102,7 +102,7 @@ export class Character {
         });
 
         if (expiredSkills.length > 0) {
-            this._recalculateStats();
+            this.updateCombatStats();
             expiredSkills.forEach(skill => skill.onExpire(this));
         }
 
@@ -169,7 +169,7 @@ export class Character {
         }
     }
 
-    _recalculateStats() {
+    updateCombatStats() {
         const maxHealthBefore = this.maxHealth;
 
         let totalDamage = this.baseDamage;
